@@ -35,7 +35,7 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack }) => {
                         <ArrowLeftIcon className="w-6 h-6" />
                     </button>
                     <div>
-                        <h2 className="text-2xl font-bold">{channel.name}</h2>
+                        <h2 className="text-xl sm:text-2xl font-bold">{channel.name}</h2>
                         <p className="text-sm text-gray-500">{channel.specialization}</p>
                     </div>
                 </div>

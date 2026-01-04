@@ -14,8 +14,8 @@ const DirectMessagesView: React.FC = () => {
     const otherUser = user.role === UserRole.Professor ? MOCK_STUDENT : MOCK_PROFESSOR;
 
     return (
-        <div className="flex h-full">
-            <aside className="w-1/3 bg-white dark:bg-gray-800 border-e border-gray-200 dark:border-gray-700">
+        <div className="flex flex-col md:flex-row h-full">
+            <aside className="w-full md:w-1/3 bg-white dark:bg-gray-800 border-e-0 md:border-e border-b md:border-b-0 border-gray-200 dark:border-gray-700">
                 <div className="p-4 border-b border-gray-200 dark:border-gray-700 font-bold">
                     Conversations
                 </div>
@@ -30,7 +30,7 @@ const DirectMessagesView: React.FC = () => {
                     </a>
                 </nav>
             </aside>
-            <main className="w-2/3">
+            <main className="w-full md:w-2/3 flex-1 md:flex-auto">
                 <ChatWindow type="dm" conversationId={otherUser.id} />
             </main>
         </div>

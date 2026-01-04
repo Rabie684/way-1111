@@ -53,3 +53,16 @@ export interface DirectMessage extends Message {
 export interface ChannelMessage extends Message {
     channelId: string;
 }
+
+export interface Notification {
+    id: string;
+    text: string;
+    timestamp: string;
+    read: boolean;
+}
+
+export interface JarvisMessage {
+    id: string;
+    sender: 'user' | 'jarvis';
+    text: string;
+}

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { User, Channel, UserRole, PostType, ChannelMessage, DirectMessage } from './types';
+import { User, Channel, UserRole, PostType, ChannelMessage, DirectMessage, Notification } from './types';
 
 export const UNIVERSITIES = [
     "جامعة ابن خلدون ملحقة قصر الشلالة",
@@ -127,6 +127,13 @@ export const MOCK_DMS: DirectMessage[] = [
      { id: 'msg-dm-2', senderId: 'prof-1', receiverId: 'student-1', text: 'Please send me an email with your justification.', timestamp: 'Today' },
 ];
 
+export const MOCK_NOTIFICATIONS: Notification[] = [
+    { id: 'notif-1', text: 'تم إضافة منشور جديد في قناة "الرياضيات المالية".', timestamp: 'منذ 5 دقائق', read: false },
+    { id: 'notif-2', text: 'سيبدأ اجتماع Google Meet لقناة "مبادئ الاقتصاد الجزئي" قريبًا.', timestamp: 'منذ ساعة', read: false },
+    { id: 'notif-3', text: 'قام الطالب "حمر العين ربيع" بإرسال رسالة مباشرة.', timestamp: 'منذ 3 ساعات', read: true },
+];
+
+
 export const STRINGS = {
     ar: {
         appName: 'جامعتك الرقمية way',
@@ -143,7 +150,6 @@ export const STRINGS = {
         submit: 'إرسال',
         myChannels: 'قنواتي',
         createChannel: 'إنشاء قناة',
-        aiTranslator: 'مترجم الذكاء الاصطناعي',
         directMessages: 'الرسائل المباشرة',
         profileSettings: 'إعدادات الملف الشخصي',
         logout: 'تسجيل الخروج',
@@ -154,11 +160,6 @@ export const STRINGS = {
         specialization: 'التخصص',
         close: 'إغلاق',
         save: 'حفظ',
-        translate: 'ترجمة',
-        enterTextToTranslate: 'أدخل النص للترجمة...',
-        translationResult: 'نتيجة الترجمة',
-        summaryFromAlgerianJournals: 'ملاحظة: يتم إنشاء الملخصات المترجمة بالاعتماد على المجلات العلمية الجزائرية فقط.',
-        availableChannels: 'القنوات المتاحة',
         subscribe: 'اشتراك',
         subscribed: 'مشترك',
         subscriptionTitle: 'تأكيد الاشتراك',
@@ -175,6 +176,12 @@ export const STRINGS = {
         orTryDemo: 'أو جرب حسابًا تجريبيًا',
         back: 'العودة',
         explore: 'استكشاف',
+        jarvisAi: 'جارفيس AI',
+        jarvisDescription: 'أنا جارفيس، مساعدك الذكي. يمكنني الإجابة على أسئلتك بالاعتماد على المجلات العلمية الجزائرية أولاً، ثم المصادر العالمية.',
+        askJarvis: 'اسأل جارفيس...',
+        welcomeBack: 'مرحباً بعودتك،',
+        notifications: 'الإشعارات',
+        noNotifications: 'لا توجد إشعارات جديدة.',
     },
     en: {
         appName: 'Your Digital University Way',
@@ -191,7 +198,6 @@ export const STRINGS = {
         submit: 'Submit',
         myChannels: 'My Channels',
         createChannel: 'Create Channel',
-        aiTranslator: 'AI Translator',
         directMessages: 'Direct Messages',
         profileSettings: 'Profile Settings',
         logout: 'Logout',
@@ -202,11 +208,6 @@ export const STRINGS = {
         specialization: 'Specialization',
         close: 'Close',
         save: 'Save',
-        translate: 'Translate',
-        enterTextToTranslate: 'Enter text to translate...',
-        translationResult: 'Translation Result',
-        summaryFromAlgerianJournals: 'Note: Translated summaries are generated using knowledge from Algerian scientific journals only.',
-        availableChannels: 'Available Channels',
         subscribe: 'Subscribe',
         subscribed: 'Subscribed',
         subscriptionTitle: 'Confirm Subscription',
@@ -223,6 +224,12 @@ export const STRINGS = {
         orTryDemo: 'Or try a demo account',
         back: 'Back',
         explore: 'Explore',
+        jarvisAi: 'Jarvis AI',
+        jarvisDescription: 'I am Jarvis, your smart assistant. I can answer your questions based on Algerian scientific journals first, then global sources.',
+        askJarvis: 'Ask Jarvis...',
+        welcomeBack: 'Welcome back,',
+        notifications: 'Notifications',
+        noNotifications: 'No new notifications.',
     },
     fr: {
         appName: 'Votre Université Numérique Way',
@@ -239,7 +246,6 @@ export const STRINGS = {
         submit: 'Soumettre',
         myChannels: 'Mes Chaînes',
         createChannel: 'Créer une chaîne',
-        aiTranslator: 'Traducteur IA',
         directMessages: 'Messages Directs',
         profileSettings: 'Paramètres du profil',
         logout: 'Déconnexion',
@@ -250,11 +256,6 @@ export const STRINGS = {
         specialization: 'Spécialisation',
         close: 'Fermer',
         save: 'Enregistrer',
-        translate: 'Traduire',
-        enterTextToTranslate: 'Entrez le texte à traduire...',
-        translationResult: 'Résultat de la traduction',
-        summaryFromAlgerianJournals: 'Note: Les résumés traduits sont générés en utilisant uniquement les connaissances des revues scientifiques algériennes.',
-        availableChannels: 'Chaînes disponibles',
         subscribe: 'S\'abonner',
         subscribed: 'Abonné',
         subscriptionTitle: 'Confirmer l\'abonnement',
@@ -271,6 +272,12 @@ export const STRINGS = {
         orTryDemo: 'Ou essayez un compte démo',
         back: 'Retour',
         explore: 'Explorer',
+        jarvisAi: 'Jarvis AI',
+        jarvisDescription: 'Je suis Jarvis, votre assistant intelligent. Je peux répondre à vos questions en me basant d\'abord sur les revues scientifiques algériennes, puis sur les sources mondiales.',
+        askJarvis: 'Demandez à Jarvis...',
+        welcomeBack: 'Content de vous revoir,',
+        notifications: 'Notifications',
+        noNotifications: 'Aucune nouvelle notification.',
     }
 };
 

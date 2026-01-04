@@ -1,7 +1,8 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { User, UserRole, Channel, DirectMessage, ChannelMessage } from '../types';
-import { MOCK_PROFESSOR, MOCK_STUDENT, MOCK_CHANNELS, MOCK_CHANNEL_MESSAGES, MOCK_DMS } from '../constants';
+import { User, UserRole, Channel, DirectMessage, ChannelMessage, Notification, JarvisMessage } from '../types';
+import { MOCK_PROFESSOR, MOCK_STUDENT, MOCK_CHANNELS, MOCK_CHANNEL_MESSAGES, MOCK_DMS, MOCK_NOTIFICATIONS } from '../constants';
+import { askJarvis } from '../services/geminiService';
 
 type Theme = 'light' | 'dark';
 type Language = 'ar' | 'en' | 'fr';
@@ -13,6 +14,8 @@ interface AppContextType {
     channels: Channel[];
     channelMessages: ChannelMessage[];
     directMessages: DirectMessage[];
+    notifications: Notification[];
+    jarvisHistory: JarvisMessage[];
     login: (email: string, role: UserRole) => void;
     logout: () => void;
     toggleTheme: () => void;
@@ -21,7 +24,9 @@ interface AppContextType {
     subscribeToChannel: (channelId: string) => void;
     sendMessage: (channelId: string, text: string) => void;
     sendDirectMessage: (receiverId: string, text: string) => void;
+    sendJarvisMessage: (text: string) => Promise<void>;
     updateUser: (updatedUser: Partial<User>) => void;
+    markNotificationsAsRead: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -33,6 +38,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const [channels, setChannels] = useState<Channel[]>(MOCK_CHANNELS);
     const [channelMessages, setChannelMessages] = useState<ChannelMessage[]>(MOCK_CHANNEL_MESSAGES);
     const [directMessages, setDirectMessages] = useState<DirectMessage[]>(MOCK_DMS);
+    const [notifications, setNotifications] = useState<Notification[]>(MOCK_NOTIFICATIONS);
+    const [jarvisHistory, setJarvisHistory] = useState<JarvisMessage[]>([]);
 
     const login = (email: string, role: UserRole) => {
         // Mock login
@@ -104,11 +111,25 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             setDirectMessages(prev => [...prev, newMessage]);
         }
     };
+
+    const sendJarvisMessage = async (text: string) => {
+        const userMessage: JarvisMessage = { id: `jarvis-${Date.now()}`, sender: 'user', text };
+        setJarvisHistory(prev => [...prev, userMessage]);
+
+        const responseText = await askJarvis(text);
+
+        const jarvisMessage: JarvisMessage = { id: `jarvis-${Date.now() + 1}`, sender: 'jarvis', text: responseText };
+        setJarvisHistory(prev => [...prev, jarvisMessage]);
+    }
     
     const updateUser = (updatedUser: Partial<User>) => {
         if (user) {
             setUser(prevUser => prevUser ? { ...prevUser, ...updatedUser } : null);
         }
+    }
+
+    const markNotificationsAsRead = () => {
+        setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     }
 
     return (
@@ -119,6 +140,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             channels,
             channelMessages,
             directMessages,
+            notifications,
+            jarvisHistory,
             login, 
             logout, 
             toggleTheme, 
@@ -127,7 +150,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             subscribeToChannel,
             sendMessage,
             sendDirectMessage,
-            updateUser
+            sendJarvisMessage,
+            updateUser,
+            markNotificationsAsRead
         }}>
             {children}
         </AppContext.Provider>
