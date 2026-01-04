@@ -37,8 +37,8 @@ const StudentDashboard: React.FC = () => {
 
     const handleChannelClick = (channel: Channel) => {
         if (user?.subscribedChannels.includes(channel.id)) {
-            setSelectedChannel(channel);
             setActiveTab('my-channels');
+            setSelectedChannel(channel);
             setSidebarOpen(false);
         } else {
             setShowSubscriptionModal(channel);
@@ -46,22 +46,26 @@ const StudentDashboard: React.FC = () => {
     };
     
     const handleSelectTab = (tab: 'my-channels' | 'explore' | 'dm' | 'ai') => {
+        // Imperatively clear selected channel when switching to a non-channel-view tab.
+        // This is more robust than a useEffect for this navigation logic.
+        if (tab !== 'my-channels') {
+            setSelectedChannel(null);
+        }
         setActiveTab(tab);
-        setSelectedChannel(null);
         setSidebarOpen(false);
+    }
+    
+    const handleBackFromChannel = () => {
+        setSelectedChannel(null);
     }
 
     if (!user) return null;
 
     const renderContent = () => {
-        if (selectedChannel) {
-            return <ChannelView channel={selectedChannel} user={user} onBack={() => setSelectedChannel(null)} />;
-        }
-        
         if (activeTab === 'ai') {
             return <JarvisAI />;
         }
-
+        
         if (activeTab === 'dm') {
             return <DirectMessagesView />;
         }
@@ -125,79 +129,107 @@ const StudentDashboard: React.FC = () => {
             );
         }
 
-        return (
-            <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 p-4">
-                <BookOpenIcon className="w-16 h-16 mb-4" />
-                <h2 className="text-xl font-semibold">Select one of your channels</h2>
-                <p>Or browse available channels to subscribe.</p>
-            </div>
-        );
+        if (activeTab === 'my-channels') {
+            if (selectedChannel) {
+                return <ChannelView channel={selectedChannel} user={user} onBack={handleBackFromChannel} />;
+            }
+            return (
+                <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 p-4">
+                    <BookOpenIcon className="w-16 h-16 mb-4" />
+                    <h2 className="text-xl font-semibold">Select one of your channels</h2>
+                    <p>Or browse available channels to subscribe.</p>
+                </div>
+            );
+        }
+
+        return null;
     };
 
     return (
-        <div className="relative flex h-[calc(100vh-4rem)]">
-             {isSidebarOpen && <div onClick={() => setSidebarOpen(false)} className="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden" aria-hidden="true"></div>}
-            {/* Sidebar */}
-            <aside className={`fixed top-16 ltr:left-0 rtl:right-0 h-[calc(100vh-4rem)] w-3/4 sm:w-1/2 md:w-1/4 bg-white dark:bg-gray-800 border-e dark:border-gray-700 flex flex-col transform transition-transform duration-300 ease-in-out z-30 md:relative md:top-0 md:h-full md:transform-none ${isSidebarOpen ? 'ltr:translate-x-0 rtl:-translate-x-0' : 'ltr:-translate-x-full rtl:translate-x-full'}`}>
-                 <button onClick={() => setSidebarOpen(false)} className="absolute top-4 end-4 p-1 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 md:hidden" aria-label="Close sidebar">
-                    <XIcon className="w-6 h-6"/>
+         <div className="flex flex-col h-[calc(100vh-4rem)]">
+            {/* Top Navigation for Desktop */}
+            <nav className="hidden md:flex items-center justify-center bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+                <button onClick={() => handleSelectTab('my-channels')} className={`p-4 text-sm font-medium flex items-center gap-2 ${activeTab === 'my-channels' ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}>
+                    <BookOpenIcon className="w-5 h-5"/> {s.myChannels}
                 </button>
-                 <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                     <div className="flex items-center space-x-3 rtl:space-x-reverse">
-                        <img src={user.avatar} alt={user.name} className="w-12 h-12 rounded-full object-cover"/>
-                        <div>
-                            <h3 className="font-bold text-lg">{user.name}</h3>
-                            <p className="text-sm text-gray-500">{user.college}</p>
+                <button onClick={() => handleSelectTab('explore')} className={`p-4 text-sm font-medium flex items-center gap-2 ${activeTab === 'explore' ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}>
+                    <CompassIcon className="w-5 h-5"/> {s.explore}
+                </button>
+                <button onClick={() => handleSelectTab('dm')} className={`p-4 text-sm font-medium flex items-center gap-2 ${activeTab === 'dm' ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}>
+                    <MessageSquareIcon className="w-5 h-5"/> {s.directMessages}
+                </button>
+                <button onClick={() => handleSelectTab('ai')} className={`p-4 text-sm font-medium flex items-center gap-2 ${activeTab === 'ai' ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}>
+                    <BotIcon className="w-5 h-5"/> {s.jarvisAi}
+                </button>
+            </nav>
+
+            <div className="relative flex flex-1 overflow-hidden">
+                {isSidebarOpen && <div onClick={() => setSidebarOpen(false)} className="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden" aria-hidden="true"></div>}
+                
+                {/* Sidebar */}
+                <aside className={`fixed top-16 ltr:left-0 rtl:right-0 h-[calc(100vh-4rem)] w-3/4 sm:w-1/2 md:w-1/4 bg-white dark:bg-gray-800 border-e dark:border-gray-700 flex flex-col transform transition-transform duration-300 ease-in-out z-30 md:relative md:top-0 md:h-full md:translate-x-0 ${isSidebarOpen ? 'ltr:translate-x-0 rtl:-translate-x-0' : 'ltr:-translate-x-full rtl:translate-x-full'}`}>
+                    <button onClick={() => setSidebarOpen(false)} className="absolute top-4 end-4 p-1 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 md:hidden" aria-label="Close sidebar">
+                        <XIcon className="w-6 h-6"/>
+                    </button>
+                    <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                        <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                            <img src={user.avatar} alt={user.name} className="w-12 h-12 rounded-full object-cover"/>
+                            <div>
+                                <h3 className="font-bold text-lg">{user.name}</h3>
+                                <p className="text-sm text-gray-500">{user.college}</p>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                {/* Navigation Tabs */}
-                <div className="flex flex-col sm:flex-row border-b border-gray-200 dark:border-gray-700">
-                     <button onClick={() => handleSelectTab('my-channels')} className={`flex-1 p-3 text-sm font-medium flex items-center justify-center gap-2 ${activeTab === 'my-channels' ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400' : 'text-gray-500'}`}>
-                        <BookOpenIcon className="w-5 h-5"/> {s.myChannels}
-                    </button>
-                    <button onClick={() => handleSelectTab('explore')} className={`flex-1 p-3 text-sm font-medium flex items-center justify-center gap-2 ${activeTab === 'explore' ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400' : 'text-gray-500'}`}>
-                        <CompassIcon className="w-5 h-5"/> {s.explore}
-                    </button>
-                    <button onClick={() => handleSelectTab('dm')} className={`flex-1 p-3 text-sm font-medium flex items-center justify-center gap-2 ${activeTab === 'dm' ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400' : 'text-gray-500'}`}>
-                        <MessageSquareIcon className="w-5 h-5"/> {s.directMessages}
-                    </button>
-                     <button onClick={() => handleSelectTab('ai')} className={`flex-1 p-3 text-sm font-medium flex items-center justify-center gap-2 ${activeTab === 'ai' ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400' : 'text-gray-500'}`}>
-                        <BotIcon className="w-5 h-5"/> {s.jarvisAi}
-                    </button>
-                </div>
+                    {/* Navigation Tabs for Mobile */}
+                    <div className="flex flex-col sm:flex-row border-b border-gray-200 dark:border-gray-700 md:hidden">
+                        <button onClick={() => handleSelectTab('my-channels')} className={`flex-1 p-3 text-sm font-medium flex items-center justify-center gap-2 ${activeTab === 'my-channels' ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400' : 'text-gray-500'}`}>
+                            <BookOpenIcon className="w-5 h-5"/> {s.myChannels}
+                        </button>
+                        <button onClick={() => handleSelectTab('explore')} className={`flex-1 p-3 text-sm font-medium flex items-center justify-center gap-2 ${activeTab === 'explore' ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400' : 'text-gray-500'}`}>
+                            <CompassIcon className="w-5 h-5"/> {s.explore}
+                        </button>
+                        <button onClick={() => handleSelectTab('dm')} className={`flex-1 p-3 text-sm font-medium flex items-center justify-center gap-2 ${activeTab === 'dm' ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400' : 'text-gray-500'}`}>
+                            <MessageSquareIcon className="w-5 h-5"/> {s.directMessages}
+                        </button>
+                        <button onClick={() => handleSelectTab('ai')} className={`flex-1 p-3 text-sm font-medium flex items-center justify-center gap-2 ${activeTab === 'ai' ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400' : 'text-gray-500'}`}>
+                            <BotIcon className="w-5 h-5"/> {s.jarvisAi}
+                        </button>
+                    </div>
+                    
+                    <nav className="flex-1 overflow-y-auto p-2">
+                        {activeTab === 'my-channels' && channels.filter(ch => user.subscribedChannels.includes(ch.id)).map(channel => (
+                            <a key={channel.id} href="#" onClick={(e) => { e.preventDefault(); handleChannelClick(channel); }} className={`block px-4 py-2 md:py-3 my-1 rounded-md text-sm font-medium ${selectedChannel?.id === channel.id ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                                {channel.name}
+                            </a>
+                        ))}
+                        {activeTab === 'my-channels' && channels.filter(ch => user.subscribedChannels.includes(ch.id)).length === 0 && (
+                            <p className="p-4 text-center text-gray-500">You are not subscribed to any channels yet.</p>
+                        )}
+                    </nav>
+                </aside>
+
+                <main className="w-full flex-1 bg-gray-100 dark:bg-gray-900 overflow-y-auto">
+                    <div className="p-2 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-gray-100 dark:bg-gray-900 z-10 md:hidden">
+                        <button onClick={() => setSidebarOpen(true)} className="p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700" aria-label="Open sidebar">
+                            <MenuIcon className="w-6 h-6"/>
+                        </button>
+                    </div>
+                    {renderContent()}
+                </main>
                 
-                <nav className="flex-1 overflow-y-auto p-2">
-                    {activeTab === 'my-channels' && channels.filter(ch => user.subscribedChannels.includes(ch.id)).map(channel => (
-                        <a key={channel.id} href="#" onClick={(e) => { e.preventDefault(); handleChannelClick(channel); }} className={`block px-4 py-2 my-1 rounded-md text-sm font-medium ${selectedChannel?.id === channel.id ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
-                            {channel.name}
-                        </a>
-                    ))}
-                    {activeTab === 'my-channels' && channels.filter(ch => user.subscribedChannels.includes(ch.id)).length === 0 && (
-                        <p className="p-4 text-center text-gray-500">You are not subscribed to any channels yet.</p>
-                    )}
-                </nav>
-            </aside>
-            <main className="w-full md:w-3/4 bg-gray-100 dark:bg-gray-900 overflow-y-auto">
-                 <div className="p-2 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-gray-100 dark:bg-gray-900 z-10 md:hidden">
-                    <button onClick={() => setSidebarOpen(true)} className="p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700" aria-label="Open sidebar">
-                        <MenuIcon className="w-6 h-6"/>
-                    </button>
-                </div>
-                {renderContent()}
-            </main>
-            {showSubscriptionModal && (
-                <SubscriptionModal 
-                    channel={showSubscriptionModal} 
-                    onClose={() => setShowSubscriptionModal(null)} 
-                    onConfirm={() => {
-                        setSelectedChannel(showSubscriptionModal);
-                        handleSelectTab('my-channels');
-                        setShowSubscriptionModal(null);
-                    }}
-                />
-            )}
+                {showSubscriptionModal && (
+                    <SubscriptionModal 
+                        channel={showSubscriptionModal} 
+                        onClose={() => setShowSubscriptionModal(null)} 
+                        onConfirm={() => {
+                            setActiveTab('my-channels');
+                            setSelectedChannel(showSubscriptionModal);
+                            setShowSubscriptionModal(null);
+                        }}
+                    />
+                )}
+            </div>
         </div>
     );
 };
