@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { User, Channel, UserRole, PostType, ChannelMessage, Notification } from './types';
+import { User, Channel, UserRole, PostType, ChannelMessage, Notification, DirectMessage, Section } from './types';
 
 export const UNIVERSITIES = [
     "جامعة ابن خلدون ملحقة قصر الشلالة",
@@ -28,7 +28,7 @@ export const MOCK_PROFESSOR: User = {
     university: 'جامعة ابن خلدون ملحقة قصر الشلالة',
     college: 'كلية العلوم الاقتصادية وعلوم التسيير',
     avatar: 'https://picsum.photos/seed/prof2/200',
-    subscribedChannels: [],
+    subscribedSections: [],
 };
 
 export const MOCK_PROFESSOR_2: User = {
@@ -39,7 +39,7 @@ export const MOCK_PROFESSOR_2: User = {
     university: 'جامعة ابن خلدون تيارت',
     college: 'Faculty of Technology',
     avatar: 'https://picsum.photos/seed/prof3/200',
-    subscribedChannels: [],
+    subscribedSections: [],
 };
 
 export const MOCK_PROFESSOR_3: User = {
@@ -50,7 +50,7 @@ export const MOCK_PROFESSOR_3: User = {
     university: 'جامعة زيان عاشور الجلفة',
     college: 'Faculty of Science',
     avatar: 'https://picsum.photos/seed/prof4/200',
-    subscribedChannels: [],
+    subscribedSections: [],
 };
 
 
@@ -62,7 +62,7 @@ export const MOCK_STUDENT: User = {
     university: 'جامعة ابن خلدون ملحقة قصر الشلالة',
     college: 'كلية العلوم الاقتصادية وعلوم التسيير',
     avatar: 'https://picsum.photos/seed/student2/200',
-    subscribedChannels: ['ch-1'],
+    subscribedSections: ['sec-1'],
 };
 
 export const MOCK_ALL_USERS = [MOCK_PROFESSOR, MOCK_PROFESSOR_2, MOCK_PROFESSOR_3, MOCK_STUDENT];
@@ -74,12 +74,12 @@ export const MOCK_CHANNELS: Channel[] = [
         specialization: 'مالية و بنوك',
         professorId: 'prof-1',
         meetLink: 'https://meet.google.com/new',
-        subscribers: 23,
         posts: [
             { id: 'p-1', type: PostType.PDF, title: 'محاضرة 1 - مقدمة.pdf', url: '#', createdAt: '2024-05-20' },
             { id: 'p-2', type: PostType.Image, title: 'رسم بياني للفائدة المركبة.png', url: 'https://picsum.photos/seed/proc/800/400', createdAt: '2024-05-21' },
             { id: 'p-3', type: PostType.Video, title: 'فيديو: شرح الخصم', url: '#', createdAt: '2024-05-22' },
         ],
+        subscribers: 23,
     },
     {
         id: 'ch-2',
@@ -87,39 +87,28 @@ export const MOCK_CHANNELS: Channel[] = [
         specialization: 'علوم اقتصادية',
         professorId: 'prof-1',
         meetLink: 'https://meet.google.com/new',
-        subscribers: 15,
         posts: [
              { id: 'p-4', type: PostType.PDF, title: 'منهج المقرر.pdf', url: '#', createdAt: '2024-05-19' },
         ],
-    },
-     {
-        id: 'ch-3',
-        name: 'Thermodynamics',
-        specialization: 'Mechanical Engineering',
-        professorId: 'prof-2',
-        meetLink: 'https://meet.google.com/new',
-        subscribers: 45,
-        posts: [
-             { id: 'p-5', type: PostType.PDF, title: 'Chapter 1: Basic Concepts.pdf', url: '#', createdAt: '2024-05-18' },
-        ],
-    },
-      {
-        id: 'ch-4',
-        name: 'Organic Chemistry',
-        specialization: 'Chemistry',
-        professorId: 'prof-3',
-        meetLink: 'https://meet.google.com/new',
-        subscribers: 32,
-        posts: [
-             { id: 'p-6', type: PostType.PDF, title: 'Lab Safety Rules.pdf', url: '#', createdAt: '2024-05-17' },
-        ],
-    },
+        subscribers: 15,
+    }
+];
+
+export const MOCK_SECTIONS: Section[] = [
+    { id: 'sec-1', name: 'الفصل الأول: الفائدة البسيطة والمركبة', channelId: 'ch-1', price: 100 },
+    { id: 'sec-2', name: 'الفصل الثاني: الدفعات', channelId: 'ch-1', price: 100 },
+    { id: 'sec-3', name: 'المدخل إلى علم الاقتصاد', channelId: 'ch-2', price: 100 },
 ];
 
 export const MOCK_CHANNEL_MESSAGES: ChannelMessage[] = [
     { id: 'msg-ch-1', senderId: 'prof-1', channelId: 'ch-1', text: 'Welcome to the channel! Please review the syllabus.', timestamp: '10:00 AM' },
     { id: 'msg-ch-2', senderId: 'student-1', channelId: 'ch-1', text: 'Thank you, professor!', timestamp: '10:01 AM' },
     { id: 'msg-ch-3', senderId: 'student-2', channelId: 'ch-1', text: 'I have a question about the first assignment.', timestamp: '10:05 AM' },
+];
+
+export const MOCK_DIRECT_MESSAGES: DirectMessage[] = [
+    { id: 'dm-1', senderId: 'student-1', receiverId: 'prof-1', text: 'السلام عليكم أستاذة، لدي سؤال بخصوص المحاضرة الأخيرة.', timestamp: '11:30 AM' },
+    { id: 'dm-2', senderId: 'prof-1', receiverId: 'student-1', text: 'وعليكم السلام، تفضل بالطبع.', timestamp: '11:32 AM' },
 ];
 
 export const MOCK_NOTIFICATIONS: Notification[] = [
@@ -158,6 +147,7 @@ export const STRINGS = {
         subscribed: 'مشترك',
         subscriptionTitle: 'تأكيد الاشتراك',
         subscriptionMessage: 'هل تريد الاشتراك في هذه القناة مقابل 100 دج؟ سيتم خصم المبلغ من رصيد هاتفك.',
+        sectionSubscriptionMessage: 'هل تريد الاشتراك في هذا القسم مقابل {price} دج؟ سيتم خصم المبلغ من رصيد هاتفك.',
         confirm: 'تأكيد',
         cancel: 'إلغاء',
         posts: 'المنشورات',
@@ -170,6 +160,7 @@ export const STRINGS = {
         orTryDemo: 'أو جرب حسابًا تجريبيًا',
         back: 'العودة',
         explore: 'استكشاف',
+        openChannel: 'عرض القناة',
         jarvisAi: 'جارفيس AI',
         jarvisDescription: 'أنا جارفيس، مساعدك الذكي. يمكنني الإجابة على أسئلتك بالاعتماد على المجلات العلمية الجزائرية أولاً، ثم المصادر العالمية.',
         askJarvis: 'اسأل جارفيس...',
@@ -206,6 +197,7 @@ export const STRINGS = {
         subscribed: 'Subscribed',
         subscriptionTitle: 'Confirm Subscription',
         subscriptionMessage: 'Subscribe to this channel for 100 DZD? The amount will be deducted from your phone balance.',
+        sectionSubscriptionMessage: 'Subscribe to this section for {price} DZD? The amount will be deducted from your phone balance.',
         confirm: 'Confirm',
         cancel: 'Cancel',
         posts: 'Posts',
@@ -218,6 +210,7 @@ export const STRINGS = {
         orTryDemo: 'Or try a demo account',
         back: 'Back',
         explore: 'Explore',
+        openChannel: 'Open Channel',
         jarvisAi: 'Jarvis AI',
         jarvisDescription: 'I am Jarvis, your smart assistant. I can answer your questions based on Algerian scientific journals first, then global sources.',
         askJarvis: 'Ask Jarvis...',
@@ -254,6 +247,7 @@ export const STRINGS = {
         subscribed: 'Abonné',
         subscriptionTitle: 'Confirmer l\'abonnement',
         subscriptionMessage: 'S\'abonner à cette chaîne pour 100 DZD? Le montant sera déduit de votre solde téléphonique.',
+        sectionSubscriptionMessage: 'S\'abonner à cette section pour {price} DZD? Le montant sera déduit de votre solde téléphonique.',
         confirm: 'Confirmer',
         cancel: 'Annuler',
         posts: 'Publications',
@@ -266,6 +260,7 @@ export const STRINGS = {
         orTryDemo: 'Ou essayez un compte démo',
         back: 'Retour',
         explore: 'Explorer',
+        openChannel: 'Ouvrir la chaîne',
         jarvisAi: 'Jarvis AI',
         jarvisDescription: 'Je suis Jarvis, votre assistant intelligent. Je peux répondre à vos questions en me basant d\'abord sur les revues scientifiques algériennes, puis sur les sources mondiales.',
         askJarvis: 'Demandez à Jarvis...',

@@ -4,7 +4,6 @@ import { useApp } from '../context/AppContext';
 import { getLang, MOCK_ALL_USERS, UNIVERSITIES, COLLEGES } from '../constants';
 import { Channel, UserRole } from '../types';
 import ChannelView from './ChannelView';
-import SubscriptionModal from './SubscriptionModal';
 import JarvisAI from './JarvisAI';
 import ProfileSettingsModal from './ProfileSettingsModal';
 import DirectMessagesView from './DirectMessagesView';
@@ -13,7 +12,6 @@ import { BookOpenIcon, UserIcon, CompassIcon, MenuIcon, XIcon, BotIcon, SunIcon,
 const StudentDashboard: React.FC = () => {
     const { user, channels, language, s, logout, theme, toggleTheme, setLanguage, notifications, markNotificationsAsRead } = useApp();
     const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
-    const [showSubscriptionModal, setShowSubscriptionModal] = useState<Channel | null>(null);
     const [activeTab, setActiveTab] = useState<'my-channels' | 'explore' | 'ai' | 'direct-messages'>('explore');
     const [isSidebarOpen, setSidebarOpen] = useState(false);
     
@@ -53,13 +51,9 @@ const StudentDashboard: React.FC = () => {
     }
 
     const handleChannelClick = (channel: Channel) => {
-        if (user?.subscribedChannels.includes(channel.id)) {
-            setActiveTab('my-channels');
-            setSelectedChannel(channel);
-            setSidebarOpen(false);
-        } else {
-            setShowSubscriptionModal(channel);
-        }
+        setActiveTab('my-channels');
+        setSelectedChannel(channel);
+        setSidebarOpen(false);
     };
     
     const handleSelectTab = (tab: 'my-channels' | 'explore' | 'ai' | 'direct-messages') => {
@@ -98,8 +92,8 @@ const StudentDashboard: React.FC = () => {
                                     {professor && (<div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-4"><img src={professor.avatar} alt={professor.name} className="w-6 h-6 rounded-full me-2"/><span>{professor.name}</span></div>)}
                                     <p className="text-sm text-gray-500 mb-4">{channel.specialization}</p>
                                     <div className="flex justify-between items-center">
-                                        <div className="flex items-center space-x-4 rtl:space-x-reverse text-sm text-gray-500"><div className="flex items-center"><UserIcon className="w-4 h-4 me-1"/> {channel.subscribers}</div><div className="flex items-center"><BookOpenIcon className="w-4 h-4 me-1"/> {channel.posts.length}</div></div>
-                                        <button onClick={() => handleChannelClick(channel)} className={`px-4 py-2 rounded-md text-sm font-semibold ${user.subscribedChannels.includes(channel.id) ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300' : 'bg-primary-500 hover:bg-primary-600 text-white'}`}>{user.subscribedChannels.includes(channel.id) ? s.subscribed : s.subscribe}</button>
+                                        <div className="flex items-center space-x-4 rtl:space-x-reverse text-sm text-gray-500"><div className="flex items-center"><BookOpenIcon className="w-4 h-4 me-1"/> {channel.posts.length}</div></div>
+                                        <button onClick={() => handleChannelClick(channel)} className={`px-4 py-2 rounded-md text-sm font-semibold bg-primary-500 hover:bg-primary-600 text-white`}>{s.openChannel}</button>
                                     </div>
                                 </div>
                             </div>
@@ -123,15 +117,70 @@ const StudentDashboard: React.FC = () => {
     };
     
     const subscribedChannelsContent = (
-        <div className="flex-1 flex flex-col overflow-y-hidden border-t border-gray-200 dark:border-gray-700">
+        <div className="flex-1 flex flex-col overflow-y-auto">
             <nav className="flex-1 overflow-y-auto p-2">
-                {channels.filter(ch => user.subscribedChannels.includes(ch.id)).map(channel => (
+                {channels.map(channel => (
                     <a key={channel.id} href="#" onClick={(e) => { e.preventDefault(); handleChannelClick(channel); }} className={`block px-4 py-2 md:py-3 my-1 rounded-md text-sm font-medium ${selectedChannel?.id === channel.id ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}>{channel.name}</a>
                 ))}
-                {channels.filter(ch => user.subscribedChannels.includes(ch.id)).length === 0 && (<p className="p-4 text-center text-gray-500">You are not subscribed to any channels yet.</p>)}
             </nav>
         </div>
     );
+
+    const sidebarFooterControls = (
+        <div className="mt-auto p-2 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between p-2">
+                <div className="flex items-center gap-2">
+                     <select value={language} onChange={(e) => setLanguage(e.target.value as 'ar' | 'en' | 'fr')} className="bg-gray-200 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md py-1 px-1 text-sm focus:outline-none focus:ring-1 focus:ring-primary-500">
+                        <option value="en">EN</option>
+                        <option value="fr">FR</option>
+                        <option value="ar">AR</option>
+                    </select>
+                    <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700" aria-label="Toggle theme">
+                        {theme === 'light' ? <MoonIcon className="w-5 h-5" /> : <SunIcon className="w-5 h-5" />}
+                    </button>
+                </div>
+                <div className="relative" ref={notifDropdownRef}>
+                    <button onClick={handleNotifClick} className="relative p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
+                        <BellIcon className="w-5 h-5"/>
+                        {unreadCount > 0 && <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-gray-800"></span>}
+                    </button>
+                    {notifDropdownOpen && (
+                         <div className="absolute bottom-full end-0 mb-2 w-72 sm:w-80 bg-white dark:bg-gray-800 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-20">
+                            <div className="p-3 font-semibold border-b border-gray-200 dark:border-gray-700">{s.notifications}</div>
+                            <div className="max-h-60 overflow-y-auto">
+                                {notifications.length > 0 ? notifications.map(notif => (
+                                    <div key={notif.id} className={`p-3 text-sm border-b border-gray-200 dark:border-gray-700/50 ${!notif.read ? 'bg-primary-50 dark:bg-primary-900/20' : ''}`}>
+                                        <p>{notif.text}</p>
+                                        <p className="text-xs text-gray-500 mt-1">{notif.timestamp}</p>
+                                    </div>
+                                )) : <p className="p-4 text-center text-gray-500">{s.noNotifications}</p>}
+                            </div>
+                         </div>
+                    )}
+                </div>
+            </div>
+            <div className="relative" ref={profileDropdownRef}>
+                {profileDropdownOpen && (
+                    <div className="absolute bottom-full start-0 end-0 mb-2 w-full bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 z-20">
+                        <button onClick={() => { setSettingsOpen(true); setProfileDropdownOpen(false); }} className="w-full text-start flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <UserIcon className="w-4 h-4 me-3" /> {s.profileSettings}
+                        </button>
+                        <button onClick={logout} className="w-full text-start flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <LogOutIcon className="w-4 h-4 me-3" /> {s.logout}
+                        </button>
+                    </div>
+                )}
+                <button onClick={() => setProfileDropdownOpen(!profileDropdownOpen)} className="w-full flex items-center space-x-3 rtl:space-x-reverse p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <img src={user.avatar} alt={user.name} className="w-10 h-10 rounded-full object-cover"/>
+                    <div className="flex-1 text-start">
+                        <h3 className="font-bold text-sm">{user.name}</h3>
+                        <p className="text-xs text-gray-500">{user.college}</p>
+                    </div>
+                </button>
+            </div>
+        </div>
+    );
+
 
     return (
         <div className="flex flex-col h-screen bg-gray-200 dark:bg-black">
@@ -141,13 +190,16 @@ const StudentDashboard: React.FC = () => {
             <aside className={`fixed top-0 ltr:left-0 rtl:right-0 h-full w-3/4 sm:w-1/2 bg-white dark:bg-gray-800 border-e dark:border-gray-700 flex flex-col transform transition-transform duration-300 ease-in-out z-30 md:hidden ${isSidebarOpen ? 'ltr:translate-x-0 rtl:-translate-x-0' : 'ltr:-translate-x-full rtl:translate-x-full'}`}>
                  <button onClick={() => setSidebarOpen(false)} className="absolute top-4 end-4 p-1 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700" aria-label="Close sidebar"><XIcon className="w-6 h-6"/></button>
                  <div className="p-4 border-b border-gray-200 dark:border-gray-700"><h1 className="text-xl font-bold text-primary-600 dark:text-primary-400">{s.appName}</h1></div>
-                <nav className="p-4 space-y-1">
-                    <button onClick={() => handleSelectTab('my-channels')} className={`w-full flex items-center p-2 rounded-md text-sm font-medium ${activeTab === 'my-channels' ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700'}`}><BookOpenIcon className="w-5 h-5 me-3"/> <span>{s.myChannels}</span></button>
-                    <button onClick={() => handleSelectTab('explore')} className={`w-full flex items-center p-2 rounded-md text-sm font-medium ${activeTab === 'explore' ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700'}`}><CompassIcon className="w-5 h-5 me-3"/> <span>{s.explore}</span></button>
-                    <button onClick={() => handleSelectTab('direct-messages')} className={`w-full flex items-center p-2 rounded-md text-sm font-medium ${activeTab === 'direct-messages' ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700'}`}><MessageSquareIcon className="w-5 h-5 me-3" /><span>{s.directMessages}</span></button>
-                    <button onClick={() => handleSelectTab('ai')} className={`w-full flex items-center p-2 rounded-md text-sm font-medium ${activeTab === 'ai' ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700'}`}><BotIcon className="w-5 h-5 me-3"/> <span>{s.jarvisAi}</span></button>
-                </nav>
-                {activeTab === 'my-channels' && subscribedChannelsContent}
+                <div className="flex-1 flex flex-col overflow-y-hidden">
+                    <nav className="p-4 space-y-1">
+                        <button onClick={() => handleSelectTab('my-channels')} className={`w-full flex items-center p-2 rounded-md text-sm font-medium ${activeTab === 'my-channels' ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700'}`}><BookOpenIcon className="w-5 h-5 me-3"/> <span>{s.myChannels}</span></button>
+                        <button onClick={() => handleSelectTab('explore')} className={`w-full flex items-center p-2 rounded-md text-sm font-medium ${activeTab === 'explore' ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700'}`}><CompassIcon className="w-5 h-5 me-3"/> <span>{s.explore}</span></button>
+                        <button onClick={() => handleSelectTab('direct-messages')} className={`w-full flex items-center p-2 rounded-md text-sm font-medium ${activeTab === 'direct-messages' ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700'}`}><MessageSquareIcon className="w-5 h-5 me-3" /><span>{s.directMessages}</span></button>
+                        <button onClick={() => handleSelectTab('ai')} className={`w-full flex items-center p-2 rounded-md text-sm font-medium ${activeTab === 'ai' ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700'}`}><BotIcon className="w-5 h-5 me-3"/> <span>{s.jarvisAi}</span></button>
+                    </nav>
+                    {activeTab === 'my-channels' && subscribedChannelsContent}
+                </div>
+                {sidebarFooterControls}
             </aside>
             
             {/* Desktop Header */}
@@ -186,7 +238,6 @@ const StudentDashboard: React.FC = () => {
                 <main className={`flex-1 bg-gray-100 dark:bg-gray-900 flex flex-col min-w-0 md:rounded-xl md:shadow-lg overflow-hidden ${activeTab !== 'my-channels' ? 'md:w-full' : ''}`}>{renderContent()}</main>
             </div>
             
-            {showSubscriptionModal && (<SubscriptionModal channel={showSubscriptionModal} onClose={() => setShowSubscriptionModal(null)} onConfirm={() => {setActiveTab('my-channels');setSelectedChannel(showSubscriptionModal);setShowSubscriptionModal(null);}}/>)}
             {settingsOpen && <ProfileSettingsModal onClose={() => setSettingsOpen(false)} />}
         </div>
     );

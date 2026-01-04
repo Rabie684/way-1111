@@ -2,20 +2,20 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
 import { getLang } from '../constants';
-import { Channel } from '../types';
+import { Section } from '../types';
 
 interface SubscriptionModalProps {
-    channel: Channel;
+    section: Section;
     onClose: () => void;
     onConfirm: () => void;
 }
 
-const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ channel, onClose, onConfirm }) => {
-    const { subscribeToChannel, language } = useApp();
+const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ section, onClose, onConfirm }) => {
+    const { subscribeToSection, language } = useApp();
     const s = getLang(language);
 
     const handleConfirm = () => {
-        subscribeToChannel(channel.id);
+        subscribeToSection(section.id);
         onConfirm();
     };
 
@@ -24,8 +24,8 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ channel, onClose,
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md m-4">
                 <div className="p-6 text-center">
                     <h2 className="text-xl font-bold mb-2">{s.subscriptionTitle}</h2>
-                    <p className="text-gray-600 dark:text-gray-300 mb-1">{`"${channel.name}"`}</p>
-                    <p className="text-gray-600 dark:text-gray-300">{s.subscriptionMessage}</p>
+                    <p className="text-gray-600 dark:text-gray-300 mb-1">{`"${section.name}"`}</p>
+                    <p className="text-gray-600 dark:text-gray-300">{s.sectionSubscriptionMessage.replace('{price}', section.price.toString())}</p>
                 </div>
                 <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 flex justify-center space-x-4 rtl:space-x-reverse">
                     <button onClick={onClose} className="px-6 py-2 text-sm font-medium text-gray-700 bg-white dark:text-gray-200 dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-md hover:bg-gray-50 dark:hover:bg-gray-500">

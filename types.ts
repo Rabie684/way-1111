@@ -12,7 +12,7 @@ export interface User {
     university: string;
     college: string;
     avatar: string;
-    subscribedChannels: string[]; // array of channel IDs
+    subscribedSections: string[]; // array of section IDs
 }
 
 export enum PostType {
@@ -39,6 +39,13 @@ export interface Channel {
     subscribers: number;
 }
 
+export interface Section {
+    id: string;
+    name: string;
+    channelId: string;
+    price: number;
+}
+
 export interface Message {
     id: string;
     senderId: string;
@@ -48,6 +55,10 @@ export interface Message {
 
 export interface ChannelMessage extends Message {
     channelId: string;
+}
+
+export interface DirectMessage extends Message {
+    receiverId: string;
 }
 
 export interface Notification {
