@@ -13,7 +13,7 @@ export const UNIVERSITIES = [
 ];
 
 export const COLLEGES = [
-    "كلية العلوم اقتصادية و علوم تسيير",
+    "كلية العلوم الاقتصادية وعلوم التسيير",
     "Faculty of Medicine",
     "Faculty of Law",
     "Faculty of Science",
@@ -26,7 +26,7 @@ export const MOCK_PROFESSOR: User = {
     email: 'bekhta@univ-ibnkhaldoun.dz',
     role: UserRole.Professor,
     university: 'جامعة ابن خلدون ملحقة قصر الشلالة',
-    college: 'كلية العلوم اقتصادية و علوم تسيير',
+    college: 'كلية العلوم الاقتصادية وعلوم التسيير',
     avatar: 'https://picsum.photos/seed/prof2/200',
     subscribedChannels: [],
 };
@@ -60,7 +60,7 @@ export const MOCK_STUDENT: User = {
     email: 'rabie@student.dz',
     role: UserRole.Student,
     university: 'جامعة ابن خلدون ملحقة قصر الشلالة',
-    college: 'كلية العلوم اقتصادية و علوم تسيير',
+    college: 'كلية العلوم الاقتصادية وعلوم التسيير',
     avatar: 'https://picsum.photos/seed/student2/200',
     subscribedChannels: ['ch-1'],
 };
