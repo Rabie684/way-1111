@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { User, Channel, UserRole, PostType, ChannelMessage, DirectMessage, Notification } from './types';
+import { User, Channel, UserRole, PostType, ChannelMessage, Notification } from './types';
 
 export const UNIVERSITIES = [
     "جامعة ابن خلدون ملحقة قصر الشلالة",
@@ -122,11 +122,6 @@ export const MOCK_CHANNEL_MESSAGES: ChannelMessage[] = [
     { id: 'msg-ch-3', senderId: 'student-2', channelId: 'ch-1', text: 'I have a question about the first assignment.', timestamp: '10:05 AM' },
 ];
 
-export const MOCK_DMS: DirectMessage[] = [
-     { id: 'msg-dm-1', senderId: 'student-1', receiverId: 'prof-1', text: 'Professor, I need an extension for the project.', timestamp: 'Yesterday' },
-     { id: 'msg-dm-2', senderId: 'prof-1', receiverId: 'student-1', text: 'Please send me an email with your justification.', timestamp: 'Today' },
-];
-
 export const MOCK_NOTIFICATIONS: Notification[] = [
     { id: 'notif-1', text: 'تم إضافة منشور جديد في قناة "الرياضيات المالية".', timestamp: 'منذ 5 دقائق', read: false },
     { id: 'notif-2', text: 'سيبدأ اجتماع Google Meet لقناة "مبادئ الاقتصاد الجزئي" قريبًا.', timestamp: 'منذ ساعة', read: false },
@@ -150,7 +145,6 @@ export const STRINGS = {
         submit: 'إرسال',
         myChannels: 'قنواتي',
         createChannel: 'إنشاء قناة',
-        directMessages: 'الرسائل المباشرة',
         profileSettings: 'إعدادات الملف الشخصي',
         logout: 'تسجيل الخروج',
         darkMode: 'الوضع الليلي',
@@ -198,7 +192,6 @@ export const STRINGS = {
         submit: 'Submit',
         myChannels: 'My Channels',
         createChannel: 'Create Channel',
-        directMessages: 'Direct Messages',
         profileSettings: 'Profile Settings',
         logout: 'Logout',
         darkMode: 'Dark Mode',
@@ -246,7 +239,6 @@ export const STRINGS = {
         submit: 'Soumettre',
         myChannels: 'Mes Chaînes',
         createChannel: 'Créer une chaîne',
-        directMessages: 'Messages Directs',
         profileSettings: 'Paramètres du profil',
         logout: 'Déconnexion',
         darkMode: 'Mode Sombre',

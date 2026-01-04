@@ -46,10 +46,6 @@ export interface Message {
     timestamp: string;
 }
 
-export interface DirectMessage extends Message {
-    receiverId: string;
-}
-
 export interface ChannelMessage extends Message {
     channelId: string;
 }

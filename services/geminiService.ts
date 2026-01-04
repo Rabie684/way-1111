@@ -1,17 +1,24 @@
 
 import { GoogleGenAI } from "@google/genai";
 
-const API_KEY = process.env.API_KEY;
-
-if (!API_KEY) {
-    console.warn("API_KEY is not set. AI features will not work.");
+let API_KEY: string | undefined;
+try {
+  API_KEY = process.env.API_KEY;
+} catch (e) {
+  console.warn("Could not access process.env. This is normal in a browser environment. API key must be configured elsewhere for AI features to work.");
+  API_KEY = undefined;
 }
 
-const ai = new GoogleGenAI({ apiKey: API_KEY! });
+let ai: GoogleGenAI | null = null;
+if (API_KEY) {
+  ai = new GoogleGenAI({ apiKey: API_KEY });
+} else {
+  console.warn("API_KEY is not set. AI features will be disabled.");
+}
 
 export const askJarvis = async (prompt: string): Promise<string> => {
-    if (!API_KEY) {
-        return "API Key not configured. Please set the API_KEY environment variable.";
+    if (!ai) {
+        return "AI Service is not initialized. Please ensure the API_KEY is configured correctly.";
     }
     
     try {

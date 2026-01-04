@@ -6,12 +6,11 @@ import { SendIcon } from './icons/IconComponents';
 import { UserRole } from '../types';
 
 interface ChatWindowProps {
-    type: 'channel' | 'dm';
-    conversationId: string; // channelId for 'channel', other userId for 'dm'
+    channelId: string;
 }
 
-const ChatWindow: React.FC<ChatWindowProps> = ({ type, conversationId }) => {
-    const { user, channelMessages, directMessages, sendMessage, sendDirectMessage, language } = useApp();
+const ChatWindow: React.FC<ChatWindowProps> = ({ channelId }) => {
+    const { user, channelMessages, sendMessage, language } = useApp();
     const s = getLang(language);
     const [newMessage, setNewMessage] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -20,28 +19,19 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ type, conversationId }) => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
 
-    useEffect(scrollToBottom, [channelMessages, directMessages, conversationId]);
+    useEffect(scrollToBottom, [channelMessages, channelId]);
 
     const handleSendMessage = (e: React.FormEvent) => {
         e.preventDefault();
         if (newMessage.trim()) {
-            if (type === 'channel') {
-                sendMessage(conversationId, newMessage.trim());
-            } else {
-                sendDirectMessage(conversationId, newMessage.trim());
-            }
+            sendMessage(channelId, newMessage.trim());
             setNewMessage('');
         }
     };
     
     if(!user) return null;
 
-    const messages = type === 'channel'
-        ? channelMessages.filter(m => m.channelId === conversationId)
-        : directMessages.filter(m => 
-            (m.senderId === user.id && m.receiverId === conversationId) ||
-            (m.senderId === conversationId && m.receiverId === user.id)
-          );
+    const messages = channelMessages.filter(m => m.channelId === channelId);
 
     const getUserById = (id: string) => {
         if (id === MOCK_PROFESSOR.id) return MOCK_PROFESSOR;

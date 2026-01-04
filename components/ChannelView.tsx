@@ -84,7 +84,7 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack }) => {
                 )}
                 {activeTab === 'chat' && (
                     <div className="h-full">
-                        <ChatWindow type="channel" conversationId={channel.id} />
+                        <ChatWindow channelId={channel.id} />
                     </div>
                 )}
             </div>
