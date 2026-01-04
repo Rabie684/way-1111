@@ -7,13 +7,14 @@ import ChannelView from './ChannelView';
 import SubscriptionModal from './SubscriptionModal';
 import JarvisAI from './JarvisAI';
 import ProfileSettingsModal from './ProfileSettingsModal';
-import { BookOpenIcon, UserIcon, CompassIcon, MenuIcon, XIcon, BotIcon, SunIcon, MoonIcon, BellIcon, LogOutIcon } from './icons/IconComponents';
+import DirectMessagesView from './DirectMessagesView';
+import { BookOpenIcon, UserIcon, CompassIcon, MenuIcon, XIcon, BotIcon, SunIcon, MoonIcon, BellIcon, LogOutIcon, MessageSquareIcon } from './icons/IconComponents';
 
 const StudentDashboard: React.FC = () => {
     const { user, channels, language, s, logout, theme, toggleTheme, setLanguage, notifications, markNotificationsAsRead } = useApp();
     const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
     const [showSubscriptionModal, setShowSubscriptionModal] = useState<Channel | null>(null);
-    const [activeTab, setActiveTab] = useState<'my-channels' | 'explore' | 'ai'>('explore');
+    const [activeTab, setActiveTab] = useState<'my-channels' | 'explore' | 'ai' | 'direct-messages'>('explore');
     const [isSidebarOpen, setSidebarOpen] = useState(false);
     
     // State from former Header
@@ -73,7 +74,7 @@ const StudentDashboard: React.FC = () => {
         }
     };
     
-    const handleSelectTab = (tab: 'my-channels' | 'explore' | 'ai') => {
+    const handleSelectTab = (tab: 'my-channels' | 'explore' | 'ai' | 'direct-messages') => {
         if (tab !== 'my-channels') {
             setSelectedChannel(null);
         }
@@ -92,6 +93,10 @@ const StudentDashboard: React.FC = () => {
             return <JarvisAI />;
         }
         
+         if (activeTab === 'direct-messages') {
+            return <DirectMessagesView />;
+        }
+
         if (activeTab === 'explore') {
              return (
                 <div className="p-4 sm:p-8">
@@ -168,11 +173,11 @@ const StudentDashboard: React.FC = () => {
     };
 
     return (
-         <div className="flex h-screen">
+         <div className="flex h-screen md:p-4 md:gap-4">
             {isSidebarOpen && <div onClick={() => setSidebarOpen(false)} className="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden" aria-hidden="true"></div>}
             
             {/* Sidebar */}
-            <aside className={`fixed top-0 ltr:left-0 rtl:right-0 h-full w-3/4 sm:w-1/2 md:w-1/4 bg-white dark:bg-gray-800 border-e dark:border-gray-700 flex flex-col transform transition-transform duration-300 ease-in-out z-30 md:relative md:translate-x-0 ${isSidebarOpen ? 'ltr:translate-x-0 rtl:-translate-x-0' : 'ltr:-translate-x-full rtl:translate-x-full'}`}>
+            <aside className={`fixed top-0 ltr:left-0 rtl:right-0 h-full w-3/4 sm:w-1/2 md:w-1/4 bg-white dark:bg-gray-800 border-e dark:border-gray-700 flex flex-col transform transition-transform duration-300 ease-in-out z-30 md:relative md:translate-x-0 md:h-full md:rounded-xl md:border-0 md:shadow-lg ${isSidebarOpen ? 'ltr:translate-x-0 rtl:-translate-x-0' : 'ltr:-translate-x-full rtl:translate-x-full'}`}>
                 <button onClick={() => setSidebarOpen(false)} className="absolute top-4 end-4 p-1 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 md:hidden" aria-label="Close sidebar">
                     <XIcon className="w-6 h-6"/>
                 </button>
@@ -186,6 +191,10 @@ const StudentDashboard: React.FC = () => {
                     </button>
                     <button onClick={() => handleSelectTab('explore')} className={`w-full flex items-center p-2 rounded-md text-sm font-medium ${activeTab === 'explore' ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                         <CompassIcon className="w-5 h-5 me-3"/> <span>{s.explore}</span>
+                    </button>
+                    <button onClick={() => handleSelectTab('direct-messages')} className={`w-full flex items-center p-2 rounded-md text-sm font-medium ${activeTab === 'direct-messages' ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                        <MessageSquareIcon className="w-5 h-5 me-3" />
+                        <span>{s.directMessages}</span>
                     </button>
                     <button onClick={() => handleSelectTab('ai')} className={`w-full flex items-center p-2 rounded-md text-sm font-medium ${activeTab === 'ai' ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                         <BotIcon className="w-5 h-5 me-3"/> <span>{s.jarvisAi}</span>
@@ -266,7 +275,7 @@ const StudentDashboard: React.FC = () => {
 
             </aside>
 
-            <main className="flex-1 bg-gray-100 dark:bg-gray-900 flex flex-col min-w-0">
+            <main className="flex-1 bg-gray-100 dark:bg-gray-900 flex flex-col min-w-0 md:rounded-xl md:shadow-lg md:overflow-hidden">
                  <div className="p-2 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800 z-10 md:hidden">
                     <button onClick={() => setSidebarOpen(true)} className="p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700" aria-label="Open sidebar">
                         <MenuIcon className="w-6 h-6"/>

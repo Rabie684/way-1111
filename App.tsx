@@ -27,7 +27,7 @@ const AppContent: React.FC = () => {
     }, [user]);
 
     return (
-        <div className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen font-sans">
+        <div className="bg-gray-200 dark:bg-black text-gray-900 dark:text-gray-100 min-h-screen font-sans">
             {user && <WelcomeToast message={`${getLang(language).welcomeBack} ${user.name}!`} show={showWelcome} />}
             {user ? (
                 <main>

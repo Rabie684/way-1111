@@ -176,6 +176,7 @@ export const STRINGS = {
         welcomeBack: 'مرحباً بعودتك،',
         notifications: 'الإشعارات',
         noNotifications: 'لا توجد إشعارات جديدة.',
+        directMessages: 'الرسائل المباشرة',
     },
     en: {
         appName: 'Your Digital University Way',
@@ -223,6 +224,7 @@ export const STRINGS = {
         welcomeBack: 'Welcome back,',
         notifications: 'Notifications',
         noNotifications: 'No new notifications.',
+        directMessages: 'Direct Messages',
     },
     fr: {
         appName: 'Votre Université Numérique Way',
@@ -270,6 +272,7 @@ export const STRINGS = {
         welcomeBack: 'Content de vous revoir,',
         notifications: 'Notifications',
         noNotifications: 'Aucune nouvelle notification.',
+        directMessages: 'Messages Directs',
     }
 };
 

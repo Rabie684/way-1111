@@ -7,12 +7,13 @@ import ChannelView from './ChannelView';
 import JarvisAI from './JarvisAI';
 import CreateChannelModal from './CreateChannelModal';
 import ProfileSettingsModal from './ProfileSettingsModal';
-import { BookOpenIcon, BotIcon, PlusCircleIcon, StarIcon, MenuIcon, XIcon, SunIcon, MoonIcon, UserIcon, LogOutIcon, BellIcon } from './icons/IconComponents';
+import DirectMessagesView from './DirectMessagesView';
+import { BookOpenIcon, BotIcon, PlusCircleIcon, StarIcon, MenuIcon, XIcon, SunIcon, MoonIcon, UserIcon, LogOutIcon, BellIcon, MessageSquareIcon } from './icons/IconComponents';
 
 const ProfessorDashboard: React.FC = () => {
     const { user, channels, language, s, logout, theme, toggleTheme, setLanguage, notifications, markNotificationsAsRead } = useApp();
     const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
-    const [activeTab, setActiveTab] = useState<'channel' | 'ai'>('channel');
+    const [activeTab, setActiveTab] = useState<'channel' | 'ai' | 'direct-messages'>('channel');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isSidebarOpen, setSidebarOpen] = useState(false);
     
@@ -55,7 +56,7 @@ const ProfessorDashboard: React.FC = () => {
         setSidebarOpen(false);
     };
 
-    const handleSelectTab = (tab: 'channel' | 'ai') => {
+    const handleSelectTab = (tab: 'channel' | 'ai' | 'direct-messages') => {
         if (tab !== 'channel') {
             setSelectedChannel(null);
         }
@@ -70,6 +71,9 @@ const ProfessorDashboard: React.FC = () => {
     const renderContent = () => {
         if (activeTab === 'ai') {
             return <JarvisAI />;
+        }
+        if (activeTab === 'direct-messages') {
+            return <DirectMessagesView />;
         }
         if (activeTab === 'channel') {
             if (selectedChannel) {
@@ -89,11 +93,11 @@ const ProfessorDashboard: React.FC = () => {
     if (!user) return null;
 
     return (
-        <div className="flex h-screen">
+        <div className="flex h-screen md:p-4 md:gap-4">
             {isSidebarOpen && <div onClick={() => setSidebarOpen(false)} className="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden" aria-hidden="true"></div>}
             
             {/* Sidebar */}
-            <aside className={`fixed top-0 ltr:left-0 rtl:right-0 h-full w-3/4 sm:w-1/2 md:w-1/4 bg-white dark:bg-gray-800 border-e dark:border-gray-700 flex flex-col transform transition-transform duration-300 ease-in-out z-30 md:relative md:translate-x-0 ${isSidebarOpen ? 'ltr:translate-x-0 rtl:-translate-x-0' : 'ltr:-translate-x-full rtl:translate-x-full'}`}>
+            <aside className={`fixed top-0 ltr:left-0 rtl:right-0 h-full w-3/4 sm:w-1/2 md:w-1/4 bg-white dark:bg-gray-800 border-e dark:border-gray-700 flex flex-col transform transition-transform duration-300 ease-in-out z-30 md:relative md:translate-x-0 md:h-full md:rounded-xl md:border-0 md:shadow-lg ${isSidebarOpen ? 'ltr:translate-x-0 rtl:-translate-x-0' : 'ltr:-translate-x-full rtl:translate-x-full'}`}>
                 <button onClick={() => setSidebarOpen(false)} className="absolute top-4 end-4 p-1 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 md:hidden" aria-label="Close sidebar">
                     <XIcon className="w-6 h-6"/>
                 </button>
@@ -105,6 +109,10 @@ const ProfessorDashboard: React.FC = () => {
                     <button onClick={() => handleSelectTab('channel')} className={`w-full flex items-center p-2 rounded-md text-sm font-medium ${activeTab === 'channel' ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                         <BookOpenIcon className="w-5 h-5 me-3" />
                         <span>{s.myChannels}</span>
+                    </button>
+                     <button onClick={() => handleSelectTab('direct-messages')} className={`w-full flex items-center p-2 rounded-md text-sm font-medium ${activeTab === 'direct-messages' ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                        <MessageSquareIcon className="w-5 h-5 me-3" />
+                        <span>{s.directMessages}</span>
                     </button>
                     <button onClick={() => handleSelectTab('ai')} className={`w-full flex items-center p-2 rounded-md text-sm font-medium ${activeTab === 'ai' ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                         <BotIcon className="w-5 h-5 me-3" />
@@ -199,7 +207,7 @@ const ProfessorDashboard: React.FC = () => {
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 bg-gray-100 dark:bg-gray-900 flex flex-col min-w-0">
+            <main className="flex-1 bg-gray-100 dark:bg-gray-900 flex flex-col min-w-0 md:rounded-xl md:shadow-lg md:overflow-hidden">
                 <div className="p-2 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800 z-10 md:hidden">
                     <button onClick={() => setSidebarOpen(true)} className="p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700" aria-label="Open sidebar">
                         <MenuIcon className="w-6 h-6"/>
