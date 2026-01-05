@@ -138,10 +138,10 @@ const ProfessorDashboard: React.FC = () => {
             <div className="relative" ref={profileDropdownRef}>
                 {profileDropdownOpen && (
                     <div className="absolute bottom-full start-0 end-0 mb-2 w-full bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 z-20">
-                        <button onClick={() => { setSettingsOpen(true); setProfileDropdownOpen(false); }} className="w-full text-start flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <button onClick={() => { setSettingsOpen(true); setProfileDropdownOpen(false); setSidebarOpen(false); }} className="w-full text-start flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
                             <UserIcon className="w-4 h-4 me-3" /> {s.profileSettings}
                         </button>
-                        <button onClick={logout} className="w-full text-start flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <button onClick={() => { logout(); setSidebarOpen(false); }} className="w-full text-start flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
                             <LogOutIcon className="w-4 h-4 me-3" /> {s.logout}
                         </button>
                     </div>

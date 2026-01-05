@@ -2,7 +2,7 @@ const CACHE_NAME = 'your-digital-university-way-cache-v1';
 const urlsToCache = [
   '/',
   '/index.html',
-  '/vite.svg',
+  '/logo.svg',
   '/index.tsx',
   '/App.tsx',
   '/types.ts',
