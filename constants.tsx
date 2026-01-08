@@ -3,21 +3,16 @@ import React from 'react';
 import { User, Channel, UserRole, PostType, ChannelMessage, Notification, DirectMessage, Section } from './types';
 
 export const UNIVERSITIES = [
+    "جامعة ابن خLDون تيارت",
     "جامعة ابن خلدون ملحقة قصر الشلالة",
-    "جامعة ابن خلدون تيارت",
-    "جامعة زيان عاشور الجلفة",
-    "University of Algiers 1",
-    "University of Oran 1",
-    "University of Constantine 1",
-    "University of Science and Technology Houari Boumediene (USTHB)",
 ];
 
 export const COLLEGES = [
-    "كلية العلوم الاقتصادية وعلوم التسيير",
-    "Faculty of Medicine",
-    "Faculty of Law",
-    "Faculty of Science",
-    "Faculty of Technology",
+    "كلية العلوم الطبيعية و الحياة",
+    "كلية العلوم الانسانية",
+    "كلية الادب العربي",
+    "كلية الحقوق",
+    "كلية العلوم الاقتصادية",
 ];
 
 export const MOCK_PROFESSOR: User = {
@@ -26,7 +21,7 @@ export const MOCK_PROFESSOR: User = {
     email: 'bekhta@univ-ibnkhaldoun.dz',
     role: UserRole.Professor,
     university: 'جامعة ابن خلدون ملحقة قصر الشلالة',
-    college: 'كلية العلوم الاقتصادية وعلوم التسيير',
+    college: 'كلية العلوم الاقتصادية',
     avatar: 'https://picsum.photos/seed/prof2/200',
     subscribedSections: [],
 };
@@ -37,7 +32,7 @@ export const MOCK_PROFESSOR_2: User = {
     email: 'prof@univ-tiaret.dz',
     role: UserRole.Professor,
     university: 'جامعة ابن خلدون تيارت',
-    college: 'Faculty of Technology',
+    college: 'كلية الحقوق',
     avatar: 'https://picsum.photos/seed/prof3/200',
     subscribedSections: [],
 };
@@ -48,7 +43,7 @@ export const MOCK_PROFESSOR_3: User = {
     email: 'prof@univ-djelfa.dz',
     role: UserRole.Professor,
     university: 'جامعة زيان عاشور الجلفة',
-    college: 'Faculty of Science',
+    college: 'كلية العلوم الانسانية',
     avatar: 'https://picsum.photos/seed/prof4/200',
     subscribedSections: [],
 };
@@ -60,7 +55,7 @@ export const MOCK_STUDENT: User = {
     email: 'rabie@student.dz',
     role: UserRole.Student,
     university: 'جامعة ابن خلدون ملحقة قصر الشلالة',
-    college: 'كلية العلوم الاقتصادية وعلوم التسيير',
+    college: 'كلية العلوم الاقتصادية',
     avatar: 'https://picsum.photos/seed/student2/200',
     subscribedSections: ['sec-1'],
 };
@@ -125,6 +120,7 @@ export const STRINGS = {
         register: 'إنشاء حساب',
         email: 'البريد الإلكتروني',
         password: 'كلمة المرور',
+        fullName: 'الاسم الكامل',
         role: 'الدور',
         professor: 'أستاذ',
         student: 'طالب',
@@ -146,8 +142,9 @@ export const STRINGS = {
         subscribe: 'اشتراك',
         subscribed: 'مشترك',
         subscriptionTitle: 'تأكيد الاشتراك',
-        subscriptionMessage: 'هل تريد الاشتراك في هذه القناة مقابل 100 دج؟ سيتم خصم المبلغ من رصيد هاتفك.',
-        sectionSubscriptionMessage: 'هل تريد الاشتراك في هذا القسم مقابل {price} دج؟ سيتم خصم المبلغ من رصيد هاتفك.',
+        subscriptionMessage: 'الاشتراك في هذه القناة سيكلف 100 دج لمدة 3 أشهر. يمكنك الانضمام مجاناً حتى يتم تفعيل الميزة.',
+        sectionSubscriptionMessage: 'الاشتراك في هذا القسم سيكلف {price} دج لمدة 3 أشهر. يمكنك الانضمام مجاناً حتى يتم تفعيل الميزة.',
+        subscriptionSuccessNotification: 'تم اشتراكك بنجاح في قسم "{sectionName}" في قناة "{channelName}".',
         confirm: 'تأكيد',
         cancel: 'إلغاء',
         posts: 'المنشورات',
@@ -176,6 +173,7 @@ export const STRINGS = {
         register: 'Register',
         email: 'Email',
         password: 'Password',
+        fullName: 'Full Name',
         role: 'Role',
         professor: 'Professor',
         student: 'Student',
@@ -197,8 +195,9 @@ export const STRINGS = {
         subscribe: 'Subscribe',
         subscribed: 'Subscribed',
         subscriptionTitle: 'Confirm Subscription',
-        subscriptionMessage: 'Subscribe to this channel for 100 DZD? The amount will be deducted from your phone balance.',
-        sectionSubscriptionMessage: 'Subscribe to this section for {price} DZD? The amount will be deducted from your phone balance.',
+        subscriptionMessage: 'Subscription for this channel will cost 100 DZD for 3 months. You can join for free until this feature is activated.',
+        sectionSubscriptionMessage: 'Subscription for this section will cost {price} DZD for 3 months. You can join for free until this feature is activated.',
+        subscriptionSuccessNotification: 'You have successfully subscribed to section "{sectionName}" in the channel "{channelName}".',
         confirm: 'Confirm',
         cancel: 'Cancel',
         posts: 'Posts',
@@ -227,6 +226,7 @@ export const STRINGS = {
         register: 'S\'inscrire',
         email: 'Email',
         password: 'Mot de passe',
+        fullName: 'Nom et Prénom',
         role: 'Rôle',
         professor: 'Professeur',
         student: 'Étudiant',
@@ -248,8 +248,9 @@ export const STRINGS = {
         subscribe: 'S\'abonner',
         subscribed: 'Abonné',
         subscriptionTitle: 'Confirmer l\'abonnement',
-        subscriptionMessage: 'S\'abonner à cette chaîne pour 100 DZD? Le montant sera déduit de votre solde téléphonique.',
-        sectionSubscriptionMessage: 'S\'abonner à cette section pour {price} DZD? Le montant sera déduit de votre solde téléphonique.',
+        subscriptionMessage: 'L\'abonnement à cette chaîne coûtera 100 DZD pour 3 mois. Vous pouvez rejoindre gratuitement jusqu\'à ce que cette fonctionnalité soit activée.',
+        sectionSubscriptionMessage: 'L\'abonnement à cette section coûtera {price} DZD pour 3 mois. Vous pouvez rejoindre gratuitement jusqu\'à ce que cette fonctionnalité soit activée.',
+        subscriptionSuccessNotification: 'Vous vous êtes abonné avec succès à la section "{sectionName}" dans la chaîne "{channelName}".',
         confirm: 'Confirmer',
         cancel: 'Annuler',
         posts: 'Publications',

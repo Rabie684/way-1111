@@ -10,14 +10,20 @@ const Login: React.FC = () => {
     const [isRegister, setIsRegister] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [name, setName] = useState('');
     const [role, setRole] = useState<UserRole>(UserRole.Student);
     const [university, setUniversity] = useState('');
     const [college, setCollege] = useState('');
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        // In a real app, you would validate and call an API
-        login(email, role);
+        login({
+            email,
+            role,
+            name: isRegister ? name : undefined,
+            university: isRegister && role === UserRole.Professor ? university : undefined,
+            college: isRegister && role === UserRole.Professor ? college : undefined,
+        });
     };
 
     return (
@@ -41,6 +47,12 @@ const Login: React.FC = () => {
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
+                    {isRegister && (
+                        <div>
+                            <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{s.fullName}</label>
+                            <input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-primary-500 focus:border-primary-500" />
+                        </div>
+                    )}
                     <div>
                         <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{s.email}</label>
                         <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-primary-500 focus:border-primary-500" />
@@ -59,20 +71,24 @@ const Login: React.FC = () => {
                                     <option value={UserRole.Professor}>{s.professor}</option>
                                 </select>
                             </div>
-                            <div>
-                                <label htmlFor="university" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{s.university}</label>
-                                <select id="university" value={university} onChange={(e) => setUniversity(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500">
-                                    <option value="">{s.select}</option>
-                                    {UNIVERSITIES.map(u => <option key={u} value={u}>{u}</option>)}
-                                </select>
-                            </div>
-                            <div>
-                                <label htmlFor="college" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{s.college}</label>
-                                <select id="college" value={college} onChange={(e) => setCollege(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500">
-                                     <option value="">{s.select}</option>
-                                    {COLLEGES.map(c => <option key={c} value={c}>{c}</option>)}
-                                </select>
-                            </div>
+                            {role === UserRole.Professor && (
+                                <>
+                                    <div>
+                                        <label htmlFor="university" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{s.university}</label>
+                                        <select id="university" value={university} onChange={(e) => setUniversity(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500">
+                                            <option value="">{s.select}</option>
+                                            {UNIVERSITIES.map(u => <option key={u} value={u}>{u}</option>)}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label htmlFor="college" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{s.college}</label>
+                                        <select id="college" value={college} onChange={(e) => setCollege(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500">
+                                             <option value="">{s.select}</option>
+                                            {COLLEGES.map(c => <option key={c} value={c}>{c}</option>)}
+                                        </select>
+                                    </div>
+                                </>
+                            )}
                         </>
                     )}
 
@@ -93,14 +109,14 @@ const Login: React.FC = () => {
                 <div className="space-y-3">
                     <button 
                         type="button"
-                        onClick={() => login('rabie@student.dz', UserRole.Student)}
+                        onClick={() => login({ email: 'rabie@student.dz', role: UserRole.Student, isDemo: true })}
                         className="w-full flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:focus:ring-offset-gray-800"
                     >
                         {s.demoStudent}
                     </button>
                     <button 
                         type="button"
-                        onClick={() => login('bekhta@univ-ibnkhaldoun.dz', UserRole.Professor)}
+                        onClick={() => login({ email: 'bekhta@univ-ibnkhaldoun.dz', role: UserRole.Professor, isDemo: true })}
                         className="w-full flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:focus:ring-offset-gray-800"
                     >
                         {s.demoProfessor}

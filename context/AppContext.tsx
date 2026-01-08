@@ -7,6 +7,15 @@ import { askJarvis } from '../services/geminiService';
 type Theme = 'light' | 'dark';
 type Language = 'ar' | 'en' | 'fr';
 
+interface LoginDetails {
+    email: string;
+    role: UserRole;
+    name?: string;
+    university?: string;
+    college?: string;
+    isDemo?: boolean;
+}
+
 interface AppContextType {
     user: User | null;
     theme: Theme;
@@ -18,7 +27,7 @@ interface AppContextType {
     directMessages: DirectMessage[];
     notifications: Notification[];
     jarvisHistory: JarvisMessage[];
-    login: (email: string, role: UserRole) => void;
+    login: (details: LoginDetails) => void;
     logout: () => void;
     toggleTheme: () => void;
     setLanguage: (lang: Language) => void;
@@ -47,12 +56,27 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     
     const s = getLang(language);
 
-    const login = (email: string, role: UserRole) => {
-        // Mock login
-        if (role === UserRole.Professor) {
-            setUser(MOCK_PROFESSOR);
+    const login = (details: LoginDetails) => {
+        const { email, role, isDemo, name, university, college } = details;
+        if (isDemo) {
+            if (role === UserRole.Professor) {
+                setUser(MOCK_PROFESSOR);
+            } else {
+                setUser(MOCK_STUDENT);
+            }
         } else {
-            setUser(MOCK_STUDENT);
+            // Create a new user object for this session
+            const newUser: User = {
+                id: `user-${Date.now()}`,
+                name: name || 'New User',
+                email: email,
+                role: role,
+                university: university || '',
+                college: college || '',
+                avatar: `https://picsum.photos/seed/${Date.now()}/200`,
+                subscribedSections: [],
+            };
+            setUser(newUser);
         }
     };
 
@@ -78,16 +102,34 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     };
     
     const subscribeToSection = (sectionId: string) => {
-        if(user && user.role === UserRole.Student) {
-            setUser(currentUser => {
-                if (!currentUser) return null;
+        if (user && user.role === UserRole.Student && !user.subscribedSections.includes(sectionId)) {
+            setUser(prevUser => {
+                if (!prevUser) return null;
                 return {
-                    ...currentUser,
-                    subscribedSections: [...currentUser.subscribedSections, sectionId]
-                }
+                    ...prevUser,
+                    subscribedSections: [...prevUser.subscribedSections, sectionId],
+                };
             });
+
+            const section = sections.find(s => s.id === sectionId);
+            if (section) {
+                const channel = channels.find(c => c.id === section.channelId);
+                if (channel) {
+                    const notifText = s.subscriptionSuccessNotification
+                        .replace('{sectionName}', section.name)
+                        .replace('{channelName}', channel.name);
+
+                    const newNotification: Notification = {
+                        id: `notif-${Date.now()}`,
+                        text: notifText,
+                        timestamp: 'Just now',
+                        read: false,
+                    };
+                    setNotifications(prev => [newNotification, ...prev]);
+                }
+            }
         }
-    }
+    };
     
     const sendMessage = (channelId: string, text: string) => {
         if (user) {
