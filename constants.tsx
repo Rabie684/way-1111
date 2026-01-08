@@ -168,6 +168,7 @@ export const STRINGS = {
         notifications: 'الإشعارات',
         noNotifications: 'لا توجد إشعارات جديدة.',
         directMessages: 'الرسائل المباشرة',
+        asjpPlatform: 'منصة ASJP',
     },
     en: {
         appName: 'Your Digital University Way',
@@ -218,6 +219,7 @@ export const STRINGS = {
         notifications: 'Notifications',
         noNotifications: 'No new notifications.',
         directMessages: 'Direct Messages',
+        asjpPlatform: 'ASJP Platform',
     },
     fr: {
         appName: 'Votre Université Numérique Way',
@@ -268,6 +270,7 @@ export const STRINGS = {
         notifications: 'Notifications',
         noNotifications: 'Aucune nouvelle notification.',
         directMessages: 'Messages Directs',
+        asjpPlatform: 'Plateforme ASJP',
     }
 };
 

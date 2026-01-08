@@ -22,7 +22,7 @@ export const askJarvis = async (prompt: string): Promise<string> => {
     }
     
     try {
-        const model = 'gemini-3-flash-preview';
+        const model = 'gemini-1.5-flash';
 
         const response = await ai.models.generateContent({
             model: model,
