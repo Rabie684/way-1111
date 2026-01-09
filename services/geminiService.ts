@@ -1,28 +1,22 @@
 
 import { GoogleGenAI } from "@google/genai";
 
-let API_KEY: string | undefined;
-try {
-  API_KEY = process.env.API_KEY;
-} catch (e) {
-  console.warn("Could not access process.env. This is normal in a browser environment. API key must be configured elsewhere for AI features to work.");
-  API_KEY = undefined;
-}
+// FIX: Per coding guidelines, API key must be obtained from process.env.API_KEY and is assumed to be present.
+// Simplified initialization according to the guidelines.
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-let ai: GoogleGenAI | null = null;
-if (API_KEY) {
-  ai = new GoogleGenAI({ apiKey: API_KEY });
-} else {
-  console.warn("API_KEY is not set. AI features will be disabled.");
-}
+const ACADEMIC_PLACEHOLDER_AR = "أهلاً بك. أنا جارفيس، مساعدك الأكاديمي. حالياً، خدمة الذكاء الاصطناعي غير مفعلة. يرجى العلم أن هذه الإجابة هي مثال توضيحي. عند تفعيل الخدمة، سأقوم بالإجابة على استفساراتك بالاعتماد على المجلات العلمية المعتمدة.";
 
 export const askJarvis = async (prompt: string): Promise<string> => {
-    if (!ai) {
-        return "AI Service is not initialized. Please ensure the API_KEY is configured correctly.";
+    // Fulfilling user request to return a placeholder if API key is not set.
+    if (!process.env.API_KEY) {
+        return ACADEMIC_PLACEHOLDER_AR;
     }
-    
+        
     try {
-        const model = 'gemini-1.5-flash';
+        // FIX: Per coding guidelines, 'gemini-1.5-flash' is a prohibited model.
+        // Using 'gemini-3-flash-preview' for basic text tasks.
+        const model = 'gemini-3-flash-preview';
 
         const response = await ai.models.generateContent({
             model: model,

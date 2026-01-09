@@ -96,3 +96,9 @@ export const ExternalLinkIcon: React.FC<{className?: string}> = ({ className }) 
         <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
     </svg>
 );
+
+export const CogIcon: React.FC<{className?: string}> = ({ className }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"/><path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="M12 2v2"/><path d="M12 22v-2"/><path d="m17 20.66-1-1.73"/><path d="m8 4.08 1 1.73"/><path d="m7 4.08-1-1.73"/><path d="m16 20.66 1 1.73"/><path d="M2 12h2"/><path d="M22 12h-2"/><path d="m7 19.92 1-1.73"/><path d="m16 4.08-1 1.73"/><path d="m8 19.92-1-1.73"/><path d="m17 4.08 1 1.73"/>
+    </svg>
+);

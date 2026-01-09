@@ -8,7 +8,7 @@ import JarvisAI from './JarvisAI';
 import CreateChannelModal from './CreateChannelModal';
 import ProfileSettingsModal from './ProfileSettingsModal';
 import DirectMessagesView from './DirectMessagesView';
-import { BookOpenIcon, BotIcon, PlusCircleIcon, StarIcon, MenuIcon, XIcon, SunIcon, MoonIcon, UserIcon, LogOutIcon, BellIcon, MessageSquareIcon, ExternalLinkIcon } from './icons/IconComponents';
+import { BookOpenIcon, BotIcon, PlusCircleIcon, StarIcon, MenuIcon, XIcon, SunIcon, MoonIcon, UserIcon, LogOutIcon, BellIcon, MessageSquareIcon, ExternalLinkIcon, CogIcon } from './icons/IconComponents';
 
 const ProfessorDashboard: React.FC = () => {
     const { user, channels, language, s, logout, theme, toggleTheme, setLanguage, notifications, markNotificationsAsRead } = useApp();
@@ -135,27 +135,30 @@ const ProfessorDashboard: React.FC = () => {
                     )}
                 </div>
             </div>
-            <div className="relative" ref={profileDropdownRef}>
-                {profileDropdownOpen && (
-                    <div className="absolute bottom-full start-0 end-0 mb-2 w-full bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 z-20">
-                        <button onClick={() => { setSettingsOpen(true); setProfileDropdownOpen(false); setSidebarOpen(false); }} className="w-full text-start flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
-                            <UserIcon className="w-4 h-4 me-3" /> {s.profileSettings}
-                        </button>
-                        <button onClick={() => { logout(); setSidebarOpen(false); }} className="w-full text-start flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
-                            <LogOutIcon className="w-4 h-4 me-3" /> {s.logout}
-                        </button>
+            <div className="flex items-center space-x-3 rtl:space-x-reverse p-2">
+                <img src={user.avatar} alt={user.name} className="w-10 h-10 rounded-full object-cover"/>
+                <div className="flex-1 text-start">
+                    <h3 className="font-bold text-sm">{user.name}</h3>
+                    <div className="flex items-center text-xs text-yellow-500">
+                        <StarIcon className="w-3 h-3 fill-current"/>
+                        <span className="ms-1 font-semibold">{totalStars}</span>
                     </div>
-                )}
-                <button onClick={() => setProfileDropdownOpen(!profileDropdownOpen)} className="w-full flex items-center space-x-3 rtl:space-x-reverse p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
-                    <img src={user.avatar} alt={user.name} className="w-10 h-10 rounded-full object-cover"/>
-                    <div className="flex-1 text-start">
-                        <h3 className="font-bold text-sm">{user.name}</h3>
-                        <div className="flex items-center text-xs text-yellow-500">
-                            <StarIcon className="w-3 h-3 fill-current"/>
-                            <span className="ms-1 font-semibold">{totalStars}</span>
+                </div>
+                <div className="relative" ref={profileDropdownRef}>
+                     <button onClick={() => setProfileDropdownOpen(!profileDropdownOpen)} className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700" aria-label="Settings">
+                        <CogIcon className="w-5 h-5" />
+                    </button>
+                    {profileDropdownOpen && (
+                        <div className="absolute bottom-full end-0 mb-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 z-20">
+                            <button onClick={() => { setSettingsOpen(true); setProfileDropdownOpen(false); setSidebarOpen(false); }} className="w-full text-start flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                <UserIcon className="w-4 h-4 me-3" /> {s.profileSettings}
+                            </button>
+                            <button onClick={() => { logout(); setSidebarOpen(false); }} className="w-full text-start flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                <LogOutIcon className="w-4 h-4 me-3" /> {s.logout}
+                            </button>
                         </div>
-                    </div>
-                </button>
+                    )}
+                </div>
             </div>
         </div>
     );
@@ -202,8 +205,11 @@ const ProfessorDashboard: React.FC = () => {
                         <button onClick={handleNotifClick} className="relative p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"><BellIcon className="w-5 h-5"/>{unreadCount > 0 && <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-gray-800"></span>}</button>
                         {notifDropdownOpen && (<div className="absolute top-full end-0 mt-2 w-72 sm:w-80 bg-white dark:bg-gray-800 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-10"><div className="p-3 font-semibold border-b border-gray-200 dark:border-gray-700">{s.notifications}</div><div className="max-h-60 overflow-y-auto">{notifications.length > 0 ? notifications.map(notif => (<div key={notif.id} className={`p-3 text-sm border-b border-gray-200 dark:border-gray-700/50 ${!notif.read ? 'bg-primary-50 dark:bg-primary-900/20' : ''}`}><p>{notif.text}</p><p className="text-xs text-gray-500 mt-1">{notif.timestamp}</p></div>)) : <p className="p-4 text-center text-gray-500">{s.noNotifications}</p>}</div></div>)}
                     </div>
+                    <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full object-cover"/>
                      <div className="relative" ref={profileDropdownRef}>
-                        <button onClick={() => setProfileDropdownOpen(!profileDropdownOpen)} className="flex items-center space-x-2 rtl:space-x-reverse p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"><img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full object-cover"/></button>
+                        <button onClick={() => setProfileDropdownOpen(!profileDropdownOpen)} className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700" aria-label="Settings">
+                           <CogIcon className="w-5 h-5"/>
+                        </button>
                         {profileDropdownOpen && (<div className="absolute top-full end-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 z-10"><button onClick={() => { setSettingsOpen(true); setProfileDropdownOpen(false); }} className="w-full text-start flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"><UserIcon className="w-4 h-4 me-3" /> {s.profileSettings}</button><button onClick={logout} className="w-full text-start flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"><LogOutIcon className="w-4 h-4 me-3" /> {s.logout}</button></div>)}
                     </div>
                 </div>
