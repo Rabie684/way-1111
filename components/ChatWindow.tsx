@@ -1,9 +1,9 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { getLang, MOCK_PROFESSOR, MOCK_STUDENT } from '../constants';
+import { getLang, MOCK_ALL_USERS } from '../constants';
 import { SendIcon } from './icons/IconComponents';
-import { UserRole } from '../types';
+import { UserRole, User } from '../types';
 
 interface ChatWindowProps {
     channelId: string;
@@ -33,11 +33,22 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ channelId }) => {
 
     const messages = channelMessages.filter(m => m.channelId === channelId);
 
-    const getUserById = (id: string) => {
-        if (id === MOCK_PROFESSOR.id) return MOCK_PROFESSOR;
-        if (id === MOCK_STUDENT.id) return MOCK_STUDENT;
-        // In a real app, you would look up the user.
-        return id === user.id ? user : { ...MOCK_STUDENT, id: id, name: `Student ${id.slice(-1)}`, avatar: `https://picsum.photos/seed/${id}/200`};
+    const getUserById = (id: string): User => {
+        const foundUser = MOCK_ALL_USERS.find(u => u.id === id);
+        if (foundUser) {
+            return foundUser;
+        }
+        // This is a fallback, but with our updated constants, it shouldn't be hit for mock data.
+        return { 
+            id: id, 
+            name: `Unknown User`, 
+            avatar: `https://picsum.photos/seed/${id}/200`, 
+            role: UserRole.Student, 
+            college: '', 
+            university: '', 
+            email: '', 
+            subscribedSections: [] 
+        };
     }
 
     return (
@@ -53,7 +64,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ channelId }) => {
                                 <p className="text-sm">{msg.text}</p>
                                 <p className={`text-xs mt-1 ${isCurrentUser ? 'text-primary-200' : 'text-gray-400'}`}>{msg.timestamp}</p>
                             </div>
-                            {isCurrentUser && <img src={sender.avatar} alt={sender.name} className="w-8 h-8 rounded-full object-cover"/>}
+                            {isCurrentUser && <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full object-cover"/>}
                         </div>
                     );
                 })}

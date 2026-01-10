@@ -60,7 +60,18 @@ export const MOCK_STUDENT: User = {
     subscribedSections: ['sec-1'],
 };
 
-export const MOCK_ALL_USERS = [MOCK_PROFESSOR, MOCK_PROFESSOR_2, MOCK_PROFESSOR_3, MOCK_STUDENT];
+export const MOCK_STUDENT_2: User = {
+    id: 'student-2',
+    name: 'علي أحمد',
+    email: 'ali@student.dz',
+    role: UserRole.Student,
+    university: 'جامعة ابن خلدون تيارت',
+    college: 'كلية الحقوق',
+    avatar: 'https://picsum.photos/seed/student3/200',
+    subscribedSections: ['sec-3'],
+};
+
+export const MOCK_ALL_USERS = [MOCK_PROFESSOR, MOCK_PROFESSOR_2, MOCK_PROFESSOR_3, MOCK_STUDENT, MOCK_STUDENT_2];
 
 export const MOCK_CHANNELS: Channel[] = [
     {

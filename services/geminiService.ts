@@ -1,19 +1,21 @@
 
 import { GoogleGenAI } from "@google/genai";
 
-// FIX: Per coding guidelines, API key must be obtained from process.env.API_KEY and is assumed to be present.
-// Simplified initialization according to the guidelines.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
 const ACADEMIC_PLACEHOLDER_AR = "أهلاً بك. أنا جارفيس، مساعدك الأكاديمي. حالياً، خدمة الذكاء الاصطناعي غير مفعلة. يرجى العلم أن هذه الإجابة هي مثال توضيحي. عند تفعيل الخدمة، سأقوم بالإجابة على استفساراتك بالاعتماد على المجلات العلمية المعتمدة.";
 
 export const askJarvis = async (prompt: string): Promise<string> => {
-    // Fulfilling user request to return a placeholder if API key is not set.
-    if (!process.env.API_KEY) {
+    // Safely check for the API key. In a browser environment without a build tool, `process` is not defined.
+    // This check prevents a runtime error that causes a white screen on app load.
+    const apiKey = typeof process !== 'undefined' && process.env ? process.env.API_KEY : undefined;
+
+    if (!apiKey) {
         return ACADEMIC_PLACEHOLDER_AR;
     }
         
     try {
+        // Initialize the AI client here, only when we know we have a key and need to make a call.
+        const ai = new GoogleGenAI({ apiKey: apiKey });
+        
         // FIX: Per coding guidelines, 'gemini-1.5-flash' is a prohibited model.
         // Using 'gemini-3-flash-preview' for basic text tasks.
         const model = 'gemini-3-flash-preview';

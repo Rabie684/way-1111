@@ -10,7 +10,7 @@ import DirectMessagesView from './DirectMessagesView';
 import { BookOpenIcon, UserIcon, CompassIcon, MenuIcon, XIcon, BotIcon, SunIcon, MoonIcon, BellIcon, LogOutIcon, MessageSquareIcon, ExternalLinkIcon, CogIcon } from './icons/IconComponents';
 
 const StudentDashboard: React.FC = () => {
-    const { user, channels, language, s, logout, theme, toggleTheme, setLanguage, notifications, markNotificationsAsRead } = useApp();
+    const { user, channels, sections, language, s, logout, theme, toggleTheme, setLanguage, notifications, markNotificationsAsRead } = useApp();
     const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
     const [activeTab, setActiveTab] = useState<'my-channels' | 'explore' | 'ai' | 'direct-messages'>('explore');
     const [isSidebarOpen, setSidebarOpen] = useState(false);
@@ -35,6 +35,16 @@ const StudentDashboard: React.FC = () => {
             return professor.university === exploreUniversity && professor.college === exploreCollege;
         });
     }, [channels, exploreUniversity, exploreCollege, professorMap]);
+
+    const subscribedChannelIds = useMemo(() => {
+        if (!user) return new Set<string>();
+        const userSections = new Set(user.subscribedSections);
+        return new Set(sections.filter(s => userSections.has(s.id)).map(s => s.channelId));
+    }, [user, sections]);
+
+    const mySubscribedChannels = useMemo(() => {
+        return channels.filter(c => subscribedChannelIds.has(c.id));
+    }, [channels, subscribedChannelIds]);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -119,9 +129,12 @@ const StudentDashboard: React.FC = () => {
     const subscribedChannelsContent = (
         <div className="flex-1 flex flex-col overflow-y-auto">
             <nav className="flex-1 overflow-y-auto p-2">
-                {channels.map(channel => (
+                {mySubscribedChannels.map(channel => (
                     <a key={channel.id} href="#" onClick={(e) => { e.preventDefault(); handleChannelClick(channel); }} className={`block px-4 py-2 md:py-3 my-1 rounded-md text-sm font-medium ${selectedChannel?.id === channel.id ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}>{channel.name}</a>
                 ))}
+                 {mySubscribedChannels.length === 0 && (
+                    <p className="p-4 text-center text-gray-500 text-sm">You are not subscribed to any channels yet. Use the Explore tab to find and join channels.</p>
+                )}
             </nav>
         </div>
     );
