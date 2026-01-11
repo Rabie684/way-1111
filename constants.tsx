@@ -3,16 +3,29 @@ import React from 'react';
 import { User, Channel, UserRole, PostType, ChannelMessage, Notification, DirectMessage, Section } from './types';
 
 export const UNIVERSITIES = [
-    "جامعة ابن خLDون تيارت",
-    "جامعة ابن خلدون ملحقة قصر الشلالة",
+    "جامعة ابن خلدون تيارت",
+    "ملحقة جامعة تيارت بقصر الشلالة",
+    "جامعة الجزائر 1 - بن يوسف بن خدة",
+    "جامعة الجزائر 2 - أبو القاسم سعد الله",
+    "جامعة الجزائر 3 - إبراهيم سلطان شيبوط",
+    "جامعة العلوم والتكنولوجيا هواري بومدين (باب الزوار)",
+    "جامعة سعد دحلب (البليدة 1)",
+    "جامعة علي لونيسي (البليدة 2)",
+    "جامعة يحيى فارس (المدية)",
+    "جامعة امحمد بوقرة (بومرداس)",
+    "جامعة آكلي محند أولحاج (البويرة)",
+    "جامعة الجيلالي بونعامة (خميس مليانة)",
 ];
 
 export const COLLEGES = [
-    "كلية العلوم الطبيعية و الحياة",
-    "كلية العلوم الانسانية",
-    "كلية الادب العربي",
-    "كلية الحقوق",
-    "كلية العلوم الاقتصادية",
+    "كلية العلوم والعلوم التطبيقية",
+    "كلية التكنولوجيا",
+    "كلية علوم الطبيعة والحياة",
+    "كلية الطب",
+    "كلية الحقوق والعلوم السياسية",
+    "كلية العلوم الاقتصادية والتجارية وعلوم التسيير",
+    "كلية الآداب واللغات",
+    "كلية العلوم الإنسانية والاجتماعية",
 ];
 
 export const MOCK_PROFESSOR: User = {
@@ -20,8 +33,8 @@ export const MOCK_PROFESSOR: User = {
     name: 'بن الطاهر بختة',
     email: 'bekhta@univ-ibnkhaldoun.dz',
     role: UserRole.Professor,
-    university: 'جامعة ابن خلدون ملحقة قصر الشلالة',
-    college: 'كلية العلوم الاقتصادية',
+    university: 'ملحقة جامعة تيارت بقصر الشلالة',
+    college: 'كلية العلوم الاقتصادية والتجارية وعلوم التسيير',
     avatar: 'https://picsum.photos/seed/prof2/200',
     subscribedSections: [],
 };
@@ -32,7 +45,7 @@ export const MOCK_PROFESSOR_2: User = {
     email: 'prof@univ-tiaret.dz',
     role: UserRole.Professor,
     university: 'جامعة ابن خلدون تيارت',
-    college: 'كلية الحقوق',
+    college: 'كلية الحقوق والعلوم السياسية',
     avatar: 'https://picsum.photos/seed/prof3/200',
     subscribedSections: [],
 };
@@ -43,7 +56,7 @@ export const MOCK_PROFESSOR_3: User = {
     email: 'prof@univ-djelfa.dz',
     role: UserRole.Professor,
     university: 'جامعة زيان عاشور الجلفة',
-    college: 'كلية العلوم الانسانية',
+    college: 'كلية العلوم الإنسانية والاجتماعية',
     avatar: 'https://picsum.photos/seed/prof4/200',
     subscribedSections: [],
 };
@@ -54,8 +67,8 @@ export const MOCK_STUDENT: User = {
     name: 'حمر العين ربيع',
     email: 'rabie@student.dz',
     role: UserRole.Student,
-    university: 'جامعة ابن خلدون ملحقة قصر الشلالة',
-    college: 'كلية العلوم الاقتصادية',
+    university: 'ملحقة جامعة تيارت بقصر الشلالة',
+    college: 'كلية العلوم الاقتصادية والتجارية وعلوم التسيير',
     avatar: 'https://picsum.photos/seed/student2/200',
     subscribedSections: ['sec-1'],
 };
@@ -66,7 +79,7 @@ export const MOCK_STUDENT_2: User = {
     email: 'ali@student.dz',
     role: UserRole.Student,
     university: 'جامعة ابن خلدون تيارت',
-    college: 'كلية الحقوق',
+    college: 'كلية الحقوق والعلوم السياسية',
     avatar: 'https://picsum.photos/seed/student3/200',
     subscribedSections: ['sec-3'],
 };
