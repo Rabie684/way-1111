@@ -183,7 +183,7 @@ const StudentDashboard: React.FC = () => {
                         <CogIcon className="w-5 h-5" />
                     </button>
                     {profileDropdownOpen && (
-                        <div className="absolute bottom-full end-0 mb-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 z-20">
+                        <div className="absolute bottom-full end-0 mb-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 z-40">
                             <button onClick={() => { setSettingsOpen(true); setProfileDropdownOpen(false); setSidebarOpen(false); }} className="w-full text-start flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
                                 <UserIcon className="w-4 h-4 me-3" /> {s.profileSettings}
                             </button>
