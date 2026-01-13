@@ -37,6 +37,7 @@ export const MOCK_PROFESSOR: User = {
     college: 'كلية العلوم الاقتصادية والتجارية وعلوم التسيير',
     avatar: 'https://picsum.photos/seed/prof2/200',
     subscribedSections: [],
+    phoneNumber: '+213123456789',
 };
 
 export const MOCK_PROFESSOR_2: User = {
@@ -48,6 +49,7 @@ export const MOCK_PROFESSOR_2: User = {
     college: 'كلية الحقوق والعلوم السياسية',
     avatar: 'https://picsum.photos/seed/prof3/200',
     subscribedSections: [],
+    phoneNumber: '',
 };
 
 export const MOCK_PROFESSOR_3: User = {
@@ -59,6 +61,7 @@ export const MOCK_PROFESSOR_3: User = {
     college: 'كلية العلوم الإنسانية والاجتماعية',
     avatar: 'https://picsum.photos/seed/prof4/200',
     subscribedSections: [],
+    phoneNumber: '',
 };
 
 
@@ -71,6 +74,7 @@ export const MOCK_STUDENT: User = {
     college: 'كلية العلوم الاقتصادية والتجارية وعلوم التسيير',
     avatar: 'https://picsum.photos/seed/student2/200',
     subscribedSections: ['sec-1'],
+    phoneNumber: '+213987654321',
 };
 
 export const MOCK_STUDENT_2: User = {
@@ -82,6 +86,7 @@ export const MOCK_STUDENT_2: User = {
     college: 'كلية الحقوق والعلوم السياسية',
     avatar: 'https://picsum.photos/seed/student3/200',
     subscribedSections: ['sec-3'],
+    phoneNumber: '',
 };
 
 export const MOCK_ALL_USERS = [MOCK_PROFESSOR, MOCK_PROFESSOR_2, MOCK_PROFESSOR_3, MOCK_STUDENT, MOCK_STUDENT_2];
@@ -190,6 +195,8 @@ export const STRINGS = {
         noNotifications: 'لا توجد إشعارات جديدة.',
         directMessages: 'الرسائل المباشرة',
         asjpPlatform: 'منصة ASJP',
+        phoneNumber: 'رقم الهاتف',
+        phoneNumberDescription: 'يستخدم لسحب الرصيد.',
     },
     en: {
         appName: 'Your Digital University Way',
@@ -243,6 +250,8 @@ export const STRINGS = {
         noNotifications: 'No new notifications.',
         directMessages: 'Direct Messages',
         asjpPlatform: 'ASJP Platform',
+        phoneNumber: 'Phone Number',
+        phoneNumberDescription: 'Used for balance withdrawal.',
     },
     fr: {
         appName: 'Votre Université Numérique Way',
@@ -296,6 +305,8 @@ export const STRINGS = {
         noNotifications: 'Aucune nouvelle notification.',
         directMessages: 'Messages Directs',
         asjpPlatform: 'Plateforme ASJP',
+        phoneNumber: 'Numéro de téléphone',
+        phoneNumberDescription: 'Utilisé pour le retrait du solde.',
     }
 };
 

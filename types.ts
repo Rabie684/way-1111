@@ -13,6 +13,7 @@ export interface User {
     college: string;
     avatar: string;
     subscribedSections: string[]; // array of section IDs
+    phoneNumber?: string;
 }
 
 export enum PostType {
