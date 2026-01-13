@@ -121,7 +121,7 @@ const ProfessorDashboard: React.FC = () => {
                         {unreadCount > 0 && <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-gray-800"></span>}
                     </button>
                     {notifDropdownOpen && (
-                         <div className="absolute bottom-full end-0 mb-2 w-72 sm:w-80 bg-white dark:bg-gray-800 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-20">
+                         <div className="absolute bottom-full end-0 mb-2 w-72 sm:w-80 bg-white dark:bg-gray-800 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-40">
                             <div className="p-3 font-semibold border-b border-gray-200 dark:border-gray-700">{s.notifications}</div>
                             <div className="max-h-60 overflow-y-auto">
                                 {notifications.length > 0 ? notifications.map(notif => (
@@ -149,7 +149,7 @@ const ProfessorDashboard: React.FC = () => {
                         <CogIcon className="w-5 h-5" />
                     </button>
                     {profileDropdownOpen && (
-                        <div className="absolute bottom-full end-0 mb-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 z-40">
+                        <div className="absolute bottom-full end-0 mb-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 z-50">
                             <button onClick={() => { setSettingsOpen(true); setProfileDropdownOpen(false); setSidebarOpen(false); }} className="w-full text-start flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
                                 <UserIcon className="w-4 h-4 me-3" /> {s.profileSettings}
                             </button>
