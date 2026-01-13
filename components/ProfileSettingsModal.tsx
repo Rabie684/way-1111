@@ -3,13 +3,14 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { getLang } from '../constants';
 import { UserRole } from '../types';
+import { LogOutIcon } from './icons/IconComponents';
 
 interface ProfileSettingsModalProps {
     onClose: () => void;
 }
 
 const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ onClose }) => {
-    const { user, updateUser, language } = useApp();
+    const { user, updateUser, language, logout } = useApp();
     const s = getLang(language);
 
     const [name, setName] = useState(user?.name || '');
@@ -42,6 +43,11 @@ const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ onClose }) 
         }
         
         updateUser(updatePayload);
+        onClose();
+    };
+
+    const handleLogout = () => {
+        logout();
         onClose();
     };
 
@@ -79,13 +85,19 @@ const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ onClose }) 
                             </div>
                         )}
                     </div>
-                    <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 flex justify-end space-x-2 rtl:space-x-reverse">
-                        <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white dark:text-gray-200 dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-md hover:bg-gray-50 dark:hover:bg-gray-500">
-                            {s.cancel}
+                    <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 flex justify-between items-center">
+                        <button type="button" onClick={handleLogout} className="px-4 py-2 text-sm font-medium text-red-600 bg-transparent rounded-md hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/50 flex items-center gap-2">
+                            <LogOutIcon className="w-4 h-4" />
+                            {s.logout}
                         </button>
-                        <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700">
-                            {s.save}
-                        </button>
+                        <div className="flex space-x-2 rtl:space-x-reverse">
+                            <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white dark:text-gray-200 dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-md hover:bg-gray-50 dark:hover:bg-gray-500">
+                                {s.cancel}
+                            </button>
+                            <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700">
+                                {s.save}
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>

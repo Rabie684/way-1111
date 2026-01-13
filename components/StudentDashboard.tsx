@@ -184,9 +184,6 @@ const StudentDashboard: React.FC = () => {
                     </button>
                     {profileDropdownOpen && (
                         <div className="absolute bottom-full end-0 mb-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 ring-1 ring-black ring-opacity-5 z-50">
-                            <button onClick={() => { setSettingsOpen(true); setProfileDropdownOpen(false); setSidebarOpen(false); }} className="w-full text-start flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                <UserIcon className="w-4 h-4 me-3" /> {s.profileSettings}
-                            </button>
                             <button onClick={() => { logout(); setSidebarOpen(false); }} className="w-full text-start flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
                                 <LogOutIcon className="w-4 h-4 me-3" /> {s.logout}
                             </button>
@@ -215,6 +212,9 @@ const StudentDashboard: React.FC = () => {
                         <a href="https://www.asjp.cerist.dz/" target="_blank" rel="noopener noreferrer" className="w-full flex items-center p-2 rounded-md text-sm font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700">
                             <ExternalLinkIcon className="w-5 h-5 me-3" /><span>{s.asjpPlatform}</span>
                         </a>
+                        <button onClick={() => { setSettingsOpen(true); setSidebarOpen(false); }} className="w-full flex items-center p-2 rounded-md text-sm font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <CogIcon className="w-5 h-5 me-3" /><span>{s.profileSettings}</span>
+                        </button>
                     </nav>
                     {activeTab === 'my-channels' && subscribedChannelsContent}
                 </div>
