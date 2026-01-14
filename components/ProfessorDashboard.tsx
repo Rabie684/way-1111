@@ -1,4 +1,5 @@
 
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { getLang } from '../constants';
@@ -8,7 +9,8 @@ import JarvisAI from './JarvisAI';
 import CreateChannelModal from './CreateChannelModal';
 import ProfileSettingsModal from './ProfileSettingsModal';
 import DirectMessagesView from './DirectMessagesView';
-import { BookOpenIcon, BotIcon, PlusCircleIcon, StarIcon, MenuIcon, XIcon, SunIcon, MoonIcon, UserIcon, LogOutIcon, BellIcon, MessageSquareIcon, ExternalLinkIcon, CogIcon } from './icons/IconComponents';
+import QRCodeModal from './QRCodeModal';
+import { BookOpenIcon, BotIcon, PlusCircleIcon, StarIcon, MenuIcon, XIcon, SunIcon, MoonIcon, UserIcon, LogOutIcon, BellIcon, MessageSquareIcon, ExternalLinkIcon, CogIcon, QrCodeIcon } from './icons/IconComponents';
 
 const ProfessorDashboard: React.FC = () => {
     const { user, channels, language, s, logout, theme, toggleTheme, setLanguage, notifications, markNotificationsAsRead } = useApp();
@@ -20,6 +22,7 @@ const ProfessorDashboard: React.FC = () => {
     const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
     const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
     const [settingsOpen, setSettingsOpen] = useState(false);
+    const [isQrModalOpen, setIsQrModalOpen] = useState(false);
     const profileDropdownRef = useRef<HTMLDivElement>(null);
     const notifDropdownRef = useRef<HTMLDivElement>(null);
     const unreadCount = notifications.filter(n => !n.read).length;
@@ -176,6 +179,9 @@ const ProfessorDashboard: React.FC = () => {
                         <a href="https://www.asjp.cerist.dz/" target="_blank" rel="noopener noreferrer" className="w-full flex items-center p-2 rounded-md text-sm font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700">
                             <ExternalLinkIcon className="w-5 h-5 me-3" /><span>{s.asjpPlatform}</span>
                         </a>
+                         <button onClick={() => { setIsQrModalOpen(true); setSidebarOpen(false); }} className="w-full flex items-center p-2 rounded-md text-sm font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <QrCodeIcon className="w-5 h-5 me-3" /><span>{s.shareApp}</span>
+                        </button>
                         <button onClick={() => { setSettingsOpen(true); setSidebarOpen(false); }} className="w-full flex items-center p-2 rounded-md text-sm font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700">
                             <CogIcon className="w-5 h-5 me-3" /><span>{s.profileSettings}</span>
                         </button>
@@ -201,6 +207,9 @@ const ProfessorDashboard: React.FC = () => {
                 <div className="flex items-center gap-2">
                     <select value={language} onChange={(e) => setLanguage(e.target.value as 'ar' | 'en' | 'fr')} className="bg-gray-100 dark:bg-gray-700 border-transparent rounded-md py-1 px-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"><option value="en">EN</option><option value="fr">FR</option><option value="ar">AR</option></select>
                     <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700" aria-label="Toggle theme">{theme === 'light' ? <MoonIcon className="w-5 h-5" /> : <SunIcon className="w-5 h-5" />}</button>
+                    <button onClick={() => setIsQrModalOpen(true)} className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700" aria-label={s.shareApp}>
+                        <QrCodeIcon className="w-5 h-5" />
+                    </button>
                     <div className="relative" ref={notifDropdownRef}>
                         <button onClick={handleNotifClick} className="relative p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"><BellIcon className="w-5 h-5"/>{unreadCount > 0 && <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-gray-800"></span>}</button>
                         {notifDropdownOpen && (<div className="absolute top-full end-0 mt-2 w-72 sm:w-80 bg-white dark:bg-gray-800 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-10"><div className="p-3 font-semibold border-b border-gray-200 dark:border-gray-700">{s.notifications}</div><div className="max-h-60 overflow-y-auto">{notifications.length > 0 ? notifications.map(notif => (<div key={notif.id} className={`p-3 text-sm border-b border-gray-200 dark:border-gray-700/50 ${!notif.read ? 'bg-primary-50 dark:bg-primary-900/20' : ''}`}><p>{notif.text}</p><p className="text-xs text-gray-500 mt-1">{notif.timestamp}</p></div>)) : <p className="p-4 text-center text-gray-500">{s.noNotifications}</p>}</div></div>)}
@@ -229,6 +238,7 @@ const ProfessorDashboard: React.FC = () => {
             
             {isModalOpen && <CreateChannelModal onClose={() => setIsModalOpen(false)} />}
             {settingsOpen && <ProfileSettingsModal onClose={() => setSettingsOpen(false)} />}
+            {isQrModalOpen && <QRCodeModal onClose={() => setIsQrModalOpen(false)} />}
         </div>
     );
 };

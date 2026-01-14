@@ -20,7 +20,8 @@ const urlsToCache = [
   '/components/SubscriptionModal.tsx',
   '/components/ProfileSettingsModal.tsx',
   '/components/WelcomeToast.tsx',
-  '/components/icons/IconComponents.tsx'
+  '/components/icons/IconComponents.tsx',
+  '/components/QRCodeModal.tsx'
 ];
 
 self.addEventListener('install', event => {

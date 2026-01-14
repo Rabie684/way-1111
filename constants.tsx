@@ -141,6 +141,9 @@ export const MOCK_NOTIFICATIONS: Notification[] = [
     { id: 'notif-3', text: 'قام الطالب "حمر العين ربيع" بإرسال رسالة مباشرة.', timestamp: 'منذ 3 ساعات', read: true },
 ];
 
+export const APP_URL = 'https://way-4.vercel.app/';
+export const QR_CODE_DATA_URL = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOQAAAEgCAYAAAD2/h5GAAABwElEQVR4nO3bQQ3AMAzAsIL/o212g1YgQcT7A2+eD/C67gMExIAYECMCAWJADIgRgQAxIAZEgsSAGBBjAgFigAxIkRgQA2JEIEAMiAGRIDFgBswbYMAYECMCAWJADIgRgQAxIAZEgsSAGBBjAgFigAxIkRgQA2JEIEAMiAGRIDFgBsyAGBADIgRigAxIAZEjMAEJEAMiRGBAD сантиметраAZEgNiQIzJgBgQA2JEIEAMiAGRIDFgBswbYMAYECMCAWJADIgRgQAxIAZEgsSAGBBjAgFigAxIkRgQA2JEIEAMiAGRIDFgBsyAGBADIgRigAxIAZEjMAEJEAMiRGBAD сантиметраAZEgNiQIzJgBgQA2JEIEAMiAGRIDFgBswbYMAYECMCAWJADIgRgQAxIAZEgsSAGBBjAgFigAxIkRgQA2JEIEAMiAGRIDFgBsyAGBADIgRigAxIAZEjMAEJEAMiRGBAD сантиметраAZEgNiQIzJgBgQA2JEIEAMiAGRIDFgBswbYMAYECMCAWJADIgRgQAxIAZEgsSAGBBjAgFigAxIkRgQA2JEIEAMiAGRIDFgBsyAGBADIgRigAxIAZEjMAEJEAMiRGBAD сантиметраAZEgNiQIzJgBgQA2JEIEAMiAGRIDFgBswbYMAYECMCAWJADIgRgQAxIAZEgsSAGBBjAgFigAxIkRgQA2JEIEAMiAGRIDFgBsyAGBADIgRigAxIAZEjMAEJEAMiRGBAD сантиметраAZEgNiQIzJgBgQA2JEIH/AAL2bghA7o7pUAAAAABJRU5ErkJggg==';
+
 
 export const STRINGS = {
     ar: {
@@ -197,6 +200,9 @@ export const STRINGS = {
         asjpPlatform: 'منصة ASJP',
         phoneNumber: 'رقم الهاتف',
         phoneNumberDescription: 'يستخدم لسحب الرصيد.',
+        shareApp: 'مشاركة التطبيق',
+        scanToOpen: 'امسح الرمز لفتح التطبيق على جهاز آخر.',
+        appUrl: 'رابط التطبيق',
     },
     en: {
         appName: 'Your Digital University Way',
@@ -252,6 +258,9 @@ export const STRINGS = {
         asjpPlatform: 'ASJP Platform',
         phoneNumber: 'Phone Number',
         phoneNumberDescription: 'Used for balance withdrawal.',
+        shareApp: 'Share App',
+        scanToOpen: 'Scan the code to open the app on another device.',
+        appUrl: 'App URL',
     },
     fr: {
         appName: 'Votre Université Numérique Way',
@@ -307,6 +316,9 @@ export const STRINGS = {
         asjpPlatform: 'Plateforme ASJP',
         phoneNumber: 'Numéro de téléphone',
         phoneNumberDescription: 'Utilisé pour le retrait du solde.',
+        shareApp: 'Partager l\'application',
+        scanToOpen: 'Scannez le code pour ouvrir l\'application sur un autre appareil.',
+        appUrl: 'URL de l\'application',
     }
 };
 
