@@ -21,7 +21,8 @@ const urlsToCache = [
   '/components/ProfileSettingsModal.tsx',
   '/components/WelcomeToast.tsx',
   '/components/icons/IconComponents.tsx',
-  '/components/QRCodeModal.tsx'
+  '/components/QRCodeModal.tsx',
+  '/components/InstallPWAModal.tsx'
 ];
 
 self.addEventListener('install', event => {

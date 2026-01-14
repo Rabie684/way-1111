@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { User, Channel, UserRole, PostType, ChannelMessage, Notification, DirectMessage, Section } from './types';
 
@@ -203,6 +204,10 @@ export const STRINGS = {
         shareApp: 'مشاركة التطبيق',
         scanToOpen: 'امسح الرمز لفتح التطبيق على جهاز آخر.',
         appUrl: 'رابط التطبيق',
+        installApp: 'تثبيت التطبيق',
+        installAppDescription: 'أضف هذا التطبيق إلى شاشتك الرئيسية للوصول السريع وعدم الاتصال بالإنترنت.',
+        install: 'تثبيت',
+        later: 'لاحقاً',
     },
     en: {
         appName: 'Your Digital University Way',
@@ -261,6 +266,10 @@ export const STRINGS = {
         shareApp: 'Share App',
         scanToOpen: 'Scan the code to open the app on another device.',
         appUrl: 'App URL',
+        installApp: 'Install App',
+        installAppDescription: 'Add this app to your home screen for quick access and offline use.',
+        install: 'Install',
+        later: 'Later',
     },
     fr: {
         appName: 'Votre Université Numérique Way',
@@ -319,6 +328,10 @@ export const STRINGS = {
         shareApp: 'Partager l\'application',
         scanToOpen: 'Scannez le code pour ouvrir l\'application sur un autre appareil.',
         appUrl: 'URL de l\'application',
+        installApp: 'Installer l\'application',
+        installAppDescription: 'Ajoutez cette application à votre écran d\'accueil pour un accès rapide et une utilisation hors ligne.',
+        install: 'Installer',
+        later: 'Plus tard',
     }
 };
 
