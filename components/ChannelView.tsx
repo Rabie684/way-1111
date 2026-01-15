@@ -5,7 +5,7 @@ import ChatWindow from './ChatWindow';
 import SubscriptionModal from './SubscriptionModal';
 import { getLang, MOCK_PROFESSOR } from '../constants';
 import { useApp } from '../context/AppContext';
-import { ArrowLeftIcon, FileTextIcon, ImageIcon, VideoIcon, UploadCloudIcon } from './icons/IconComponents';
+import { ArrowLeftIcon, FileTextIcon, ImageIcon, VideoIcon, UploadCloudIcon, TrashIcon } from './icons/IconComponents';
 
 interface ChannelViewProps {
     channel: Channel;
@@ -23,10 +23,11 @@ const PostIcon: React.FC<{ type: PostType }> = ({ type }) => {
 };
 
 const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack }) => {
-    const { language, addPostToChannel, sections } = useApp();
+    const { language, addPostToChannel, sections, clearChannelChat } = useApp();
     const s = getLang(language);
     const [activeTab, setActiveTab] = useState<'posts' | 'chat'>('posts');
     const [showSubscriptionModal, setShowSubscriptionModal] = useState<Section | null>(null);
+    const [showClearConfirm, setShowClearConfirm] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -40,8 +41,15 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack }) => {
         fileInputRef.current?.click();
     };
 
+    const handleConfirmClearChat = () => {
+        clearChannelChat(channel.id);
+        setShowClearConfirm(false);
+    };
+
     const channelSections = sections.filter(sec => sec.channelId === channel.id);
     const isSubscribedToChannel = user.role === UserRole.Professor || channelSections.some(sec => user.subscribedSections.includes(sec.id));
+
+    const isOwner = user.role === UserRole.Professor && user.id === channel.professorId;
 
     const header = (
         <header className="p-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
@@ -91,12 +99,23 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack }) => {
                 <>
                     {/* Tabs */}
                     <div className="flex border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-                        <button onClick={() => setActiveTab('posts')} className={`flex-1 p-3 font-medium text-sm ${activeTab === 'posts' ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400' : 'text-gray-500'}`}>{s.posts}</button>
-                        <button onClick={() => setActiveTab('chat')} className={`flex-1 p-3 font-medium text-sm ${activeTab === 'chat' ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400' : 'text-gray-500'}`}>{s.chat}</button>
+                        <button onClick={() => setActiveTab('posts')} className={`flex-grow p-3 font-medium text-sm ${activeTab === 'posts' ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400' : 'text-gray-500'}`}>{s.posts}</button>
+                        <button onClick={() => setActiveTab('chat')} className={`flex-grow p-3 font-medium text-sm ${activeTab === 'chat' ? 'border-b-2 border-primary-500 text-primary-600 dark:text-primary-400' : 'text-gray-500'}`}>{s.chat}</button>
+                        {isOwner && activeTab === 'chat' && (
+                            <div className="flex-shrink-0 flex items-center pe-4">
+                                <button
+                                    onClick={() => setShowClearConfirm(true)}
+                                    className="flex items-center gap-1 px-2 py-1 text-xs text-red-600 dark:text-red-400 rounded-md hover:bg-red-50 dark:hover:bg-red-900/50"
+                                    title={s.clearChat}
+                                >
+                                    <TrashIcon className="w-4 h-4" />
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     {/* Content */}
-                    <div className="flex-1 overflow-y-auto p-4">
+                    <div className={`flex-1 overflow-y-auto ${activeTab === 'chat' ? 'p-0' : 'p-4'}`}>
                         {activeTab === 'posts' && (
                             <div className="space-y-4">
                                 {user.role === UserRole.Professor && (
@@ -137,6 +156,24 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack }) => {
                         setShowSubscriptionModal(null);
                     }}
                 />
+            )}
+            {showClearConfirm && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md m-4">
+                        <div className="p-6 text-center">
+                            <h2 className="text-xl font-bold mb-2">{s.clearChatConfirmTitle}</h2>
+                            <p className="text-gray-600 dark:text-gray-300">{s.clearChatConfirmMessage}</p>
+                        </div>
+                        <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 flex justify-center space-x-4 rtl:space-x-reverse">
+                            <button onClick={() => setShowClearConfirm(false)} className="px-6 py-2 text-sm font-medium text-gray-700 bg-white dark:text-gray-200 dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-md hover:bg-gray-50 dark:hover:bg-gray-500">
+                                {s.cancel}
+                            </button>
+                            <button onClick={handleConfirmClearChat} className="px-6 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700">
+                                {s.confirm}
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );

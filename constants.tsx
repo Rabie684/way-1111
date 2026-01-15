@@ -4,7 +4,7 @@ import React from 'react';
 import { User, Channel, UserRole, PostType, ChannelMessage, Notification, DirectMessage, Section } from './types';
 
 export const UNIVERSITIES = [
-    "جامعة ابن خلدون تيارت",
+    "جامعة ابن خLDون تيارت",
     "ملحقة جامعة تيارت بقصر الشلالة",
     "جامعة الجزائر 1 - بن يوسف بن خدة",
     "جامعة الجزائر 2 - أبو القاسم سعد الله",
@@ -208,6 +208,9 @@ export const STRINGS = {
         installAppDescription: 'مرحبا بك في جامعتك الرقمية',
         install: 'تثبيت',
         later: 'لاحقاً',
+        clearChat: 'محو المحادثة',
+        clearChatConfirmTitle: 'تأكيد محو المحادثة',
+        clearChatConfirmMessage: 'هل أنت متأكد أنك تريد محو سجل المحادثة بالكامل لهذه القناة؟ هذا الإجراء لا يمكن التراجع عنه وسيحذف المحادثة للجميع.',
     },
     en: {
         appName: 'Your Digital University Way',
@@ -270,6 +273,9 @@ export const STRINGS = {
         installAppDescription: 'Add this app to your home screen for quick access and offline use.',
         install: 'Install',
         later: 'Later',
+        clearChat: 'Clear Chat',
+        clearChatConfirmTitle: 'Confirm Clear Chat',
+        clearChatConfirmMessage: 'Are you sure you want to clear the entire chat history for this channel? This action is irreversible and will delete the chat for everyone.',
     },
     fr: {
         appName: 'Votre Université Numérique Way',
@@ -332,6 +338,9 @@ export const STRINGS = {
         installAppDescription: 'Ajoutez cette application à votre écran d\'accueil pour un accès rapide et une utilisation hors ligne.',
         install: 'Installer',
         later: 'Plus tard',
+        clearChat: 'Effacer le chat',
+        clearChatConfirmTitle: 'Confirmer l\'effacement',
+        clearChatConfirmMessage: 'Êtes-vous sûr de vouloir effacer tout l\'historique du chat pour cette chaîne ? Cette action est irréversible et supprimera le chat pour tout le monde.',
     }
 };
 

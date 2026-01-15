@@ -52,6 +52,7 @@ interface AppContextType {
     sendJarvisMessage: (text: string) => Promise<void>;
     updateUser: (updatedUser: Partial<User>) => Promise<void>;
     markNotificationsAsRead: () => Promise<void>;
+    clearChannelChat: (channelId: string) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -87,173 +88,160 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     };
     
     const register = async (details: LoginDetails) => {
-        const { email, name, role, university, college } = details;
+        // Mock registration: create a new user object and add it to the state (for this session only)
         const newUser: User = {
             id: `user-${Date.now()}`,
-            name: name!,
-            email: email!,
-            role: role!,
-            university: university || '',
-            college: college || '',
-            avatar: `https://picsum.photos/seed/${Date.now()}/200`,
+            name: details.name!,
+            email: details.email,
+            role: details.role!,
+            university: details.university || '',
+            college: details.college || '',
+            avatar: 'https://picsum.photos/seed/newuser/200',
             subscribedSections: [],
         };
-        // Add to our runtime mock data and log in
-        MOCK_ALL_USERS.push(newUser);
+        // MOCK_ALL_USERS.push(newUser); // This would persist across logins in a real app
         setUser(newUser);
-    }
+    };
 
     const logout = async () => {
         setUser(null);
     };
 
     const toggleTheme = () => {
-        setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
+        setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
     };
 
     const createChannel = async (channelData: Omit<Channel, 'id' | 'professorId' | 'posts' | 'subscribers'>) => {
-        if (user && user.role === UserRole.Professor) {
-            const newChannel: Channel = {
-                ...channelData,
-                id: `ch-${Date.now()}`,
-                professorId: user.id,
-                posts: [],
-                subscribers: 0,
-            };
-            setChannels(prev => [...prev, newChannel]);
-        }
+        if (!user || user.role !== UserRole.Professor) return;
+        const newChannel: Channel = {
+            ...channelData,
+            id: `ch-${Date.now()}`,
+            professorId: user.id,
+            posts: [],
+            subscribers: 0,
+        };
+        setChannels(prev => [...prev, newChannel]);
     };
-    
-    const subscribeToSection = async (sectionId: string) => {
-        if (user && user.role === UserRole.Student && !user.subscribedSections.includes(sectionId)) {
-             setUser(prevUser => {
-                if (!prevUser) return null;
-                return {
-                    ...prevUser,
-                    subscribedSections: [...prevUser.subscribedSections, sectionId],
-                };
-            });
 
-            const section = sections.find(s => s.id === sectionId);
-            if (section) {
-                const channel = channels.find(c => c.id === section.channelId);
-                if (channel) {
-                    const notifText = s.subscriptionSuccessNotification
-                        .replace('{sectionName}', section.name)
-                        .replace('{channelName}', channel.name);
-                    
-                    const newNotification: Notification = {
-                        id: `notif-${Date.now()}`,
-                        text: notifText,
-                        timestamp: 'Just now',
-                        read: false,
-                    };
-                    setNotifications(prev => [newNotification, ...prev]);
-                }
-            }
+    const subscribeToSection = async (sectionId: string) => {
+        if (!user) return;
+        setUser(prevUser => {
+            if (!prevUser) return null;
+            const newSubscriptions = [...prevUser.subscribedSections, sectionId];
+            return { ...prevUser, subscribedSections: newSubscriptions };
+        });
+        
+        const section = sections.find(s => s.id === sectionId);
+        const channel = channels.find(c => c.id === section?.channelId);
+        if (section && channel) {
+            const newNotification: Notification = {
+                id: `notif-${Date.now()}`,
+                text: s.subscriptionSuccessNotification
+                    .replace('{sectionName}', section.name)
+                    .replace('{channelName}', channel.name),
+                timestamp: 'Just now',
+                read: false,
+            };
+            setNotifications(prev => [newNotification, ...prev]);
         }
     };
-    
+
     const sendMessage = async (channelId: string, text: string) => {
-        if (user) {
-            const newMessage: ChannelMessage = {
-                id: `msg-ch-${Date.now()}`,
-                senderId: user.id,
-                channelId: channelId,
-                text: text,
-                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            };
-            setChannelMessages(prev => [...prev, newMessage]);
-        }
-    }
+        if (!user) return;
+        const newMessage: ChannelMessage = {
+            id: `msg-${Date.now()}`,
+            channelId,
+            senderId: user.id,
+            text,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        };
+        setChannelMessages(prev => [...prev, newMessage]);
+    };
 
     const sendDirectMessage = async (receiverId: string, text: string) => {
-        if (user) {
-            const newMessage: DirectMessage = {
-                id: `dm-${Date.now()}`,
-                senderId: user.id,
-                receiverId: receiverId,
-                text: text,
-                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            };
-            setDirectMessages(prev => [...prev, newMessage]);
-        }
+        if (!user) return;
+         const newMessage: DirectMessage = {
+            id: `dm-${Date.now()}`,
+            senderId: user.id,
+            receiverId,
+            text,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        };
+        setDirectMessages(prev => [...prev, newMessage]);
     };
-
+    
     const addPostToChannel = async (channelId: string, file: File) => {
-       if (!user) return;
-        
+        const fileType = file.type.split('/')[0];
+        let type: PostType;
+        if (fileType === 'image') type = PostType.Image;
+        else if (fileType === 'video') type = PostType.Video;
+        else type = PostType.PDF;
+
         const newPost: Post = {
             id: `post-${Date.now()}`,
-            type: file.type.startsWith('image/') ? PostType.Image : (file.type.startsWith('video/') ? PostType.Video : PostType.PDF),
+            type,
             title: file.name,
-            url: URL.createObjectURL(file), // Use blob URL for local preview
+            url: URL.createObjectURL(file), // For local preview
             createdAt: new Date().toISOString().split('T')[0],
         };
-        
-        setChannels(prevChannels => prevChannels.map(channel => {
-            if (channel.id === channelId) {
-                return { ...channel, posts: [...channel.posts, newPost] };
-            }
-            return channel;
-        }));
+
+        setChannels(prevChannels => prevChannels.map(ch => 
+            ch.id === channelId ? { ...ch, posts: [newPost, ...ch.posts] } : ch
+        ));
     };
-    
+
     const sendJarvisMessage = async (text: string) => {
+        if(!user) return;
         const userMessage: JarvisMessage = { id: `jarvis-${Date.now()}`, sender: 'user', text };
         setJarvisHistory(prev => [...prev, userMessage]);
+        
+        const jarvisResponseText = await askJarvis(text);
 
-        const responseText = await askJarvis(text);
-
-        // FIX: Corrected object literal syntax. Missing colon after 'id'.
-        const jarvisMessage: JarvisMessage = { id: `jarvis-${Date.now() + 1}`, sender: 'jarvis', text: responseText };
+        const jarvisMessage: JarvisMessage = { id: `jarvis-${Date.now()+1}`, sender: 'jarvis', text: jarvisResponseText };
         setJarvisHistory(prev => [...prev, jarvisMessage]);
-    }
+    };
     
     const updateUser = async (updatedUser: Partial<User>) => {
-        if (user) {
-            const newUserData = { ...user, ...updatedUser };
-            setUser(newUserData);
-            const userIndex = MOCK_ALL_USERS.findIndex(u => u.id === user.id);
-            if (userIndex !== -1) {
-                MOCK_ALL_USERS[userIndex] = newUserData;
-            }
-        }
-    }
+        if (!user) return;
+        setUser(prev => prev ? { ...prev, ...updatedUser } : null);
+    };
 
     const markNotificationsAsRead = async () => {
         setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-    }
+    };
 
-    return (
-        <AppContext.Provider value={{ 
-            user, 
-            theme, 
-            language, 
-            s,
-            channels,
-            sections,
-            channelMessages,
-            directMessages,
-            notifications,
-            jarvisHistory,
-            login, 
-            register,
-            logout, 
-            toggleTheme, 
-            setLanguage, 
-            createChannel,
-            subscribeToSection,
-            sendMessage,
-            sendDirectMessage,
-            addPostToChannel,
-            sendJarvisMessage,
-            updateUser,
-            markNotificationsAsRead
-        }}>
-            {children}
-        </AppContext.Provider>
-    );
+    const clearChannelChat = async (channelId: string) => {
+        setChannelMessages(prev => prev.filter(msg => msg.channelId !== channelId));
+    };
+
+    const value = {
+        user,
+        theme,
+        language,
+        s,
+        channels,
+        sections,
+        channelMessages,
+        directMessages,
+        notifications,
+        jarvisHistory,
+        login,
+        register,
+        logout,
+        toggleTheme,
+        setLanguage,
+        createChannel,
+        subscribeToSection,
+        sendMessage,
+        sendDirectMessage,
+        addPostToChannel,
+        sendJarvisMessage,
+        updateUser,
+        markNotificationsAsRead,
+        clearChannelChat,
+    };
+
+    return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };
 
 export const useApp = () => {
