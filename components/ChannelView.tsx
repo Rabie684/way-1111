@@ -6,7 +6,7 @@ import ChatWindow from './ChatWindow';
 import SubscriptionModal from './SubscriptionModal';
 import { getLang, MOCK_PROFESSOR } from '../constants';
 import { useApp } from '../context/AppContext';
-import { ArrowLeftIcon, FileTextIcon, ImageIcon, VideoIcon, UploadCloudIcon, TrashIcon } from './icons/IconComponents';
+import { ArrowLeftIcon, FileTextIcon, ImageIcon, VideoIcon, UploadCloudIcon, TrashIcon, DownloadIcon, CheckCircleIcon, LoaderIcon } from './icons/IconComponents';
 
 interface ChannelViewProps {
     channel: Channel;
@@ -24,12 +24,12 @@ const PostIcon: React.FC<{ type: PostType }> = ({ type }) => {
 };
 
 const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack }) => {
-    const { language, addPostToChannel, sections, clearChannelChat, deletePostFromChannel } = useApp();
-    const s = getLang(language);
+    const { s, addPostToChannel, sections, clearChannelChat, deletePostFromChannel, offlinePostIds, downloadPostForOffline, removePostFromOffline } = useApp();
     const [activeTab, setActiveTab] = useState<'posts' | 'chat'>('posts');
     const [showSubscriptionModal, setShowSubscriptionModal] = useState<Section | null>(null);
     const [showClearConfirm, setShowClearConfirm] = useState(false);
     const [postToDelete, setPostToDelete] = useState<Post | null>(null);
+    const [downloadingPosts, setDownloadingPosts] = useState<Set<string>>(new Set());
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,6 +53,20 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack }) => {
             deletePostFromChannel(channel.id, postToDelete.id);
             setPostToDelete(null);
         }
+    };
+
+    const handleDownload = async (post: Post) => {
+        setDownloadingPosts(prev => new Set(prev).add(post.id));
+        await downloadPostForOffline(post);
+        setDownloadingPosts(prev => {
+            const next = new Set(prev);
+            next.delete(post.id);
+            return next;
+        });
+    };
+    
+    const handleRemoveOffline = async (post: Post) => {
+        await removePostFromOffline(post);
     };
 
     const channelSections = sections.filter(sec => sec.channelId === channel.id);
@@ -134,29 +148,56 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack }) => {
                                         <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Drag & drop files or <span className="font-medium text-primary-600 hover:text-primary-500">{s.upload}</span></p>
                                     </div>
                                 )}
-                                {channel.posts.map(post => (
-                                    <div key={post.id} className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow flex items-center justify-between gap-4">
-                                        <div className="flex items-center overflow-hidden">
-                                            <PostIcon type={post.type} />
-                                            <div className="ms-4 overflow-hidden">
-                                                <a href={post.url} target="_blank" rel="noopener noreferrer" className="font-medium hover:underline truncate block">{post.title}</a>
-                                                <p className="text-xs text-gray-500">Posted on {post.createdAt}</p>
+                                {channel.posts.map(post => {
+                                    const isOffline = offlinePostIds.has(post.id);
+                                    const isDownloading = downloadingPosts.has(post.id);
+                                    return (
+                                        <div key={post.id} className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow flex items-center justify-between gap-4">
+                                            <div className="flex items-center overflow-hidden flex-1">
+                                                <PostIcon type={post.type} />
+                                                <div className="ms-4 overflow-hidden">
+                                                    <a href={post.url} target="_blank" rel="noopener noreferrer" className="font-medium hover:underline truncate block">{post.title}</a>
+                                                    <p className="text-xs text-gray-500">Posted on {post.createdAt}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center flex-shrink-0 gap-2">
+                                                {post.type === PostType.Image && <img src={post.url} alt={post.title} className="w-24 h-12 object-cover rounded hidden sm:block"/>}
+                                                
+                                                {isDownloading ? (
+                                                    <div className="p-2 text-gray-400" title="Downloading...">
+                                                        <LoaderIcon className="w-5 h-5" />
+                                                    </div>
+                                                ) : isOffline ? (
+                                                    <button
+                                                        onClick={() => handleRemoveOffline(post)}
+                                                        className="p-2 flex items-center gap-1 text-green-600 dark:text-green-400 rounded-full hover:bg-green-100 dark:hover:bg-green-900/50"
+                                                        title={s.removeFromOffline}
+                                                    >
+                                                        <CheckCircleIcon className="w-5 h-5" />
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => handleDownload(post)}
+                                                        className="p-2 text-gray-400 hover:text-primary-500 rounded-full hover:bg-primary-100 dark:hover:bg-primary-900/50"
+                                                        title={s.downloadForOffline}
+                                                    >
+                                                        <DownloadIcon className="w-5 h-5" />
+                                                    </button>
+                                                )}
+
+                                                {isOwner && (
+                                                    <button
+                                                        onClick={() => setPostToDelete(post)}
+                                                        className="p-2 text-gray-400 hover:text-red-500 rounded-full hover:bg-red-100 dark:hover:bg-red-900/50"
+                                                        title={s.deletePost}
+                                                    >
+                                                        <TrashIcon className="w-5 h-5" />
+                                                    </button>
+                                                )}
                                             </div>
                                         </div>
-                                        <div className="flex items-center flex-shrink-0">
-                                            {post.type === PostType.Image && <img src={post.url} alt={post.title} className="w-32 h-16 object-cover rounded"/>}
-                                            {isOwner && (
-                                                <button
-                                                    onClick={() => setPostToDelete(post)}
-                                                    className="ms-4 p-2 text-gray-400 hover:text-red-500 rounded-full hover:bg-red-100 dark:hover:bg-red-900/50"
-                                                    title={s.deletePost}
-                                                >
-                                                    <TrashIcon className="w-5 h-5" />
-                                                </button>
-                                            )}
-                                        </div>
-                                    </div>
-                                ))}
+                                    )
+                                })}
                             </div>
                         )}
                         {activeTab === 'chat' && (

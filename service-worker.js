@@ -1,4 +1,5 @@
 const CACHE_NAME = 'your-digital-university-way-cache-v1';
+const OFFLINE_FILES_CACHE_NAME = 'offline-files-cache-v1';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -76,7 +77,7 @@ self.addEventListener('fetch', event => {
 });
 
 self.addEventListener('activate', event => {
-  const cacheWhitelist = [CACHE_NAME];
+  const cacheWhitelist = [CACHE_NAME, OFFLINE_FILES_CACHE_NAME];
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(

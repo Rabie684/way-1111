@@ -28,6 +28,8 @@ interface LoginDetails {
     isDemo?: boolean;
 }
 
+const OFFLINE_CACHE_NAME = 'offline-files-cache-v1';
+
 interface AppContextType {
     user: User | null;
     theme: Theme;
@@ -39,6 +41,7 @@ interface AppContextType {
     directMessages: DirectMessage[];
     notifications: Notification[];
     jarvisHistory: JarvisMessage[];
+    offlinePostIds: Set<string>;
     login: (details: LoginDetails) => Promise<void>;
     register: (details: LoginDetails) => Promise<void>;
     logout: () => Promise<void>;
@@ -54,6 +57,8 @@ interface AppContextType {
     markNotificationsAsRead: () => Promise<void>;
     clearChannelChat: (channelId: string) => Promise<void>;
     deletePostFromChannel: (channelId: string, postId: string) => Promise<void>;
+    downloadPostForOffline: (post: Post) => Promise<void>;
+    removePostFromOffline: (post: Post) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -68,6 +73,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const [directMessages, setDirectMessages] = useState<DirectMessage[]>(MOCK_DIRECT_MESSAGES);
     const [notifications, setNotifications] = useState<Notification[]>(MOCK_NOTIFICATIONS);
     const [jarvisHistory, setJarvisHistory] = useState<JarvisMessage[]>([]);
+    const [offlinePostIds, setOfflinePostIds] = useState<Set<string>>(new Set());
     
     const s = getLang(language);
     
@@ -215,15 +221,49 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setChannelMessages(prev => prev.filter(msg => msg.channelId !== channelId));
     };
 
-    const deletePostFromChannel = async (channelId: string, postId: string) => {
-        setChannels(prevChannels =>
-            prevChannels.map(ch =>
-                ch.id === channelId
-                    ? { ...ch, posts: ch.posts.filter(p => p.id !== postId) }
-                    : ch
-            )
-        );
+    const removePostFromOffline = async (post: Post) => {
+        const cache = await caches.open(OFFLINE_CACHE_NAME);
+        const deleted = await cache.delete(post.url);
+        if (deleted) {
+            setOfflinePostIds(prev => {
+                const next = new Set(prev);
+                next.delete(post.id);
+                return next;
+            });
+        }
     };
+    
+    const deletePostFromChannel = async (channelId: string, postId: string) => {
+        let postToRemove: Post | undefined;
+        setChannels(prevChannels =>
+            prevChannels.map(ch => {
+                if (ch.id === channelId) {
+                    postToRemove = ch.posts.find(p => p.id === postId);
+                    return { ...ch, posts: ch.posts.filter(p => p.id !== postId) };
+                }
+                return ch;
+            })
+        );
+        if (postToRemove) {
+            await removePostFromOffline(postToRemove);
+        }
+    };
+
+    const downloadPostForOffline = async (post: Post) => {
+        try {
+            const cache = await caches.open(OFFLINE_CACHE_NAME);
+            const response = await fetch(post.url);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch: ${response.statusText}`);
+            }
+            await cache.put(post.url, response);
+            setOfflinePostIds(prev => new Set(prev).add(post.id));
+        } catch (error) {
+            console.error('Failed to download post for offline:', post.url, error);
+            alert(`Failed to download file. It might be due to a network issue or cross-origin restrictions (CORS). Some resources like placeholder images from external sites cannot be cached for offline use.`);
+        }
+    };
+
 
     const value = {
         user,
@@ -236,6 +276,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         directMessages,
         notifications,
         jarvisHistory,
+        offlinePostIds,
         login,
         register,
         logout,
@@ -251,6 +292,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         markNotificationsAsRead,
         clearChannelChat,
         deletePostFromChannel,
+        downloadPostForOffline,
+        removePostFromOffline,
     };
 
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

@@ -100,9 +100,9 @@ export const MOCK_CHANNELS: Channel[] = [
         professorId: 'prof-1',
         meetLink: 'https://meet.google.com/new',
         posts: [
-            { id: 'p-1', type: PostType.PDF, title: 'محاضرة 1 - مقدمة.pdf', url: '#', createdAt: '2024-05-20' },
+            { id: 'p-1', type: PostType.PDF, title: 'محاضرة 1 - مقدمة.pdf', url: 'https://www.actuarialfoundation.org/wp-content/uploads/2019/07/AF-Financial-Literacy-Middle-School-final-webletters-compressed.pdf', createdAt: '2024-05-20' },
             { id: 'p-2', type: PostType.Image, title: 'رسم بياني للفائدة المركبة.png', url: 'https://picsum.photos/seed/proc/800/400', createdAt: '2024-05-21' },
-            { id: 'p-3', type: PostType.Video, title: 'فيديو: شرح الخصم', url: '#', createdAt: '2024-05-22' },
+            { id: 'p-3', type: PostType.Video, title: 'فيديو: شرح الخصم', url: 'https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/360/Big_Buck_Bunny_360_10s_1MB.mp4', createdAt: '2024-05-22' },
         ],
         subscribers: 23,
     },
@@ -214,6 +214,9 @@ export const STRINGS = {
         deletePost: 'حذف المنشور',
         deletePostConfirmTitle: 'تأكيد الحذف',
         deletePostConfirmMessage: 'هل أنت متأكد أنك تريد حذف هذا المنشور؟ لا يمكن التراجع عن هذا الإجراء.',
+        downloadForOffline: 'تنزيل للعرض بدون انترنت',
+        downloaded: 'تم التنزيل',
+        removeFromOffline: 'إزالة من التنزيلات',
     },
     en: {
         appName: 'Your Digital University Way',
@@ -282,6 +285,9 @@ export const STRINGS = {
         deletePost: 'Delete Post',
         deletePostConfirmTitle: 'Confirm Deletion',
         deletePostConfirmMessage: 'Are you sure you want to delete this post? This action cannot be undone.',
+        downloadForOffline: 'Download for offline',
+        downloaded: 'Downloaded',
+        removeFromOffline: 'Remove from offline',
     },
     fr: {
         appName: 'Votre Université Numérique Way',
@@ -350,6 +356,9 @@ export const STRINGS = {
         deletePost: 'Supprimer la publication',
         deletePostConfirmTitle: 'Confirmer la suppression',
         deletePostConfirmMessage: 'Êtes-vous sûr de vouloir supprimer cette publication ? Cette action est irréversible.',
+        downloadForOffline: 'Télécharger pour hors ligne',
+        downloaded: 'Téléchargé',
+        removeFromOffline: 'Supprimer des téléchargements',
     }
 };
 
