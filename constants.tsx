@@ -41,31 +41,6 @@ export const MOCK_PROFESSOR: User = {
     phoneNumber: '+213123456789',
 };
 
-export const MOCK_PROFESSOR_2: User = {
-    id: 'prof-2',
-    name: 'أستاذ تيارت',
-    email: 'prof@univ-tiaret.dz',
-    role: UserRole.Professor,
-    university: 'جامعة ابن خldون تيارت',
-    college: 'كلية الحقوق والعلوم السياسية',
-    avatar: 'https://picsum.photos/seed/prof3/200',
-    subscribedSections: [],
-    phoneNumber: '',
-};
-
-export const MOCK_PROFESSOR_3: User = {
-    id: 'prof-3',
-    name: 'أستاذ الجلفة',
-    email: 'prof@univ-djelfa.dz',
-    role: UserRole.Professor,
-    university: 'جامعة زيان عاشور الجلفة',
-    college: 'كلية العلوم الإنسانية والاجتماعية',
-    avatar: 'https://picsum.photos/seed/prof4/200',
-    subscribedSections: [],
-    phoneNumber: '',
-};
-
-
 export const MOCK_STUDENT: User = {
     id: 'student-1',
     name: 'حمر العين ربيع',
@@ -78,19 +53,7 @@ export const MOCK_STUDENT: User = {
     phoneNumber: '+213987654321',
 };
 
-export const MOCK_STUDENT_2: User = {
-    id: 'student-2',
-    name: 'علي أحمد',
-    email: 'ali@student.dz',
-    role: UserRole.Student,
-    university: 'جامعة ابن خلدون تيارت',
-    college: 'كلية الحقوق والعلوم السياسية',
-    avatar: 'https://picsum.photos/seed/student3/200',
-    subscribedSections: ['sec-3'],
-    phoneNumber: '',
-};
-
-export const MOCK_ALL_USERS = [MOCK_PROFESSOR, MOCK_PROFESSOR_2, MOCK_PROFESSOR_3, MOCK_STUDENT, MOCK_STUDENT_2];
+export const MOCK_ALL_USERS = [MOCK_PROFESSOR, MOCK_STUDENT];
 
 export const MOCK_CHANNELS: Channel[] = [
     {
@@ -128,7 +91,6 @@ export const MOCK_SECTIONS: Section[] = [
 export const MOCK_CHANNEL_MESSAGES: ChannelMessage[] = [
     { id: 'msg-ch-1', senderId: 'prof-1', channelId: 'ch-1', text: 'Welcome to the channel! Please review the syllabus.', timestamp: '10:00 AM' },
     { id: 'msg-ch-2', senderId: 'student-1', channelId: 'ch-1', text: 'Thank you, professor!', timestamp: '10:01 AM' },
-    { id: 'msg-ch-3', senderId: 'student-2', channelId: 'ch-1', text: 'I have a question about the first assignment.', timestamp: '10:05 AM' },
 ];
 
 export const MOCK_DIRECT_MESSAGES: DirectMessage[] = [
