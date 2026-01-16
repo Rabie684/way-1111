@@ -217,6 +217,22 @@ export const STRINGS = {
         downloadForOffline: 'تنزيل للعرض بدون انترنت',
         downloaded: 'تم التنزيل',
         removeFromOffline: 'إزالة من التنزيلات',
+        termsAndConditions: "شروط وأحكام الاستخدام",
+        agree: "أوافق",
+        professorCharterTitle: "ميثاق الأستاذ",
+        professorCharterRules: [
+            "الاستقلالية التامة: الأستاذ هو المسؤول الوحيد عن صحة وجودة ما ينشره لطلبته في قناته الخاصة.",
+            "الإدارة الذاتية: الالتزام بإدارة مساحات النقاش وتصفيرها لضمان بقاء البيئة تعليمية ومنضبطة.",
+            "الأمانة الأكاديمية: استخدام المنصة لنشر المحتوى العلمي الذي يخدم المسار الدراسي فقط.",
+            "القبول التقني: الموافقة على أن دور المنصة هو توفير 'الوسيلة' التقنية للربط بينه وبين الطلبة."
+        ],
+        studentCharterTitle: "ميثاق الطالب",
+        studentCharterRules: [
+            "الوقار الرقمي: الالتزام بالأدب في الدردشة، فأي تجاوز يعرضك للحظر الفوري من قِبل الأستاذ.",
+            "الاستعمال العادل: المنصة للبحث العلمي فقط؛ يمنع استغلالها في أي تواصل خارج هذا الإطار.",
+            "احترام الخصوصية: يُمنع محاولة تصوير أو نشر بيانات الزملاء أو الأساتذة خارج المنصة.",
+            "الموافقة التقنية: الإقرار بأن المنصة توفر الأدوات، وأن مسؤولية التفاعل تقع على عاتق المستخدم."
+        ],
     },
     en: {
         appName: 'Your Digital University Way',
@@ -288,6 +304,22 @@ export const STRINGS = {
         downloadForOffline: 'Download for offline',
         downloaded: 'Downloaded',
         removeFromOffline: 'Remove from offline',
+        termsAndConditions: "Terms and Conditions of Use",
+        agree: "I Agree",
+        professorCharterTitle: "Professor Charter",
+        professorCharterRules: [
+            "Complete Independence: The professor is solely responsible for the accuracy and quality of the content published to their students in their private channel.",
+            "Self-Management: Commitment to managing and clearing discussion spaces to ensure a disciplined and educational environment.",
+            "Academic Integrity: Using the platform to publish only scientific content that serves the academic curriculum.",
+            "Technical Acceptance: Agreeing that the platform's role is to provide the technical 'means' to connect with students."
+        ],
+        studentCharterTitle: "Student Charter",
+        studentCharterRules: [
+            "Digital Decorum: Adherence to etiquette in chats; any violation will result in an immediate ban by the professor.",
+            "Fair Use: The platform is for academic research only; using it for any communication outside this scope is prohibited.",
+            "Respect for Privacy: Attempting to capture or publish data of colleagues or professors outside the platform is forbidden.",
+            "Technical Agreement: Acknowledging that the platform provides the tools, and the responsibility for interaction lies with the user."
+        ],
     },
     fr: {
         appName: 'Votre Université Numérique Way',
@@ -359,6 +391,22 @@ export const STRINGS = {
         downloadForOffline: 'Télécharger pour hors ligne',
         downloaded: 'Téléchargé',
         removeFromOffline: 'Supprimer des téléchargements',
+        termsAndConditions: "Conditions d'utilisation",
+        agree: "J'accepte",
+        professorCharterTitle: "Charte de l'enseignant",
+        professorCharterRules: [
+            "Indépendance totale : L'enseignant est le seul responsable de l'exactitude et de la qualité du contenu publié pour ses étudiants sur sa chaîne privée.",
+            "Autogestion : Engagement à gérer et à vider les espaces de discussion pour garantir un environnement discipliné et éducatif.",
+            "Intégrité académique : Utiliser la plateforme uniquement pour publier du contenu scientifique qui sert le programme académique.",
+            "Acceptation technique : Accepter que le rôle de la plateforme est de fournir le 'moyen' technique de se connecter avec les étudiants."
+        ],
+        studentCharterTitle: "Charte de l'étudiant",
+        studentCharterRules: [
+            "Bienséance numérique : Respect de l'étiquette dans les discussions ; toute infraction entraînera un bannissement immédiat par l'enseignant.",
+            "Utilisation équitable : La plateforme est réservée à la recherche universitaire ; son utilisation pour toute communication hors de ce cadre est interdite.",
+            "Respect de la vie privée : Il est interdit de tenter de capturer ou de publier des données de collègues ou d'enseignants en dehors de la plateforme.",
+            "Accord technique : Reconnaître que la plateforme fournit les outils et que la responsabilité de l'interaction incombe à l'utilisateur."
+        ],
     }
 };
 

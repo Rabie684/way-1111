@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { UserRole } from '../types';
 import { UNIVERSITIES, COLLEGES, getLang } from '../constants';
+import TermsOfServiceModal from './TermsOfServiceModal';
 
 const Login: React.FC = () => {
     const { login, register, language } = useApp();
@@ -14,22 +15,30 @@ const Login: React.FC = () => {
     const [university, setUniversity] = useState('');
     const [college, setCollege] = useState('');
     const [loading, setLoading] = useState(false);
+    const [showTermsModal, setShowTermsModal] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setLoading(true);
         if (isRegister) {
-            await register({
-                email,
-                password,
-                role,
-                name,
-                university: role === UserRole.Professor ? university : undefined,
-                college: role === UserRole.Professor ? college : undefined,
-            });
+            setShowTermsModal(true);
         } else {
+            setLoading(true);
             await login({ email, password });
+            setLoading(false);
         }
+    };
+
+    const handleRegistration = async () => {
+        setShowTermsModal(false);
+        setLoading(true);
+        await register({
+            email,
+            password,
+            role,
+            name,
+            university: role === UserRole.Professor ? university : undefined,
+            college: role === UserRole.Professor ? college : undefined,
+        });
         setLoading(false);
     };
 
@@ -130,6 +139,13 @@ const Login: React.FC = () => {
                     </button>
                 </div>
             </div>
+            {showTermsModal && (
+                <TermsOfServiceModal
+                    role={role}
+                    onClose={() => setShowTermsModal(false)}
+                    onAgree={handleRegistration}
+                />
+            )}
         </div>
     );
 };
