@@ -4,7 +4,7 @@ import React from 'react';
 import { User, Channel, UserRole, PostType, ChannelMessage, Notification, DirectMessage, Section } from './types';
 
 export const UNIVERSITIES = [
-    "جامعة ابن خLDون تيارت",
+    "جامعة ابن خلدون تيارت",
     "ملحقة جامعة تيارت بقصر الشلالة",
     "جامعة الجزائر 1 - بن يوسف بن خدة",
     "جامعة الجزائر 2 - أبو القاسم سعد الله",
@@ -46,7 +46,7 @@ export const MOCK_PROFESSOR_2: User = {
     name: 'أستاذ تيارت',
     email: 'prof@univ-tiaret.dz',
     role: UserRole.Professor,
-    university: 'جامعة ابن خلدون تيارت',
+    university: 'جامعة ابن خldون تيارت',
     college: 'كلية الحقوق والعلوم السياسية',
     avatar: 'https://picsum.photos/seed/prof3/200',
     subscribedSections: [],
@@ -211,6 +211,9 @@ export const STRINGS = {
         clearChat: 'محو المحادثة',
         clearChatConfirmTitle: 'تأكيد محو المحادثة',
         clearChatConfirmMessage: 'هل أنت متأكد أنك تريد محو سجل المحادثة بالكامل لهذه القناة؟ هذا الإجراء لا يمكن التراجع عنه وسيحذف المحادثة للجميع.',
+        deletePost: 'حذف المنشور',
+        deletePostConfirmTitle: 'تأكيد الحذف',
+        deletePostConfirmMessage: 'هل أنت متأكد أنك تريد حذف هذا المنشور؟ لا يمكن التراجع عن هذا الإجراء.',
     },
     en: {
         appName: 'Your Digital University Way',
@@ -276,6 +279,9 @@ export const STRINGS = {
         clearChat: 'Clear Chat',
         clearChatConfirmTitle: 'Confirm Clear Chat',
         clearChatConfirmMessage: 'Are you sure you want to clear the entire chat history for this channel? This action is irreversible and will delete the chat for everyone.',
+        deletePost: 'Delete Post',
+        deletePostConfirmTitle: 'Confirm Deletion',
+        deletePostConfirmMessage: 'Are you sure you want to delete this post? This action cannot be undone.',
     },
     fr: {
         appName: 'Votre Université Numérique Way',
@@ -341,6 +347,9 @@ export const STRINGS = {
         clearChat: 'Effacer le chat',
         clearChatConfirmTitle: 'Confirmer l\'effacement',
         clearChatConfirmMessage: 'Êtes-vous sûr de vouloir effacer tout l\'historique du chat pour cette chaîne ? Cette action est irréversible et supprimera le chat pour tout le monde.',
+        deletePost: 'Supprimer la publication',
+        deletePostConfirmTitle: 'Confirmer la suppression',
+        deletePostConfirmMessage: 'Êtes-vous sûr de vouloir supprimer cette publication ? Cette action est irréversible.',
     }
 };
 

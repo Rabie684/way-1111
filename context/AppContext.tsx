@@ -53,6 +53,7 @@ interface AppContextType {
     updateUser: (updatedUser: Partial<User>) => Promise<void>;
     markNotificationsAsRead: () => Promise<void>;
     clearChannelChat: (channelId: string) => Promise<void>;
+    deletePostFromChannel: (channelId: string, postId: string) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -214,6 +215,16 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setChannelMessages(prev => prev.filter(msg => msg.channelId !== channelId));
     };
 
+    const deletePostFromChannel = async (channelId: string, postId: string) => {
+        setChannels(prevChannels =>
+            prevChannels.map(ch =>
+                ch.id === channelId
+                    ? { ...ch, posts: ch.posts.filter(p => p.id !== postId) }
+                    : ch
+            )
+        );
+    };
+
     const value = {
         user,
         theme,
@@ -239,6 +250,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         updateUser,
         markNotificationsAsRead,
         clearChannelChat,
+        deletePostFromChannel,
     };
 
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

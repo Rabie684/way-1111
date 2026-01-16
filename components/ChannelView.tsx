@@ -1,6 +1,7 @@
 
+
 import React, { useState, useRef } from 'react';
-import { Channel, User, UserRole, PostType, Section } from '../types';
+import { Channel, User, UserRole, PostType, Section, Post } from '../types';
 import ChatWindow from './ChatWindow';
 import SubscriptionModal from './SubscriptionModal';
 import { getLang, MOCK_PROFESSOR } from '../constants';
@@ -23,11 +24,12 @@ const PostIcon: React.FC<{ type: PostType }> = ({ type }) => {
 };
 
 const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack }) => {
-    const { language, addPostToChannel, sections, clearChannelChat } = useApp();
+    const { language, addPostToChannel, sections, clearChannelChat, deletePostFromChannel } = useApp();
     const s = getLang(language);
     const [activeTab, setActiveTab] = useState<'posts' | 'chat'>('posts');
     const [showSubscriptionModal, setShowSubscriptionModal] = useState<Section | null>(null);
     const [showClearConfirm, setShowClearConfirm] = useState(false);
+    const [postToDelete, setPostToDelete] = useState<Post | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -44,6 +46,13 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack }) => {
     const handleConfirmClearChat = () => {
         clearChannelChat(channel.id);
         setShowClearConfirm(false);
+    };
+    
+    const handleConfirmDelete = () => {
+        if (postToDelete) {
+            deletePostFromChannel(channel.id, postToDelete.id);
+            setPostToDelete(null);
+        }
     };
 
     const channelSections = sections.filter(sec => sec.channelId === channel.id);
@@ -126,7 +135,7 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack }) => {
                                     </div>
                                 )}
                                 {channel.posts.map(post => (
-                                    <div key={post.id} className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow flex items-center justify-between">
+                                    <div key={post.id} className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow flex items-center justify-between gap-4">
                                         <div className="flex items-center overflow-hidden">
                                             <PostIcon type={post.type} />
                                             <div className="ms-4 overflow-hidden">
@@ -134,7 +143,18 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack }) => {
                                                 <p className="text-xs text-gray-500">Posted on {post.createdAt}</p>
                                             </div>
                                         </div>
-                                        {post.type === PostType.Image && <img src={post.url} alt={post.title} className="w-32 h-16 object-cover rounded flex-shrink-0"/>}
+                                        <div className="flex items-center flex-shrink-0">
+                                            {post.type === PostType.Image && <img src={post.url} alt={post.title} className="w-32 h-16 object-cover rounded"/>}
+                                            {isOwner && (
+                                                <button
+                                                    onClick={() => setPostToDelete(post)}
+                                                    className="ms-4 p-2 text-gray-400 hover:text-red-500 rounded-full hover:bg-red-100 dark:hover:bg-red-900/50"
+                                                    title={s.deletePost}
+                                                >
+                                                    <TrashIcon className="w-5 h-5" />
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
                                 ))}
                             </div>
@@ -169,6 +189,24 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack }) => {
                                 {s.cancel}
                             </button>
                             <button onClick={handleConfirmClearChat} className="px-6 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700">
+                                {s.confirm}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+             {postToDelete && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md m-4">
+                        <div className="p-6 text-center">
+                            <h2 className="text-xl font-bold mb-2">{s.deletePostConfirmTitle}</h2>
+                            <p className="text-gray-600 dark:text-gray-300">{s.deletePostConfirmMessage}</p>
+                        </div>
+                        <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 flex justify-center space-x-4 rtl:space-x-reverse">
+                            <button onClick={() => setPostToDelete(null)} className="px-6 py-2 text-sm font-medium text-gray-700 bg-white dark:text-gray-200 dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-md hover:bg-gray-50 dark:hover:bg-gray-500">
+                                {s.cancel}
+                            </button>
+                            <button onClick={handleConfirmDelete} className="px-6 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700">
                                 {s.confirm}
                             </button>
                         </div>
