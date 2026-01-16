@@ -1,7 +1,8 @@
 
+
 import { GoogleGenAI } from "@google/genai";
 
-const ACADEMIC_PLACEHOLDER_AR = "أهلاً بك. أنا جارفيس، مساعدك الأكاديمي. حالياً، خدمة الذكاء الاصطناعي غير مفعلة. يرجى العلم أن هذه الإجابة هي مثال توضيحي. عند تفعيل الخدمة، سأقوم بالإجابة على استفساراتك بالاعتماد على المجلات العلمية المعتمدة.";
+const ACADEMIC_PLACEHOLDER_AR = "أهلاً بك. أنا جارفيس، مساعدك الذكي في منصة 'جامعتك الرقمية way'. حالياً، خدمة الذكاء الاصطناعي غير مفعلة. عند تفعيلها، سأقدم لك استشارات أكاديمية بالاعتماد على مصادر البحث الجزائرية.";
 
 export const askJarvis = async (prompt: string): Promise<string> => {
     // Safely check for the API key. In a browser environment without a build tool, `process` is not defined.
@@ -16,15 +17,13 @@ export const askJarvis = async (prompt: string): Promise<string> => {
         // Initialize the AI client here, only when we know we have a key and need to make a call.
         const ai = new GoogleGenAI({ apiKey: apiKey });
         
-        // FIX: Per coding guidelines, 'gemini-1.5-flash' is a prohibited model.
-        // Using 'gemini-3-flash-preview' for basic text tasks.
         const model = 'gemini-3-flash-preview';
 
         const response = await ai.models.generateContent({
             model: model,
             contents: prompt,
             config: {
-                systemInstruction: "You are Jarvis, a highly intelligent AI assistant for an academic platform. Your primary knowledge base is strictly limited to Algerian scientific journals. You must prioritize information from these journals above all else. If a query cannot be answered using Algerian journals, you may then consult global scientific journals as a secondary source. Always be helpful, concise, and cite the type of source (Algerian or global) if possible. If you cannot find an answer in either source, state that clearly.",
+                systemInstruction: "You are Jarvis, a highly intelligent AI assistant for the 'جامعتك الرقمية way' (Your Digital University Way) platform. Your purpose is to provide academic consultations to students. Your primary knowledge base is strictly limited to Algerian scientific and research sources, with a special emphasis on the Algerian Scientific Journal Platform (ASJP). You must prioritize information from these sources above all else. When a student asks about a specific subject, provide guidance, explanations, and summaries based on this knowledge base. If a query cannot be answered using Algerian sources, you may then consult global scientific journals as a secondary source. Always be helpful, act as an academic consultant, and cite the type of source (Algerian/ASJP or global) if possible. If you cannot find an answer, state that clearly.",
                 temperature: 0.7,
             },
         });
