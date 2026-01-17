@@ -53,7 +53,31 @@ export const MOCK_STUDENT: User = {
     phoneNumber: '+213987654321',
 };
 
-export const MOCK_ALL_USERS = [MOCK_PROFESSOR, MOCK_STUDENT];
+export const MOCK_STUDENT_2: User = {
+    id: 'student-2',
+    name: 'علي أحمد',
+    email: 'ali@student.dz',
+    role: UserRole.Student,
+    university: 'جامعة ابن خلدون تيارت',
+    college: 'كلية الحقوق والعلوم السياسية',
+    avatar: 'https://picsum.photos/seed/student3/200',
+    subscribedSections: ['sec-2'], // Subscribed to ch-1
+    phoneNumber: '',
+};
+
+export const MOCK_STUDENT_3: User = {
+    id: 'student-3',
+    name: 'فاطمة الزهراء',
+    email: 'fatima@student.dz',
+    role: UserRole.Student,
+    university: 'ملحقة جامعة تيارت بقصر الشلالة',
+    college: 'كلية العلوم الاقتصادية والتجارية وعلوم التسيير',
+    avatar: 'https://picsum.photos/seed/student4/200',
+    subscribedSections: ['sec-1', 'sec-3'], // Subscribed to ch-1 and ch-2
+    phoneNumber: '',
+};
+
+export const MOCK_ALL_USERS = [MOCK_PROFESSOR, MOCK_STUDENT, MOCK_STUDENT_2, MOCK_STUDENT_3];
 
 export const MOCK_CHANNELS: Channel[] = [
     {
@@ -68,6 +92,7 @@ export const MOCK_CHANNELS: Channel[] = [
             { id: 'p-3', type: PostType.Video, title: 'فيديو: شرح الخصم', url: 'https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/360/Big_Buck_Bunny_360_10s_1MB.mp4', createdAt: '2024-05-22' },
         ],
         subscribers: 23,
+        blockedUsers: [],
     },
     {
         id: 'ch-2',
@@ -79,6 +104,7 @@ export const MOCK_CHANNELS: Channel[] = [
              { id: 'p-4', type: PostType.PDF, title: 'منهج المقرر.pdf', url: '#', createdAt: '2024-05-19' },
         ],
         subscribers: 15,
+        blockedUsers: [],
     }
 ];
 
@@ -195,6 +221,11 @@ export const STRINGS = {
             "احترام الخصوصية: يُمنع محاولة تصوير أو نشر بيانات الزملاء أو الأساتذة خارج المنصة.",
             "الموافقة التقنية: الإقرار بأن المنصة توفر الأدوات، وأن مسؤولية التفاعل تقع على عاتق المستخدم."
         ],
+        subscribers: 'المشتركون',
+        block: 'حظر',
+        message: 'مراسلة',
+        blockUserConfirmTitle: 'تأكيد الحظر',
+        blockUserConfirmMessage: 'هل أنت متأكد أنك تريد حظر {userName} من هذه القناة؟ سيفقد الوصول إلى كل المحتوى والدردشة.',
     },
     en: {
         appName: 'Your Digital University Way',
@@ -282,6 +313,11 @@ export const STRINGS = {
             "Respect for Privacy: Attempting to capture or publish data of colleagues or professors outside the platform is forbidden.",
             "Technical Agreement: Acknowledging that the platform provides the tools, and the responsibility for interaction lies with the user."
         ],
+        subscribers: 'Subscribers',
+        block: 'Block',
+        message: 'Message',
+        blockUserConfirmTitle: 'Confirm Block',
+        blockUserConfirmMessage: 'Are you sure you want to block {userName} from this channel? They will lose access to all content and chat.',
     },
     fr: {
         appName: 'Votre Université Numérique Way',
@@ -369,6 +405,11 @@ export const STRINGS = {
             "Respect de la vie privée : Il est interdit de tenter de capturer ou de publier des données de collègues ou d'enseignants en dehors de la plateforme.",
             "Accord technique : Reconnaître que la plateforme fournit les outils et que la responsabilité de l'interaction incombe à l'utilisateur."
         ],
+        subscribers: 'Abonnés',
+        block: 'Bloquer',
+        message: 'Message',
+        blockUserConfirmTitle: 'Confirmer le blocage',
+        blockUserConfirmMessage: 'Êtes-vous sûr de vouloir bloquer {userName} de cette chaîne ? Il perdra l\'accès à tout le contenu et au chat.',
     }
 };
 

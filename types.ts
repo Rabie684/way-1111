@@ -1,4 +1,5 @@
 
+
 export enum UserRole {
     Student = 'student',
     Professor = 'professor',
@@ -38,6 +39,7 @@ export interface Channel {
     meetLink: string;
     posts: Post[];
     subscribers: number;
+    blockedUsers: string[];
 }
 
 export interface Section {

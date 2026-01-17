@@ -47,7 +47,7 @@ interface AppContextType {
     logout: () => Promise<void>;
     toggleTheme: () => void;
     setLanguage: (lang: Language) => void;
-    createChannel: (channel: Omit<Channel, 'id' | 'professorId' | 'posts' | 'subscribers'>) => Promise<void>;
+    createChannel: (channel: Omit<Channel, 'id' | 'professorId' | 'posts' | 'subscribers' | 'blockedUsers'>) => Promise<void>;
     subscribeToSection: (sectionId: string) => Promise<void>;
     sendMessage: (channelId: string, text: string) => Promise<void>;
     sendDirectMessage: (receiverId: string, text: string) => Promise<void>;
@@ -59,6 +59,7 @@ interface AppContextType {
     deletePostFromChannel: (channelId: string, postId: string) => Promise<void>;
     downloadPostForOffline: (post: Post) => Promise<void>;
     removePostFromOffline: (post: Post) => Promise<void>;
+    blockUserFromChannel: (userId: string, channelId: string) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -118,7 +119,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
     };
 
-    const createChannel = async (channelData: Omit<Channel, 'id' | 'professorId' | 'posts' | 'subscribers'>) => {
+    const createChannel = async (channelData: Omit<Channel, 'id' | 'professorId' | 'posts' | 'subscribers' | 'blockedUsers'>) => {
         if (!user || user.role !== UserRole.Professor) return;
         const newChannel: Channel = {
             ...channelData,
@@ -126,6 +127,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             professorId: user.id,
             posts: [],
             subscribers: 0,
+            blockedUsers: [],
         };
         setChannels(prev => [...prev, newChannel]);
     };
@@ -264,6 +266,18 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         }
     };
 
+    const blockUserFromChannel = async (userId: string, channelId: string) => {
+        setChannels(prevChannels => prevChannels.map(ch => {
+            if (ch.id === channelId && !ch.blockedUsers.includes(userId)) {
+                return {
+                    ...ch,
+                    blockedUsers: [...ch.blockedUsers, userId]
+                };
+            }
+            return ch;
+        }));
+    };
+
 
     const value = {
         user,
@@ -294,6 +308,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         deletePostFromChannel,
         downloadPostForOffline,
         removePostFromOffline,
+        blockUserFromChannel,
     };
 
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

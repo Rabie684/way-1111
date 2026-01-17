@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { getLang } from '../constants';
-import { Channel } from '../types';
+import { Channel, User } from '../types';
 import ChannelView from './ChannelView';
 import JarvisAI from './JarvisAI';
 import CreateChannelModal from './CreateChannelModal';
@@ -23,6 +23,8 @@ const ProfessorDashboard: React.FC = () => {
     const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
     const [settingsOpen, setSettingsOpen] = useState(false);
     const [isQrModalOpen, setIsQrModalOpen] = useState(false);
+    const [dmTargetUser, setDmTargetUser] = useState<User | null>(null);
+
     const profileDropdownRef = useRef<HTMLDivElement>(null);
     const notifDropdownRef = useRef<HTMLDivElement>(null);
     const unreadCount = notifications.filter(n => !n.read).length;
@@ -68,11 +70,17 @@ const ProfessorDashboard: React.FC = () => {
         setSelectedChannel(null);
     }
 
+    const handleStartDirectMessage = (targetUser: User) => {
+        setActiveTab('direct-messages');
+        setDmTargetUser(targetUser);
+        setSidebarOpen(false);
+    }
+
     const renderContent = () => {
         if (activeTab === 'ai') return <JarvisAI />;
-        if (activeTab === 'direct-messages') return <DirectMessagesView />;
+        if (activeTab === 'direct-messages') return <DirectMessagesView initialUser={dmTargetUser} onViewLoad={() => setDmTargetUser(null)} />;
         if (activeTab === 'channel') {
-            if (selectedChannel) return <ChannelView channel={selectedChannel} user={user!} onBack={handleBackFromChannel} />;
+            if (selectedChannel) return <ChannelView channel={selectedChannel} user={user!} onBack={handleBackFromChannel} onStartDirectMessage={handleStartDirectMessage} />;
             return (
                 <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 p-4">
                     <BookOpenIcon className="w-16 h-16 mb-4" />

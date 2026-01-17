@@ -5,7 +5,12 @@ import { MOCK_ALL_USERS } from '../constants';
 import { UserIcon, SendIcon, ArrowLeftIcon } from './icons/IconComponents';
 import { User } from '../types';
 
-const DirectMessagesView: React.FC = () => {
+interface DirectMessagesViewProps {
+    initialUser?: User | null;
+    onViewLoad?: () => void;
+}
+
+const DirectMessagesView: React.FC<DirectMessagesViewProps> = ({ initialUser, onViewLoad }) => {
     const { s, user, directMessages, sendDirectMessage } = useApp();
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [newMessage, setNewMessage] = useState('');
@@ -20,6 +25,13 @@ const DirectMessagesView: React.FC = () => {
             scrollToBottom();
         }
     }, [directMessages, selectedUser]);
+    
+    useEffect(() => {
+        if (initialUser && onViewLoad) {
+            setSelectedUser(initialUser);
+            onViewLoad();
+        }
+    }, [initialUser, onViewLoad]);
     
     if (!user) return null;
 

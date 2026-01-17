@@ -1,17 +1,19 @@
 
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { Channel, User, UserRole, PostType, Section, Post } from '../types';
 import ChatWindow from './ChatWindow';
 import SubscriptionModal from './SubscriptionModal';
-import { getLang, MOCK_PROFESSOR } from '../constants';
+import { getLang, MOCK_ALL_USERS } from '../constants';
 import { useApp } from '../context/AppContext';
-import { ArrowLeftIcon, FileTextIcon, ImageIcon, VideoIcon, UploadCloudIcon, TrashIcon, DownloadIcon, CheckCircleIcon, LoaderIcon } from './icons/IconComponents';
+import { ArrowLeftIcon, FileTextIcon, ImageIcon, VideoIcon, UploadCloudIcon, TrashIcon, DownloadIcon, CheckCircleIcon, LoaderIcon, UsersIcon, MessageSquareIcon, SlashIcon } from './icons/IconComponents';
+import ConfirmationModal from './ConfirmationModal';
 
 interface ChannelViewProps {
     channel: Channel;
     user: User;
     onBack: () => void;
+    onStartDirectMessage: (user: User) => void;
 }
 
 const PostIcon: React.FC<{ type: PostType }> = ({ type }) => {
@@ -23,14 +25,28 @@ const PostIcon: React.FC<{ type: PostType }> = ({ type }) => {
     }
 };
 
-const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack }) => {
-    const { s, addPostToChannel, sections, clearChannelChat, deletePostFromChannel, offlinePostIds, downloadPostForOffline, removePostFromOffline } = useApp();
+const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack, onStartDirectMessage }) => {
+    const { s, addPostToChannel, sections, clearChannelChat, deletePostFromChannel, offlinePostIds, downloadPostForOffline, removePostFromOffline, blockUserFromChannel } = useApp();
     const [activeTab, setActiveTab] = useState<'posts' | 'chat'>('posts');
     const [showSubscriptionModal, setShowSubscriptionModal] = useState<Section | null>(null);
     const [showClearConfirm, setShowClearConfirm] = useState(false);
     const [postToDelete, setPostToDelete] = useState<Post | null>(null);
     const [downloadingPosts, setDownloadingPosts] = useState<Set<string>>(new Set());
+    const [subscribersDropdownOpen, setSubscribersDropdownOpen] = useState(false);
+    const [userToBlock, setUserToBlock] = useState<User | null>(null);
+
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const subscribersDropdownRef = useRef<HTMLDivElement>(null);
+
+     useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (subscribersDropdownRef.current && !subscribersDropdownRef.current.contains(event.target as Node)) {
+                setSubscribersDropdownOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -69,10 +85,31 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack }) => {
         await removePostFromOffline(post);
     };
 
-    const channelSections = sections.filter(sec => sec.channelId === channel.id);
-    const isSubscribedToChannel = user.role === UserRole.Professor || channelSections.some(sec => user.subscribedSections.includes(sec.id));
+    const handleConfirmBlock = () => {
+        if(userToBlock) {
+            blockUserFromChannel(userToBlock.id, channel.id);
+            setUserToBlock(null);
+        }
+    }
+
+    const channelSections = useMemo(() => sections.filter(sec => sec.channelId === channel.id), [sections, channel.id]);
+    const channelSectionIds = useMemo(() => new Set(channelSections.map(s => s.id)), [channelSections]);
+
+    const subscribedStudents = useMemo(() => 
+        MOCK_ALL_USERS.filter(u => 
+            u.role === UserRole.Student &&
+            u.subscribedSections.some(secId => channelSectionIds.has(secId)) &&
+            !channel.blockedUsers.includes(u.id)
+        ), 
+    [channelSectionIds, channel.blockedUsers]);
 
     const isOwner = user.role === UserRole.Professor && user.id === channel.professorId;
+    
+    const isSubscribedToChannel = isOwner || 
+        (channelSections.some(sec => user.subscribedSections.includes(sec.id)) && !channel.blockedUsers.includes(user.id));
+    
+    const professor = MOCK_ALL_USERS.find(u => u.id === channel.professorId);
+
 
     const header = (
         <header className="p-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
@@ -87,8 +124,40 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack }) => {
             </div>
             <div className="flex items-center justify-between mt-2">
                 <div className="flex items-center text-sm">
-                    <img src={MOCK_PROFESSOR.avatar} alt={MOCK_PROFESSOR.name} className="w-6 h-6 rounded-full me-2"/>
-                    <span>{MOCK_PROFESSOR.name}</span>
+                    {professor && <>
+                        <img src={professor.avatar} alt={professor.name} className="w-6 h-6 rounded-full me-2"/>
+                        <span>{professor.name}</span>
+                    </>}
+                     {isOwner && (
+                        <div className="relative ms-4" ref={subscribersDropdownRef}>
+                            <button onClick={() => setSubscribersDropdownOpen(!subscribersDropdownOpen)} className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-800 dark:hover:text-gray-200 px-2 py-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
+                                <UsersIcon className="w-4 h-4" />
+                                <span>{subscribedStudents.length} {s.subscribers}</span>
+                            </button>
+                            {subscribersDropdownOpen && (
+                                <div className="absolute top-full start-0 mt-2 w-72 bg-white dark:bg-gray-800 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-20">
+                                    <div className="p-2 max-h-60 overflow-y-auto">
+                                        {subscribedStudents.length > 0 ? subscribedStudents.map(student => (
+                                            <div key={student.id} className="flex items-center justify-between p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
+                                                <div className="flex items-center gap-2 overflow-hidden">
+                                                    <img src={student.avatar} alt={student.name} className="w-8 h-8 rounded-full object-cover" />
+                                                    <span className="text-sm font-medium truncate">{student.name}</span>
+                                                </div>
+                                                <div className="flex items-center flex-shrink-0">
+                                                    <button onClick={() => onStartDirectMessage(student)} className="p-2 rounded-full text-gray-500 hover:text-primary-500 hover:bg-primary-100 dark:hover:bg-primary-900/50" title={s.message}>
+                                                        <MessageSquareIcon className="w-4 h-4" />
+                                                    </button>
+                                                    <button onClick={() => setUserToBlock(student)} className="p-2 rounded-full text-gray-500 hover:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/50" title={s.block}>
+                                                        <SlashIcon className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )) : <p className="p-4 text-center text-gray-500 text-sm">No subscribers yet.</p>}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
                 <a href={channel.meetLink} target="_blank" rel="noopener noreferrer" className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700">
                     <VideoIcon className="w-4 h-4 me-1.5"/>
@@ -141,7 +210,7 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack }) => {
                     <div className={`flex-1 overflow-y-auto ${activeTab === 'chat' ? 'p-0' : 'p-4'}`}>
                         {activeTab === 'posts' && (
                             <div className="space-y-4">
-                                {user.role === UserRole.Professor && (
+                                {isOwner && (
                                     <div onClick={handleUploadClick} className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-dashed border-gray-300 dark:border-gray-600 text-center cursor-pointer hover:border-primary-500 dark:hover:border-primary-500 transition">
                                         <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
                                         <UploadCloudIcon className="w-12 h-12 mx-auto text-gray-400"/>
@@ -219,40 +288,28 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack }) => {
                 />
             )}
             {showClearConfirm && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md m-4">
-                        <div className="p-6 text-center">
-                            <h2 className="text-xl font-bold mb-2">{s.clearChatConfirmTitle}</h2>
-                            <p className="text-gray-600 dark:text-gray-300">{s.clearChatConfirmMessage}</p>
-                        </div>
-                        <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 flex justify-center space-x-4 rtl:space-x-reverse">
-                            <button onClick={() => setShowClearConfirm(false)} className="px-6 py-2 text-sm font-medium text-gray-700 bg-white dark:text-gray-200 dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-md hover:bg-gray-50 dark:hover:bg-gray-500">
-                                {s.cancel}
-                            </button>
-                            <button onClick={handleConfirmClearChat} className="px-6 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700">
-                                {s.confirm}
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <ConfirmationModal
+                    title={s.clearChatConfirmTitle}
+                    message={s.clearChatConfirmMessage}
+                    onClose={() => setShowClearConfirm(false)}
+                    onConfirm={handleConfirmClearChat}
+                />
             )}
              {postToDelete && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md m-4">
-                        <div className="p-6 text-center">
-                            <h2 className="text-xl font-bold mb-2">{s.deletePostConfirmTitle}</h2>
-                            <p className="text-gray-600 dark:text-gray-300">{s.deletePostConfirmMessage}</p>
-                        </div>
-                        <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 flex justify-center space-x-4 rtl:space-x-reverse">
-                            <button onClick={() => setPostToDelete(null)} className="px-6 py-2 text-sm font-medium text-gray-700 bg-white dark:text-gray-200 dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-md hover:bg-gray-50 dark:hover:bg-gray-500">
-                                {s.cancel}
-                            </button>
-                            <button onClick={handleConfirmDelete} className="px-6 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700">
-                                {s.confirm}
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                 <ConfirmationModal
+                    title={s.deletePostConfirmTitle}
+                    message={s.deletePostConfirmMessage}
+                    onClose={() => setPostToDelete(null)}
+                    onConfirm={handleConfirmDelete}
+                />
+            )}
+            {userToBlock && (
+                <ConfirmationModal
+                    title={s.blockUserConfirmTitle}
+                    message={s.blockUserConfirmMessage.replace('{userName}', userToBlock.name)}
+                    onClose={() => setUserToBlock(null)}
+                    onConfirm={handleConfirmBlock}
+                />
             )}
         </div>
     );
