@@ -6,7 +6,7 @@ import ChatWindow from './ChatWindow';
 import SubscriptionModal from './SubscriptionModal';
 import { getLang, MOCK_ALL_USERS } from '../constants';
 import { useApp } from '../context/AppContext';
-import { ArrowLeftIcon, FileTextIcon, ImageIcon, VideoIcon, UploadCloudIcon, TrashIcon, DownloadIcon, CheckCircleIcon, LoaderIcon, UsersIcon, MessageSquareIcon, SlashIcon } from './icons/IconComponents';
+import { ArrowLeftIcon, FileTextIcon, ImageIcon, VideoIcon, UploadCloudIcon, TrashIcon, DownloadIcon, CheckCircleIcon, LoaderIcon, UsersIcon, MessageSquareIcon, SlashIcon, ChevronDownIcon } from './icons/IconComponents';
 import ConfirmationModal from './ConfirmationModal';
 
 interface ChannelViewProps {
@@ -34,6 +34,7 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack, onStar
     const [downloadingPosts, setDownloadingPosts] = useState<Set<string>>(new Set());
     const [subscribersDropdownOpen, setSubscribersDropdownOpen] = useState(false);
     const [userToBlock, setUserToBlock] = useState<User | null>(null);
+    const [expandedStudentId, setExpandedStudentId] = useState<string | null>(null);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const subscribersDropdownRef = useRef<HTMLDivElement>(null);
@@ -136,21 +137,41 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack, onStar
                             </button>
                             {subscribersDropdownOpen && (
                                 <div className="absolute top-full start-0 mt-2 w-72 bg-white dark:bg-gray-800 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-20">
-                                    <div className="p-2 max-h-60 overflow-y-auto">
+                                    <div className="p-1 max-h-60 overflow-y-auto">
                                         {subscribedStudents.length > 0 ? subscribedStudents.map(student => (
-                                            <div key={student.id} className="flex items-center justify-between p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
-                                                <div className="flex items-center gap-2 overflow-hidden">
-                                                    <img src={student.avatar} alt={student.name} className="w-8 h-8 rounded-full object-cover" />
-                                                    <span className="text-sm font-medium truncate">{student.name}</span>
+                                             <div key={student.id} className="py-1">
+                                                <div 
+                                                    className="flex items-center justify-between cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-md"
+                                                    onClick={() => {
+                                                        setExpandedStudentId(prev => prev === student.id ? null : student.id);
+                                                    }}
+                                                >
+                                                    <div className="flex items-center gap-2 overflow-hidden">
+                                                        <img src={student.avatar} alt={student.name} className="w-8 h-8 rounded-full object-cover" />
+                                                        <span className="text-sm font-medium truncate">{student.name}</span>
+                                                    </div>
+                                                    <ChevronDownIcon className={`w-5 h-5 text-gray-400 transition-transform flex-shrink-0 ${expandedStudentId === student.id ? 'rotate-180' : ''}`} />
                                                 </div>
-                                                <div className="flex items-center flex-shrink-0">
-                                                    <button onClick={() => onStartDirectMessage(student)} className="p-2 rounded-full text-gray-500 hover:text-primary-500 hover:bg-primary-100 dark:hover:bg-primary-900/50" title={s.message}>
-                                                        <MessageSquareIcon className="w-4 h-4" />
-                                                    </button>
-                                                    <button onClick={() => setUserToBlock(student)} className="p-2 rounded-full text-gray-500 hover:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/50" title={s.block}>
-                                                        <SlashIcon className="w-4 h-4" />
-                                                    </button>
-                                                </div>
+                                                {expandedStudentId === student.id && (
+                                                    <div className="flex items-center justify-end pt-2 px-2 space-x-2 rtl:space-x-reverse">
+                                                        <button 
+                                                            onClick={() => onStartDirectMessage(student)} 
+                                                            className="flex items-center gap-1.5 px-3 py-1 text-sm rounded-md text-gray-700 dark:text-gray-200 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors" 
+                                                            title={s.message}
+                                                        >
+                                                            <MessageSquareIcon className="w-4 h-4" />
+                                                            <span>{s.message}</span>
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => setUserToBlock(student)} 
+                                                            className="flex items-center gap-1.5 px-3 py-1 text-sm rounded-md text-white bg-red-600 hover:bg-red-700 transition-colors" 
+                                                            title={s.block}
+                                                        >
+                                                            <SlashIcon className="w-4 h-4" />
+                                                            <span>{s.block}</span>
+                                                        </button>
+                                                    </div>
+                                                )}
                                             </div>
                                         )) : <p className="p-4 text-center text-gray-500 text-sm">No subscribers yet.</p>}
                                     </div>
