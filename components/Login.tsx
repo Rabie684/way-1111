@@ -1,8 +1,10 @@
+
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { UserRole } from '../types';
 import { UNIVERSITIES, COLLEGES, getLang } from '../constants';
 import TermsOfServiceModal from './TermsOfServiceModal';
+import AutocompleteInput from './AutocompleteInput';
 
 const Login: React.FC = () => {
     const { login, register, language } = useApp();
@@ -36,8 +38,8 @@ const Login: React.FC = () => {
             password,
             role,
             name,
-            university: role === UserRole.Professor ? university : undefined,
-            college: role === UserRole.Professor ? college : undefined,
+            university,
+            college,
         });
         setLoading(false);
     };
@@ -91,17 +93,25 @@ const Login: React.FC = () => {
                                 <>
                                     <div>
                                         <label htmlFor="university" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{s.university}</label>
-                                        <select id="university" value={university} onChange={(e) => setUniversity(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500">
-                                            <option value="">{s.select}</option>
-                                            {UNIVERSITIES.map(u => <option key={u} value={u}>{u}</option>)}
-                                        </select>
+                                        <AutocompleteInput
+                                            id="university"
+                                            options={UNIVERSITIES}
+                                            value={university}
+                                            onValueChange={setUniversity}
+                                            placeholder={s.select}
+                                            required
+                                        />
                                     </div>
                                     <div>
                                         <label htmlFor="college" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{s.college}</label>
-                                        <select id="college" value={college} onChange={(e) => setCollege(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500">
-                                             <option value="">{s.select}</option>
-                                            {COLLEGES.map(c => <option key={c} value={c}>{c}</option>)}
-                                        </select>
+                                        <AutocompleteInput
+                                            id="college"
+                                            options={COLLEGES}
+                                            value={college}
+                                            onValueChange={setCollege}
+                                            placeholder={s.select}
+                                            required
+                                        />
                                     </div>
                                 </>
                             )}

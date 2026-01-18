@@ -9,6 +9,7 @@ import JarvisAI from './JarvisAI';
 import ProfileSettingsModal from './ProfileSettingsModal';
 import DirectMessagesView from './DirectMessagesView';
 import QRCodeModal from './QRCodeModal';
+import AutocompleteInput from './AutocompleteInput';
 import { BookOpenIcon, UserIcon, CompassIcon, MenuIcon, XIcon, BotIcon, SunIcon, MoonIcon, BellIcon, LogOutIcon, MessageSquareIcon, ExternalLinkIcon, CogIcon, QrCodeIcon } from './icons/IconComponents';
 
 const StudentDashboard: React.FC = () => {
@@ -88,11 +89,23 @@ const StudentDashboard: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
                     <div>
                         <label htmlFor="university" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{s.university}</label>
-                        <select id="university" value={exploreUniversity} onChange={(e) => setExploreUniversity(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"><option value="">{s.select}</option>{UNIVERSITIES.map(u => <option key={u} value={u}>{u}</option>)}</select>
+                        <AutocompleteInput
+                            id="university-explore"
+                            options={UNIVERSITIES}
+                            value={exploreUniversity}
+                            onValueChange={setExploreUniversity}
+                            placeholder={s.select}
+                        />
                     </div>
                     <div>
                         <label htmlFor="college" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{s.college}</label>
-                        <select id="college" value={exploreCollege} onChange={(e) => setExploreCollege(e.target.value)} className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"><option value="">{s.select}</option>{COLLEGES.map(c => <option key={c} value={c}>{c}</option>)}</select>
+                        <AutocompleteInput
+                            id="college-explore"
+                            options={COLLEGES}
+                            value={exploreCollege}
+                            onValueChange={setExploreCollege}
+                            placeholder={s.select}
+                        />
                     </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -117,7 +130,7 @@ const StudentDashboard: React.FC = () => {
             </div>
         );
         if (activeTab === 'my-channels') {
-            if (selectedChannel) return <ChannelView channel={selectedChannel} user={user} onBack={handleBackFromChannel} />;
+            if (selectedChannel) return <ChannelView channel={selectedChannel} user={user} onBack={handleBackFromChannel} onStartDirectMessage={() => {}} />;
             return (
                 <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 p-4">
                     <BookOpenIcon className="w-16 h-16 mb-4" />
