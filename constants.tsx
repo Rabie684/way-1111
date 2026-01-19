@@ -226,6 +226,9 @@ export const STRINGS = {
         message: 'مراسلة',
         blockUserConfirmTitle: 'تأكيد الحظر',
         blockUserConfirmMessage: 'هل أنت متأكد أنك تريد حظر {userName} من هذه القناة؟ سيفقد الوصول إلى كل المحتوى والدردشة.',
+        channelsBy: 'قنوات الأستاذ {profName}',
+        channels: 'قنوات',
+        noProfessorsFound: 'لم يتم العثور على أساتذة في الجامعة والكلية المحددة.',
     },
     en: {
         appName: 'Your Digital University Way',
@@ -318,6 +321,9 @@ export const STRINGS = {
         message: 'Message',
         blockUserConfirmTitle: 'Confirm Block',
         blockUserConfirmMessage: 'Are you sure you want to block {userName} from this channel? They will lose access to all content and chat.',
+        channelsBy: 'Channels by {profName}',
+        channels: 'Channels',
+        noProfessorsFound: 'No professors found for the selected university and college.',
     },
     fr: {
         appName: 'Votre Université Numérique Way',
@@ -410,6 +416,9 @@ export const STRINGS = {
         message: 'Message',
         blockUserConfirmTitle: 'Confirmer le blocage',
         blockUserConfirmMessage: 'Êtes-vous sûr de vouloir bloquer {userName} de cette chaîne ? Il perdra l\'accès à tout le contenu et au chat.',
+        channelsBy: 'Chaînes par {profName}',
+        channels: 'Chaînes',
+        noProfessorsFound: 'Aucun professeur trouvé pour l\'université et la faculté sélectionnées.',
     }
 };
 

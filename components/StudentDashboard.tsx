@@ -3,14 +3,14 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { getLang, MOCK_ALL_USERS, UNIVERSITIES, COLLEGES } from '../constants';
-import { Channel, UserRole } from '../types';
+import { Channel, User, UserRole } from '../types';
 import ChannelView from './ChannelView';
 import JarvisAI from './JarvisAI';
 import ProfileSettingsModal from './ProfileSettingsModal';
 import DirectMessagesView from './DirectMessagesView';
 import QRCodeModal from './QRCodeModal';
 import AutocompleteInput from './AutocompleteInput';
-import { BookOpenIcon, UserIcon, CompassIcon, MenuIcon, XIcon, BotIcon, SunIcon, MoonIcon, BellIcon, LogOutIcon, MessageSquareIcon, ExternalLinkIcon, CogIcon, QrCodeIcon } from './icons/IconComponents';
+import { BookOpenIcon, UserIcon, CompassIcon, MenuIcon, XIcon, BotIcon, SunIcon, MoonIcon, BellIcon, LogOutIcon, MessageSquareIcon, ExternalLinkIcon, CogIcon, QrCodeIcon, ArrowLeftIcon } from './icons/IconComponents';
 
 const StudentDashboard: React.FC = () => {
     const { user, channels, sections, language, s, logout, theme, toggleTheme, setLanguage, notifications, markNotificationsAsRead } = useApp();
@@ -28,17 +28,26 @@ const StudentDashboard: React.FC = () => {
 
     const [exploreUniversity, setExploreUniversity] = useState('');
     const [exploreCollege, setExploreCollege] = useState('');
+    const [selectedProfessorId, setSelectedProfessorId] = useState<string | null>(null);
 
     const professorMap = useMemo(() => new Map(MOCK_ALL_USERS.filter(u => u.role === UserRole.Professor).map(p => [p.id, p])), []);
 
-    const filteredExploreChannels = useMemo(() => {
+    const filteredProfessors = useMemo(() => {
         if (!exploreUniversity || !exploreCollege) return [];
-        return channels.filter(channel => {
-            const professor = professorMap.get(channel.professorId);
-            if (!professor) return false;
-            return professor.university === exploreUniversity && professor.college === exploreCollege;
-        });
-    }, [channels, exploreUniversity, exploreCollege, professorMap]);
+        const professorsWithChannels = new Set(channels.map(c => c.professorId));
+        return MOCK_ALL_USERS.filter(u => 
+            u.role === UserRole.Professor &&
+            professorsWithChannels.has(u.id) &&
+            u.university === exploreUniversity &&
+            u.college === exploreCollege
+        );
+    }, [channels, exploreUniversity, exploreCollege]);
+
+    const selectedProfessorChannels = useMemo(() => {
+        if (!selectedProfessorId) return [];
+        return channels.filter(channel => channel.professorId === selectedProfessorId);
+    }, [channels, selectedProfessorId]);
+
 
     const subscribedChannelIds = useMemo(() => {
         if (!user) return new Set<string>();
@@ -58,6 +67,11 @@ const StudentDashboard: React.FC = () => {
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
+    
+    useEffect(() => {
+        setSelectedProfessorId(null);
+    }, [exploreUniversity, exploreCollege]);
+
 
     const handleNotifClick = () => {
         setNotifDropdownOpen(!notifDropdownOpen);
@@ -84,11 +98,11 @@ const StudentDashboard: React.FC = () => {
         if (activeTab === 'ai') return <JarvisAI />;
         if (activeTab === 'direct-messages') return <DirectMessagesView />;
         if (activeTab === 'explore') return (
-            <div className="p-4 sm:p-8">
-                <h1 className="text-2xl sm:text-3xl font-bold mb-6">{s.explore}</h1>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
+            <div className="p-4 sm:p-8 h-full flex flex-col overflow-y-auto">
+                <h1 className="text-2xl sm:text-3xl font-bold mb-6 flex-shrink-0">{s.explore}</h1>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 p-4 bg-white dark:bg-gray-800 rounded-lg shadow flex-shrink-0">
                     <div>
-                        <label htmlFor="university" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{s.university}</label>
+                        <label htmlFor="university-explore" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{s.university}</label>
                         <AutocompleteInput
                             id="university-explore"
                             options={UNIVERSITIES}
@@ -98,7 +112,7 @@ const StudentDashboard: React.FC = () => {
                         />
                     </div>
                     <div>
-                        <label htmlFor="college" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{s.college}</label>
+                        <label htmlFor="college-explore" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{s.college}</label>
                         <AutocompleteInput
                             id="college-explore"
                             options={COLLEGES}
@@ -108,25 +122,58 @@ const StudentDashboard: React.FC = () => {
                         />
                     </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredExploreChannels.map(channel => {
-                        const professor = professorMap.get(channel.professorId);
-                        return(
-                            <div key={channel.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-transform hover:scale-105">
-                                <div className="p-6">
-                                    <h3 className="text-xl font-bold text-primary-600 dark:text-primary-400 mb-2">{channel.name}</h3>
-                                    {professor && (<div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-4"><img src={professor.avatar} alt={professor.name} className="w-6 h-6 rounded-full me-2"/><span>{professor.name}</span></div>)}
-                                    <p className="text-sm text-gray-500 mb-4">{channel.specialization}</p>
-                                    <div className="flex justify-between items-center">
-                                        <div className="flex items-center space-x-4 rtl:space-x-reverse text-sm text-gray-500"><div className="flex items-center"><BookOpenIcon className="w-4 h-4 me-1"/> {channel.posts.length}</div></div>
-                                        <button onClick={() => handleChannelClick(channel)} className={`px-4 py-2 rounded-md text-sm font-semibold bg-primary-500 hover:bg-primary-600 text-white`}>{s.openChannel}</button>
-                                    </div>
-                                </div>
+                <div className="flex-1">
+                    {selectedProfessorId ? (
+                        <div>
+                            <button onClick={() => setSelectedProfessorId(null)} className="flex items-center gap-2 mb-4 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">
+                                <ArrowLeftIcon className="w-4 h-4" />
+                                {s.back}
+                            </button>
+                             <h2 className="text-xl font-bold mb-4">{s.channelsBy.replace('{profName}', professorMap.get(selectedProfessorId)?.name || '')}</h2>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                               {selectedProfessorChannels.map(channel => {
+                                    const professor = professorMap.get(channel.professorId);
+                                    return(
+                                        <div key={channel.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-transform hover:scale-105">
+                                            <div className="p-6">
+                                                <h3 className="text-xl font-bold text-primary-600 dark:text-primary-400 mb-2">{channel.name}</h3>
+                                                {professor && (<div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-4"><img src={professor.avatar} alt={professor.name} className="w-6 h-6 rounded-full me-2"/><span>{professor.name}</span></div>)}
+                                                <p className="text-sm text-gray-500 mb-4">{channel.specialization}</p>
+                                                <div className="flex justify-between items-center">
+                                                    <div className="flex items-center space-x-4 rtl:space-x-reverse text-sm text-gray-500"><div className="flex items-center"><BookOpenIcon className="w-4 h-4 me-1"/> {channel.posts.length}</div></div>
+                                                    <button onClick={() => handleChannelClick(channel)} className={`px-4 py-2 rounded-md text-sm font-semibold bg-primary-500 hover:bg-primary-600 text-white`}>{s.openChannel}</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )
+                                })}
                             </div>
-                        )
-                    })}
+                             {selectedProfessorChannels.length === 0 && <p className="text-center text-gray-500 mt-8">This professor has no channels.</p>}
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {filteredProfessors.map(prof => {
+                                const profChannelsCount = channels.filter(c => c.professorId === prof.id).length;
+                                return (
+                                    <div key={prof.id} onClick={() => setSelectedProfessorId(prof.id)} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex items-center gap-4 cursor-pointer transition-all hover:shadow-lg hover:border-primary-500 border-2 border-transparent">
+                                        <img src={prof.avatar} alt={prof.name} className="w-16 h-16 rounded-full object-cover" />
+                                        <div className="flex-1">
+                                            <h3 className="font-bold text-lg">{prof.name}</h3>
+                                            <p className="text-sm text-gray-500">{prof.college}</p>
+                                        </div>
+                                        <div className="text-center">
+                                            <p className="font-bold text-2xl text-primary-600 dark:text-primary-400">{profChannelsCount}</p>
+                                            <p className="text-xs text-gray-500">{s.channels}</p>
+                                        </div>
+                                    </div>
+                                )
+                            })}
+                            {filteredProfessors.length === 0 && exploreUniversity && exploreCollege && (
+                                <p className="text-center text-gray-500 mt-8">{s.noProfessorsFound}</p>
+                            )}
+                        </div>
+                    )}
                 </div>
-                {filteredExploreChannels.length === 0 && exploreUniversity && exploreCollege && (<p className="text-center text-gray-500 mt-8">No channels found for the selected university and college.</p>)}
             </div>
         );
         if (activeTab === 'my-channels') {
