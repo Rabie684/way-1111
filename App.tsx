@@ -1,5 +1,6 @@
 
 
+
 import React, { useState, useEffect } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import Login from './components/Login';
@@ -7,6 +8,7 @@ import ProfessorDashboard from './components/ProfessorDashboard';
 import StudentDashboard from './components/StudentDashboard';
 import WelcomeToast from './components/WelcomeToast';
 import InstallPWAModal from './components/InstallPWAModal';
+import HalEye from './components/HalEye';
 import { UserRole } from './types';
 import { getLang } from './constants';
 
@@ -53,6 +55,7 @@ const AppContent: React.FC = () => {
 
     return (
         <div className="bg-gray-200 dark:bg-black text-gray-900 dark:text-gray-100 min-h-screen font-sans">
+            <HalEye />
             {user && <WelcomeToast message={`${getLang(language).welcomeBack} ${user.name}!`} show={showWelcome} />}
             {installPrompt && <InstallPWAModal installPrompt={installPrompt} onClose={() => setInstallPrompt(null)} />}
             {user ? (
