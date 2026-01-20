@@ -179,10 +179,35 @@ const StudentDashboard: React.FC = () => {
         if (activeTab === 'my-channels') {
             if (selectedChannel) return <ChannelView channel={selectedChannel} user={user} onBack={handleBackFromChannel} onStartDirectMessage={() => {}} />;
             return (
-                <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 p-4">
-                    <BookOpenIcon className="w-16 h-16 mb-4" />
-                    <h2 className="text-xl font-semibold">Select one of your channels</h2>
-                    <p>Or browse available channels to subscribe.</p>
+                 <div className="p-4 sm:p-8 h-full flex flex-col overflow-y-auto">
+                    <h1 className="text-2xl sm:text-3xl font-bold mb-6 flex-shrink-0">{s.myChannels}</h1>
+                    <div className="flex-1">
+                        {mySubscribedChannels.length > 0 ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {mySubscribedChannels.map(channel => {
+                                    const professor = professorMap.get(channel.professorId);
+                                    return(
+                                        <div key={channel.id} onClick={() => handleChannelClick(channel)} className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-transform hover:scale-105 cursor-pointer">
+                                            <div className="p-6">
+                                                <h3 className="text-xl font-bold text-primary-600 dark:text-primary-400 mb-2">{channel.name}</h3>
+                                                {professor && (<div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-4"><img src={professor.avatar} alt={professor.name} className="w-6 h-6 rounded-full me-2"/><span>{professor.name}</span></div>)}
+                                                <p className="text-sm text-gray-500 mb-4">{channel.specialization}</p>
+                                                <div className="flex justify-between items-center text-sm text-gray-500">
+                                                    <div className="flex items-center"><BookOpenIcon className="w-4 h-4 me-1"/> {channel.posts.length} {s.posts}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        ) : (
+                             <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 p-4">
+                                <BookOpenIcon className="w-16 h-16 mb-4" />
+                                <h2 className="text-xl font-semibold">{s.noSubscribedChannels}</h2>
+                                <p>{s.noSubscribedChannelsHint}</p>
+                            </div>
+                        )}
+                    </div>
                 </div>
             );
         }

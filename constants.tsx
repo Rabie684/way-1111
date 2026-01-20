@@ -229,6 +229,8 @@ export const STRINGS = {
         channelsBy: 'قنوات الأستاذ {profName}',
         channels: 'قنوات',
         noProfessorsFound: 'لم يتم العثور على أساتذة في الجامعة والكلية المحددة.',
+        noSubscribedChannels: "أنت غير مشترك في أي قناة بعد",
+        noSubscribedChannelsHint: "استخدم قسم 'استكشاف' للعثور على القنوات والانضمام إليها.",
     },
     en: {
         appName: 'Your Digital University Way',
@@ -324,6 +326,8 @@ export const STRINGS = {
         channelsBy: 'Channels by {profName}',
         channels: 'Channels',
         noProfessorsFound: 'No professors found for the selected university and college.',
+        noSubscribedChannels: "You are not subscribed to any channels yet",
+        noSubscribedChannelsHint: "Use the 'Explore' tab to find and join channels.",
     },
     fr: {
         appName: 'Votre Université Numérique Way',
@@ -419,6 +423,8 @@ export const STRINGS = {
         channelsBy: 'Chaînes par {profName}',
         channels: 'Chaînes',
         noProfessorsFound: 'Aucun professeur trouvé pour l\'université et la faculté sélectionnées.',
+        noSubscribedChannels: "Vous n'êtes abonné à aucune chaîne pour le moment",
+        noSubscribedChannelsHint: "Utilisez l'onglet 'Explorer' pour trouver et rejoindre des chaînes.",
     }
 };
 
