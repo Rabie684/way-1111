@@ -1,6 +1,7 @@
 
 
-import React, { useState, useRef, useEffect } from 'react';
+
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { getLang } from '../constants';
 import { Channel, User } from '../types';
@@ -14,8 +15,9 @@ import { BookOpenIcon, BotIcon, PlusCircleIcon, StarIcon, MenuIcon, XIcon, SunIc
 
 const ProfessorDashboard: React.FC = () => {
     const { user, channels, language, s, logout, theme, toggleTheme, setLanguage, notifications, markNotificationsAsRead } = useApp();
-    const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
     const [activeTab, setActiveTab] = useState<'channel' | 'ai' | 'direct-messages'>('channel');
+    const [selectedChannelId, setSelectedChannelId] = useState<string | null>(null);
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isSidebarOpen, setSidebarOpen] = useState(false);
     
@@ -31,6 +33,44 @@ const ProfessorDashboard: React.FC = () => {
 
     const professorChannels = channels.filter(ch => ch.professorId === user?.id);
     const totalStars = professorChannels.reduce((acc, ch) => acc + ch.subscribers * 5, 0);
+    
+    const selectedChannel = useMemo(() => {
+        if (!selectedChannelId) return null;
+        return channels.find(c => c.id === selectedChannelId) || null;
+    }, [selectedChannelId, channels]);
+
+    useEffect(() => {
+        const handleHashChange = () => {
+            const hash = window.location.hash;
+            if (hash.startsWith('#/channel/')) {
+                const channelId = hash.substring('#/channel/'.length);
+                setActiveTab('channel');
+                setSelectedChannelId(channelId);
+            } else if (hash === '#/ai') {
+                setActiveTab('ai');
+                setSelectedChannelId(null);
+            } else if (hash === '#/direct-messages') {
+                setActiveTab('direct-messages');
+                setSelectedChannelId(null);
+            } else {
+                setActiveTab('channel');
+                setSelectedChannelId(professorChannels.length > 0 ? professorChannels[0].id : null);
+            }
+        };
+
+        window.addEventListener('hashchange', handleHashChange);
+        handleHashChange(); // Initial load
+
+        if (!window.location.hash && professorChannels.length > 0) {
+            window.location.hash = `#/channel/${professorChannels[0].id}`;
+        } else if (!window.location.hash) {
+             window.location.hash = '#/';
+        }
+
+
+        return () => window.removeEventListener('hashchange', handleHashChange);
+    }, [channels]);
+
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -53,26 +93,22 @@ const ProfessorDashboard: React.FC = () => {
     }
 
     const handleSelectChannel = (channel: Channel) => {
-        setActiveTab('channel');
-        setSelectedChannel(channel);
+        window.location.hash = `#/channel/${channel.id}`;
         setSidebarOpen(false);
     };
 
     const handleSelectTab = (tab: 'channel' | 'ai' | 'direct-messages') => {
-        if (tab !== 'channel') {
-            setSelectedChannel(null);
-        }
-        setActiveTab(tab);
+        window.location.hash = `#/${tab === 'channel' && professorChannels.length > 0 ? `channel/${professorChannels[0].id}` : tab}`;
         setSidebarOpen(false);
     }
     
     const handleBackFromChannel = () => {
-        setSelectedChannel(null);
+       window.history.back();
     }
 
     const handleStartDirectMessage = (targetUser: User) => {
-        setActiveTab('direct-messages');
         setDmTargetUser(targetUser);
+        window.location.hash = '#/direct-messages';
         setSidebarOpen(false);
     }
 
@@ -102,7 +138,7 @@ const ProfessorDashboard: React.FC = () => {
             </div>
             <nav className="flex-1 overflow-y-auto p-2">
                 {professorChannels.map(channel => (
-                    <a key={channel.id} href="#" onClick={(e) => { e.preventDefault(); handleSelectChannel(channel); }} className={`block px-4 py-2 md:py-3 my-1 rounded-md text-sm font-medium ${selectedChannel?.id === channel.id ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
+                    <a key={channel.id} href={`#/channel/${channel.id}`} onClick={(e) => { e.preventDefault(); handleSelectChannel(channel); }} className={`block px-4 py-2 md:py-3 my-1 rounded-md text-sm font-medium ${selectedChannel?.id === channel.id ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
                         {channel.name}
                     </a>
                 ))}

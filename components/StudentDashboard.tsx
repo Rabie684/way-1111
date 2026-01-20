@@ -1,5 +1,6 @@
 
 
+
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { getLang, MOCK_ALL_USERS, UNIVERSITIES, COLLEGES } from '../constants';
@@ -14,10 +15,11 @@ import { BookOpenIcon, UserIcon, CompassIcon, MenuIcon, XIcon, BotIcon, SunIcon,
 
 const StudentDashboard: React.FC = () => {
     const { user, channels, sections, language, s, logout, theme, toggleTheme, setLanguage, notifications, markNotificationsAsRead } = useApp();
-    const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
     const [activeTab, setActiveTab] = useState<'my-channels' | 'explore' | 'ai' | 'direct-messages'>('explore');
+    const [selectedChannelId, setSelectedChannelId] = useState<string | null>(null);
+    const [selectedProfessorId, setSelectedProfessorId] = useState<string | null>(null);
+
     const [isSidebarOpen, setSidebarOpen] = useState(false);
-    
     const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
     const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
     const [settingsOpen, setSettingsOpen] = useState(false);
@@ -28,9 +30,56 @@ const StudentDashboard: React.FC = () => {
 
     const [exploreUniversity, setExploreUniversity] = useState('');
     const [exploreCollege, setExploreCollege] = useState('');
-    const [selectedProfessorId, setSelectedProfessorId] = useState<string | null>(null);
 
     const professorMap = useMemo(() => new Map(MOCK_ALL_USERS.filter(u => u.role === UserRole.Professor).map(p => [p.id, p])), []);
+    
+    const selectedChannel = useMemo(() => {
+        if (!selectedChannelId) return null;
+        return channels.find(c => c.id === selectedChannelId) || null;
+    }, [selectedChannelId, channels]);
+
+    useEffect(() => {
+        const handleHashChange = () => {
+            const hash = window.location.hash;
+            if (hash.startsWith('#/channel/')) {
+                const channelId = hash.substring('#/channel/'.length);
+                setActiveTab('my-channels');
+                setSelectedChannelId(channelId);
+            } else if (hash.startsWith('#/explore/')) {
+                const profId = hash.substring('#/explore/'.length);
+                setActiveTab('explore');
+                setSelectedProfessorId(profId);
+                setSelectedChannelId(null);
+            } else if (hash === '#/explore') {
+                setActiveTab('explore');
+                setSelectedChannelId(null);
+                setSelectedProfessorId(null);
+            } else if (hash === '#/ai') {
+                setActiveTab('ai');
+                setSelectedChannelId(null);
+            } else if (hash === '#/direct-messages') {
+                setActiveTab('direct-messages');
+                setSelectedChannelId(null);
+            } else if (hash === '#/my-channels') {
+                setActiveTab('my-channels');
+                setSelectedChannelId(null);
+            } else {
+                setActiveTab('explore');
+                setSelectedChannelId(null);
+                setSelectedProfessorId(null);
+            }
+        };
+
+        window.addEventListener('hashchange', handleHashChange);
+        handleHashChange(); // Initial load
+
+        if (!window.location.hash) {
+            window.location.hash = '#/explore';
+        }
+
+        return () => window.removeEventListener('hashchange', handleHashChange);
+    }, []);
+
 
     const filteredProfessors = useMemo(() => {
         if (!exploreUniversity || !exploreCollege) return [];
@@ -79,18 +128,18 @@ const StudentDashboard: React.FC = () => {
     }
 
     const handleChannelClick = (channel: Channel) => {
-        setActiveTab('my-channels');
-        setSelectedChannel(channel);
+        window.location.hash = `#/channel/${channel.id}`;
         setSidebarOpen(false);
     };
     
     const handleSelectTab = (tab: 'my-channels' | 'explore' | 'ai' | 'direct-messages') => {
-        if (tab !== 'my-channels') setSelectedChannel(null);
-        setActiveTab(tab);
+        window.location.hash = `#/${tab}`;
         setSidebarOpen(false);
     }
     
-    const handleBackFromChannel = () => setSelectedChannel(null);
+    const handleBackFromChannel = () => {
+        window.history.back();
+    }
 
     if (!user) return null;
 
@@ -125,7 +174,7 @@ const StudentDashboard: React.FC = () => {
                 <div className="flex-1">
                     {selectedProfessorId ? (
                         <div>
-                            <button onClick={() => setSelectedProfessorId(null)} className="flex items-center gap-2 mb-4 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">
+                            <button onClick={() => window.location.hash = '#/explore'} className="flex items-center gap-2 mb-4 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">
                                 <ArrowLeftIcon className="w-4 h-4" />
                                 {s.back}
                             </button>
@@ -155,7 +204,7 @@ const StudentDashboard: React.FC = () => {
                             {filteredProfessors.map(prof => {
                                 const profChannelsCount = channels.filter(c => c.professorId === prof.id).length;
                                 return (
-                                    <div key={prof.id} onClick={() => setSelectedProfessorId(prof.id)} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex items-center gap-4 cursor-pointer transition-all hover:shadow-lg hover:border-primary-500 border-2 border-transparent">
+                                    <div key={prof.id} onClick={() => window.location.hash = `#/explore/${prof.id}`} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex items-center gap-4 cursor-pointer transition-all hover:shadow-lg hover:border-primary-500 border-2 border-transparent">
                                         <img src={prof.avatar} alt={prof.name} className="w-16 h-16 rounded-full object-cover" />
                                         <div className="flex-1">
                                             <h3 className="font-bold text-lg">{prof.name}</h3>
@@ -218,7 +267,7 @@ const StudentDashboard: React.FC = () => {
         <div className="flex-1 flex flex-col overflow-y-auto">
             <nav className="flex-1 overflow-y-auto p-2">
                 {mySubscribedChannels.map(channel => (
-                    <a key={channel.id} href="#" onClick={(e) => { e.preventDefault(); handleChannelClick(channel); }} className={`block px-4 py-2 md:py-3 my-1 rounded-md text-sm font-medium ${selectedChannel?.id === channel.id ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}>{channel.name}</a>
+                    <a key={channel.id} href={`#/channel/${channel.id}`} onClick={(e) => { e.preventDefault(); handleChannelClick(channel); }} className={`block px-4 py-2 md:py-3 my-1 rounded-md text-sm font-medium ${selectedChannel?.id === channel.id ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}>{channel.name}</a>
                 ))}
                  {mySubscribedChannels.length === 0 && (
                     <p className="p-4 text-center text-gray-500 text-sm">You are not subscribed to any channels yet. Use the Explore tab to find and join channels.</p>
