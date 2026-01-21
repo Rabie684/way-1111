@@ -1,5 +1,3 @@
-
-
 import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { Channel, User, UserRole, PostType, Section, Post } from '../types';
 import ChatWindow from './ChatWindow';
@@ -26,7 +24,7 @@ const PostIcon: React.FC<{ type: PostType }> = ({ type }) => {
 };
 
 const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack, onStartDirectMessage }) => {
-    const { s, addPostToChannel, sections, clearChannelChat, deletePostFromChannel, offlinePostIds, downloadPostForOffline, removePostFromOffline, blockUserFromChannel } = useApp();
+    const { s, addPostToChannel, sections, clearChannelChat, deletePostFromChannel, offlinePostIds, downloadPostForOffline, removePostFromOffline, blockUserFromChannel, isUploadingPost, isGoogleDriveConnected } = useApp();
     const [activeTab, setActiveTab] = useState<'posts' | 'chat'>('posts');
     const [showSubscriptionModal, setShowSubscriptionModal] = useState<Section | null>(null);
     const [showClearConfirm, setShowClearConfirm] = useState(false);
@@ -53,10 +51,13 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack, onStar
         const file = e.target.files?.[0];
         if (file) {
             addPostToChannel(channel.id, file);
+            // Reset file input to allow uploading the same file again
+            if(fileInputRef.current) fileInputRef.current.value = "";
         }
     };
 
     const handleUploadClick = () => {
+        if (isUploadingPost) return;
         fileInputRef.current?.click();
     };
 
@@ -232,10 +233,27 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack, onStar
                         {activeTab === 'posts' && (
                             <div className="space-y-4">
                                 {isOwner && (
-                                    <div onClick={handleUploadClick} className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-dashed border-gray-300 dark:border-gray-600 text-center cursor-pointer hover:border-primary-500 dark:hover:border-primary-500 transition">
-                                        <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
-                                        <UploadCloudIcon className="w-12 h-12 mx-auto text-gray-400"/>
-                                        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Drag & drop files or <span className="font-medium text-primary-600 hover:text-primary-500">{s.upload}</span></p>
+                                    <div 
+                                        onClick={handleUploadClick} 
+                                        className={`bg-white dark:bg-gray-800 p-4 rounded-lg border border-dashed border-gray-300 dark:border-gray-600 text-center transition ${isUploadingPost ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:border-primary-500 dark:hover:border-primary-500'}`}
+                                    >
+                                        <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" disabled={isUploadingPost}/>
+                                        {isUploadingPost ? (
+                                            <>
+                                                <LoaderIcon className="w-12 h-12 mx-auto text-primary-500"/>
+                                                <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Uploading to Google Drive...</p>
+                                            </>
+                                        ) : isGoogleDriveConnected ? (
+                                            <>
+                                                <UploadCloudIcon className="w-12 h-12 mx-auto text-gray-400"/>
+                                                <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Drag & drop files or <span className="font-medium text-primary-600 hover:text-primary-500">{s.upload}</span></p>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <UploadCloudIcon className="w-12 h-12 mx-auto text-gray-400"/>
+                                                 <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Please connect Google Drive in settings to upload files.</p>
+                                            </>
+                                        )}
                                     </div>
                                 )}
                                 {channel.posts.map(post => {
@@ -253,7 +271,7 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack, onStar
                                             <div className="flex items-center flex-shrink-0 gap-2">
                                                 {post.type === PostType.Image && <img src={post.url} alt={post.title} className="w-24 h-12 object-cover rounded hidden sm:block"/>}
                                                 
-                                                {isDownloading ? (
+                                                {post.url.includes('google.com') ? null : isDownloading ? (
                                                     <div className="p-2 text-gray-400" title="Downloading...">
                                                         <LoaderIcon className="w-5 h-5" />
                                                     </div>
