@@ -21,6 +21,7 @@ export enum PostType {
     PDF = 'pdf',
     Image = 'image',
     Video = 'video',
+    Link = 'link',
 }
 
 export interface Post {
@@ -65,7 +66,7 @@ export interface DirectMessage extends Message {
 }
 
 export interface Notification {
-    id: string;
+    id:string;
     text: string;
     timestamp: string;
     read: boolean;

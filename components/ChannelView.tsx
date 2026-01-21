@@ -4,8 +4,10 @@ import ChatWindow from './ChatWindow';
 import SubscriptionModal from './SubscriptionModal';
 import { getLang, MOCK_ALL_USERS } from '../constants';
 import { useApp } from '../context/AppContext';
-import { ArrowLeftIcon, FileTextIcon, ImageIcon, VideoIcon, UploadCloudIcon, TrashIcon, DownloadIcon, CheckCircleIcon, LoaderIcon, UsersIcon, MessageSquareIcon, SlashIcon, ChevronDownIcon } from './icons/IconComponents';
+import { ArrowLeftIcon, FileTextIcon, ImageIcon, VideoIcon, UploadCloudIcon, TrashIcon, DownloadIcon, CheckCircleIcon, LoaderIcon, UsersIcon, MessageSquareIcon, SlashIcon, ChevronDownIcon, LinkIcon } from './icons/IconComponents';
 import ConfirmationModal from './ConfirmationModal';
+import AddPostModal from './AddPostModal';
+
 
 interface ChannelViewProps {
     channel: Channel;
@@ -19,12 +21,13 @@ const PostIcon: React.FC<{ type: PostType }> = ({ type }) => {
         case PostType.PDF: return <FileTextIcon className="w-6 h-6 text-red-500" />;
         case PostType.Image: return <ImageIcon className="w-6 h-6 text-blue-500" />;
         case PostType.Video: return <VideoIcon className="w-6 h-6 text-green-500" />;
+        case PostType.Link: return <LinkIcon className="w-6 h-6 text-purple-500" />;
         default: return null;
     }
 };
 
 const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack, onStartDirectMessage }) => {
-    const { s, addPostToChannel, sections, clearChannelChat, deletePostFromChannel, offlinePostIds, downloadPostForOffline, removePostFromOffline, blockUserFromChannel, isUploadingPost, isGoogleDriveConnected } = useApp();
+    const { s, sections, addPostFromFile, isUploadingPost, clearChannelChat, deletePostFromChannel, offlinePostIds, downloadPostForOffline, removePostFromOffline, blockUserFromChannel } = useApp();
     const [activeTab, setActiveTab] = useState<'posts' | 'chat'>('posts');
     const [showSubscriptionModal, setShowSubscriptionModal] = useState<Section | null>(null);
     const [showClearConfirm, setShowClearConfirm] = useState(false);
@@ -33,9 +36,11 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack, onStar
     const [subscribersDropdownOpen, setSubscribersDropdownOpen] = useState(false);
     const [userToBlock, setUserToBlock] = useState<User | null>(null);
     const [expandedStudentId, setExpandedStudentId] = useState<string | null>(null);
+    const [isAddPostModalOpen, setIsAddPostModalOpen] = useState(false);
+    const [largeFileInfo, setLargeFileInfo] = useState<{name: string, size: number} | null>(null);
 
-    const fileInputRef = useRef<HTMLInputElement>(null);
     const subscribersDropdownRef = useRef<HTMLDivElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
      useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -46,19 +51,24 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack, onStar
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
-
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            addPostToChannel(channel.id, file);
-            // Reset file input to allow uploading the same file again
-            if(fileInputRef.current) fileInputRef.current.value = "";
-        }
-    };
-
+    
     const handleUploadClick = () => {
         if (isUploadingPost) return;
         fileInputRef.current?.click();
+    };
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const MAX_DIRECT_UPLOAD_MB = 30;
+            if (file.size < MAX_DIRECT_UPLOAD_MB * 1024 * 1024) {
+                await addPostFromFile(channel.id, file);
+            } else {
+                setLargeFileInfo({ name: file.name, size: file.size });
+                setIsAddPostModalOpen(true);
+            }
+            if (fileInputRef.current) fileInputRef.current.value = "";
+        }
     };
 
     const handleConfirmClearChat = () => {
@@ -192,6 +202,14 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack, onStar
     return (
         <div className="flex flex-col h-full">
             {header}
+            
+            {isAddPostModalOpen && largeFileInfo && (
+                <AddPostModal
+                    channelId={channel.id}
+                    onClose={() => setIsAddPostModalOpen(false)}
+                    largeFileInfo={largeFileInfo}
+                />
+            )}
 
             {!isSubscribedToChannel && user.role === UserRole.Student ? (
                 <div className="flex-1 overflow-y-auto p-4 sm:p-6 text-center bg-gray-50 dark:bg-gray-900">
@@ -235,23 +253,19 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack, onStar
                                 {isOwner && (
                                     <div 
                                         onClick={handleUploadClick} 
-                                        className={`bg-white dark:bg-gray-800 p-4 rounded-lg border border-dashed border-gray-300 dark:border-gray-600 text-center transition ${isUploadingPost ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:border-primary-500 dark:hover:border-primary-500'}`}
+                                        className={`bg-white dark:bg-gray-800 p-4 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 text-center transition ${isUploadingPost ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:border-primary-500 dark:hover:border-primary-500'}`}
                                     >
-                                        <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" disabled={isUploadingPost}/>
+                                        <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" disabled={isUploadingPost} accept="image/*,video/*,application/pdf" />
                                         {isUploadingPost ? (
                                             <>
                                                 <LoaderIcon className="w-12 h-12 mx-auto text-primary-500"/>
-                                                <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Uploading to Google Drive...</p>
-                                            </>
-                                        ) : isGoogleDriveConnected ? (
-                                            <>
-                                                <UploadCloudIcon className="w-12 h-12 mx-auto text-gray-400"/>
-                                                <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Drag & drop files or <span className="font-medium text-primary-600 hover:text-primary-500">{s.upload}</span></p>
+                                                <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">جاري الرفع...</p>
                                             </>
                                         ) : (
                                             <>
                                                 <UploadCloudIcon className="w-12 h-12 mx-auto text-gray-400"/>
-                                                 <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Please connect Google Drive in settings to upload files.</p>
+                                                <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">اسحب وأفلت الملفات أو <span className="font-medium text-primary-600 hover:text-primary-500">{s.upload}</span></p>
+                                                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">الرفع المباشر حتى 30 ميغابايت. للملفات الأكبر، سيُطلب منك رابط.</p>
                                             </>
                                         )}
                                     </div>
@@ -271,7 +285,7 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack, onStar
                                             <div className="flex items-center flex-shrink-0 gap-2">
                                                 {post.type === PostType.Image && <img src={post.url} alt={post.title} className="w-24 h-12 object-cover rounded hidden sm:block"/>}
                                                 
-                                                {post.url.includes('google.com') ? null : isDownloading ? (
+                                                {post.type === PostType.Link || post.url.includes('google.com') ? null : isDownloading ? (
                                                     <div className="p-2 text-gray-400" title="Downloading...">
                                                         <LoaderIcon className="w-5 h-5" />
                                                     </div>

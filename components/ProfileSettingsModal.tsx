@@ -8,17 +8,8 @@ interface ProfileSettingsModalProps {
     onClose: () => void;
 }
 
-const GoogleDriveIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-        <path fill="#4285F4" d="M12.38 5.85L18.1 15.48L14.24 22L8.52 12.37L12.38 5.85Z" />
-        <path fill="#34A853" d="M5.15 8.8L8.52 12.37L4.66 19L1.29 12.43L5.15 8.8Z" />
-        <path fill="#FFC107" d="M19.71 8.8L16.34 12.37L18.1 15.48L21.47 8.91L19.71 8.8Z" />
-    </svg>
-);
-
-
 const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ onClose }) => {
-    const { user, updateUser, language, logout, isGoogleDriveConnected, connectGoogleDrive, disconnectGoogleDrive } = useApp();
+    const { user, updateUser, language, logout } = useApp();
     const s = getLang(language);
 
     const [name, setName] = useState(user?.name || '');
@@ -77,7 +68,6 @@ const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ onClose }) 
                             <input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500" />
                         </div>
                         {user?.role === UserRole.Professor && (
-                            <>
                             <div>
                                 <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{s.phoneNumber}</label>
                                 <input
@@ -90,22 +80,6 @@ const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ onClose }) 
                                 />
                                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{s.phoneNumberDescription}</p>
                             </div>
-                            <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Google Drive Integration</label>
-                                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Connect your Google Drive account to upload and share files directly in your channels.</p>
-                                {isGoogleDriveConnected ? (
-                                    <div className="mt-3 flex items-center justify-between">
-                                        <span className="text-sm text-green-600 dark:text-green-400">Connected to Google Drive</span>
-                                        <button type="button" onClick={disconnectGoogleDrive} className="text-sm font-medium text-red-600 hover:text-red-500">Disconnect</button>
-                                    </div>
-                                ) : (
-                                    <button type="button" onClick={connectGoogleDrive} className="mt-3 w-full flex justify-center items-center gap-2 py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                                        <GoogleDriveIcon />
-                                        Connect with Google Drive
-                                    </button>
-                                )}
-                            </div>
-                            </>
                         )}
                     </div>
                     <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 flex justify-between items-center">

@@ -14,14 +14,6 @@ import {
 } from '../constants';
 import { askJarvis } from '../services/geminiService';
 
-// Extend the window object with Google API types
-declare global {
-    interface Window {
-        gapi: any;
-        google: any;
-    }
-}
-
 type Theme = 'light' | 'dark';
 type Language = 'ar' | 'en' | 'fr';
 
@@ -49,10 +41,7 @@ interface AppContextType {
     notifications: Notification[];
     jarvisHistory: JarvisMessage[];
     offlinePostIds: Set<string>;
-    isGoogleDriveConnected: boolean;
     isUploadingPost: boolean;
-    connectGoogleDrive: () => void;
-    disconnectGoogleDrive: () => void;
     login: (details: LoginDetails) => Promise<void>;
     register: (details: LoginDetails) => Promise<void>;
     logout: () => Promise<void>;
@@ -62,7 +51,8 @@ interface AppContextType {
     subscribeToSection: (sectionId: string) => Promise<void>;
     sendMessage: (channelId: string, text: string) => Promise<void>;
     sendDirectMessage: (receiverId: string, text: string) => Promise<void>;
-    addPostToChannel: (channelId: string, file: File) => Promise<void>;
+    addPostFromFile: (channelId: string, file: File) => Promise<void>;
+    addPostFromLink: (channelId: string, title: string, url: string) => Promise<void>;
     sendJarvisMessage: (text: string) => Promise<void>;
     updateUser: (updatedUser: Partial<User>) => Promise<void>;
     markNotificationsAsRead: () => Promise<void>;
@@ -86,72 +76,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const [notifications, setNotifications] = useState<Notification[]>(MOCK_NOTIFICATIONS);
     const [jarvisHistory, setJarvisHistory] = useState<JarvisMessage[]>([]);
     const [offlinePostIds, setOfflinePostIds] = useState<Set<string>>(new Set());
-    
-    const [googleAccessToken, setGoogleAccessToken] = useState<string | null>(() => localStorage.getItem('google_access_token'));
-    const [isGapiReady, setIsGapiReady] = useState(false);
     const [isUploadingPost, setIsUploadingPost] = useState(false);
     
-    const isGoogleDriveConnected = !!googleAccessToken;
     const s = getLang(language);
-
-    useEffect(() => {
-        const initializeGapiClient = () => {
-            if (window.gapi) {
-                window.gapi.load('client', async () => {
-                    await window.gapi.client.init({
-                        apiKey: process.env.GOOGLE_API_KEY,
-                        clientId: process.env.GOOGLE_CLIENT_ID,
-                        discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"],
-                    });
-                    setIsGapiReady(true);
-                    if (googleAccessToken) {
-                        window.gapi.client.setToken({ access_token: googleAccessToken });
-                    }
-                });
-            } else {
-                setTimeout(initializeGapiClient, 100);
-            }
-        };
-        initializeGapiClient();
-    }, [googleAccessToken]);
-
-    const connectGoogleDrive = () => {
-        if (!window.google || !process.env.GOOGLE_CLIENT_ID) {
-            alert("Google API script not loaded yet. Please try again.");
-            return;
-        }
-
-        const tokenClient = window.google.accounts.oauth2.initTokenClient({
-            client_id: process.env.GOOGLE_CLIENT_ID,
-            scope: 'https://www.googleapis.com/auth/drive.file',
-            callback: (tokenResponse: any) => {
-                if (tokenResponse.error) {
-                    console.error('Google Auth Error:', tokenResponse.error);
-                    alert('Failed to connect to Google Drive.');
-                    return;
-                }
-                const token = tokenResponse.access_token;
-                setGoogleAccessToken(token);
-                localStorage.setItem('google_access_token', token);
-                window.gapi.client.setToken({ access_token: token });
-                alert("Successfully connected to Google Drive!");
-            },
-        });
-        tokenClient.requestAccessToken();
-    };
-
-    const disconnectGoogleDrive = () => {
-        if (googleAccessToken && window.google) {
-            window.google.accounts.oauth2.revoke(googleAccessToken, () => {
-                console.log('Token revoked.');
-            });
-        }
-        setGoogleAccessToken(null);
-        localStorage.removeItem('google_access_token');
-        if (window.gapi && window.gapi.client) {
-            window.gapi.client.setToken(null);
-        }
-    };
     
     const login = async (details: LoginDetails) => {
         const { email, isDemo, role } = details;
@@ -184,7 +111,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     };
 
     const logout = async () => {
-        if(isGoogleDriveConnected) disconnectGoogleDrive();
         setUser(null);
     };
 
@@ -252,72 +178,67 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setDirectMessages(prev => [...prev, newMessage]);
     };
     
-    const addPostToChannel = async (channelId: string, file: File) => {
-        if (!isGoogleDriveConnected || !isGapiReady) {
-            alert("Please connect to Google Drive from your profile settings first.");
-            return;
-        }
-
+    const addPostFromFile = async (channelId: string, file: File) => {
         setIsUploadingPost(true);
         try {
-            const metadata = { name: file.name, mimeType: file.type };
-            const form = new FormData();
-            form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-            form.append('file', file);
+            await new Promise<void>((resolve, reject) => {
+                const fileReader = new FileReader();
+                fileReader.readAsDataURL(file);
 
-            const uploadResponse = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-                method: 'POST',
-                headers: new Headers({ 'Authorization': `Bearer ${googleAccessToken}` }),
-                body: form,
+                fileReader.onload = () => {
+                    const fileUrl = fileReader.result as string;
+                    const mimeType = file.type;
+                    let type: PostType;
+
+                    if (mimeType.startsWith('image/')) {
+                        type = PostType.Image;
+                    } else if (mimeType.startsWith('video/')) {
+                        type = PostType.Video;
+                    } else if (mimeType === 'application/pdf') {
+                        type = PostType.PDF;
+                    } else {
+                        // This check should ideally be done before calling the function
+                        return reject(new Error('Unsupported file type'));
+                    }
+
+                    const newPost: Post = {
+                        id: `post-${Date.now()}`,
+                        type,
+                        title: file.name,
+                        url: fileUrl,
+                        createdAt: new Date().toISOString().split('T')[0],
+                    };
+
+                    setChannels(prevChannels => prevChannels.map(ch => 
+                        ch.id === channelId ? { ...ch, posts: [newPost, ...ch.posts] } : ch
+                    ));
+                    resolve();
+                };
+
+                fileReader.onerror = (error) => {
+                    console.error("Error reading file:", error);
+                    alert("فشل في قراءة الملف.");
+                    reject(error);
+                };
             });
-            
-            const uploadedFile = await uploadResponse.json();
-
-            if (!uploadResponse.ok || uploadedFile.error) {
-                 const error = uploadedFile.error || { message: `HTTP error! status: ${uploadResponse.status}` };
-                if (error.code === 401) {
-                    alert("Your Google connection has expired. Please disconnect and reconnect your account from the settings.");
-                    disconnectGoogleDrive();
-                }
-                throw new Error(error.message);
-            }
-
-            const fileId = uploadedFile.id;
-
-            await window.gapi.client.drive.permissions.create({
-                fileId: fileId,
-                resource: { role: 'reader', type: 'anyone' }
-            });
-
-            const fileInfoResponse = await window.gapi.client.drive.files.get({
-                fileId: fileId,
-                fields: 'webViewLink'
-            });
-
-            const webViewLink = fileInfoResponse.result.webViewLink;
-            const fileType = file.type.split('/')[0];
-            let type: PostType;
-            if (fileType === 'image') type = PostType.Image;
-            else if (fileType === 'video') type = PostType.Video;
-            else type = PostType.PDF;
-
-            const newPost: Post = {
-                id: `post-${Date.now()}`,
-                type,
-                title: file.name,
-                url: webViewLink,
-                createdAt: new Date().toISOString().split('T')[0],
-            };
-
-            setChannels(prevChannels => prevChannels.map(ch => 
-                ch.id === channelId ? { ...ch, posts: [newPost, ...ch.posts] } : ch
-            ));
-        } catch (error: any) {
-            console.error("Error uploading to Google Drive:", error);
-            alert(`Failed to upload file to Google Drive: ${error.message}`);
+        } catch (error) {
+            console.error("Upload failed:", error);
         } finally {
             setIsUploadingPost(false);
         }
+    };
+
+    const addPostFromLink = async (channelId: string, title: string, url: string) => {
+        const newPost: Post = {
+            id: `post-${Date.now()}`,
+            type: PostType.Link,
+            title: title,
+            url: url,
+            createdAt: new Date().toISOString().split('T')[0],
+        };
+        setChannels(prev => prev.map(ch => 
+            ch.id === channelId ? { ...ch, posts: [newPost, ...ch.posts] } : ch
+        ));
     };
 
     const sendJarvisMessage = async (text: string) => {
@@ -375,6 +296,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const downloadPostForOffline = async (post: Post) => {
         try {
             const cache = await caches.open(OFFLINE_CACHE_NAME);
+            // Fetch supports data URLs in modern browsers
             const response = await fetch(post.url);
             if (!response.ok) {
                 throw new Error(`Failed to fetch: ${response.statusText}`);
@@ -412,10 +334,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         notifications,
         jarvisHistory,
         offlinePostIds,
-        isGoogleDriveConnected,
         isUploadingPost,
-        connectGoogleDrive,
-        disconnectGoogleDrive,
         login,
         register,
         logout,
@@ -425,7 +344,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         subscribeToSection,
         sendMessage,
         sendDirectMessage,
-        addPostToChannel,
+        addPostFromFile,
+        addPostFromLink,
         sendJarvisMessage,
         updateUser,
         markNotificationsAsRead,
