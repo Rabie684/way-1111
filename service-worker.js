@@ -1,4 +1,4 @@
-const CACHE_NAME = 'your-digital-university-way-cache-v1';
+const CACHE_NAME = 'your-digital-university-way-cache-v2';
 const OFFLINE_FILES_CACHE_NAME = 'offline-files-cache-v1';
 const urlsToCache = [
   '/',

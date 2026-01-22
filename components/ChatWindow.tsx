@@ -1,10 +1,10 @@
 
 
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { getLang, MOCK_ALL_USERS } from '../constants';
+import { getLang } from '../constants';
 import { SendIcon } from './icons/IconComponents';
-// FIX: Import Gender enum
 import { UserRole, User, Gender } from '../types';
 
 interface ChatWindowProps {
@@ -12,7 +12,7 @@ interface ChatWindowProps {
 }
 
 const ChatWindow: React.FC<ChatWindowProps> = ({ channelId }) => {
-    const { user, channelMessages, sendMessage, language } = useApp();
+    const { user, channelMessages, sendMessage, language, allUsers } = useApp();
     const s = getLang(language);
     const [newMessage, setNewMessage] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -36,17 +36,16 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ channelId }) => {
     const messages = channelMessages.filter(m => m.channelId === channelId);
 
     const getUserById = (id: string): User => {
-        const foundUser = MOCK_ALL_USERS.find(u => u.id === id);
+        const foundUser = allUsers.find(u => u.id === id);
         if (foundUser) {
             return foundUser;
         }
-        // This is a fallback, but with our updated constants, it shouldn't be hit for mock data.
+        // Fallback for cases where a user might not be in the list
         return { 
             id: id, 
             name: `Unknown User`, 
             avatar: `https://picsum.photos/seed/${id}/200`, 
             role: UserRole.Student,
-            // FIX: Added missing gender property to satisfy the User type.
             gender: Gender.Male, 
             college: '', 
             university: '', 

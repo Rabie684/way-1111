@@ -1,6 +1,8 @@
 
 
 
+
+
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { getLang } from '../constants';
@@ -38,6 +40,8 @@ const ProfessorDashboard: React.FC = () => {
         if (!selectedChannelId) return null;
         return channels.find(c => c.id === selectedChannelId) || null;
     }, [selectedChannelId, channels]);
+    
+    const asjpLink = `https://www.asjp.cerist.dz/revues/?lng=${language}`;
 
     useEffect(() => {
         const handleHashChange = () => {
@@ -220,7 +224,7 @@ const ProfessorDashboard: React.FC = () => {
                         <button onClick={() => handleSelectTab('channel')} className={`w-full flex items-center p-2 rounded-md text-sm font-medium ${activeTab === 'channel' ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700'}`}><BookOpenIcon className="w-5 h-5 me-3" /><span>{s.myChannels}</span></button>
                         <button onClick={() => handleSelectTab('direct-messages')} className={`w-full flex items-center p-2 rounded-md text-sm font-medium ${activeTab === 'direct-messages' ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700'}`}><MessageSquareIcon className="w-5 h-5 me-3" /><span>{s.directMessages}</span></button>
                         <button onClick={() => handleSelectTab('ai')} className={`w-full flex items-center p-2 rounded-md text-sm font-medium ${activeTab === 'ai' ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700'}`}><BotIcon className="w-5 h-5 me-3" /><span>{s.jarvisAi}</span></button>
-                        <a href="https://www.asjp.cerist.dz/ar/" target="_blank" rel="noopener noreferrer" className="w-full flex items-center p-2 rounded-md text-sm font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <a href={asjpLink} target="_blank" rel="noopener noreferrer" className="w-full flex items-center p-2 rounded-md text-sm font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700">
                             <ExternalLinkIcon className="w-5 h-5 me-3" /><span>{s.asjpPlatform}</span>
                         </a>
                          <button onClick={() => { setIsQrModalOpen(true); setSidebarOpen(false); }} className="w-full flex items-center p-2 rounded-md text-sm font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700">
@@ -242,7 +246,7 @@ const ProfessorDashboard: React.FC = () => {
                         <button onClick={() => handleSelectTab('channel')} className={`px-3 py-2 rounded-md text-sm font-medium ${activeTab === 'channel' ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>{s.myChannels}</button>
                         <button onClick={() => handleSelectTab('direct-messages')} className={`px-3 py-2 rounded-md text-sm font-medium ${activeTab === 'direct-messages' ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>{s.directMessages}</button>
                         <button onClick={() => handleSelectTab('ai')} className={`px-3 py-2 rounded-md text-sm font-medium ${activeTab === 'ai' ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>{s.jarvisAi}</button>
-                        <a href="https://www.asjp.cerist.dz/ar/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <a href={asjpLink} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700">
                             <ExternalLinkIcon className="w-4 h-4"/>
                             <span>{s.asjpPlatform}</span>
                         </a>

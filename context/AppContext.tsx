@@ -32,6 +32,7 @@ const OFFLINE_CACHE_NAME = 'offline-files-cache-v1';
 
 interface AppContextType {
     user: User | null;
+    allUsers: User[];
     theme: Theme;
     language: Language;
     s: typeof STRINGS.en;
@@ -68,6 +69,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
+    const [allUsers, setAllUsers] = useState<User[]>(MOCK_ALL_USERS);
     const [theme, setTheme] = useState<Theme>('light');
     const [language, setLanguage] = useState<Language>('ar');
     const [channels, setChannels] = useState<Channel[]>(MOCK_CHANNELS);
@@ -88,7 +90,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             return;
         }
 
-        const foundUser = MOCK_ALL_USERS.find(u => u.email.toLowerCase() === email.toLowerCase());
+        const foundUser = allUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
         if (foundUser) {
             setUser(foundUser);
         } else {
@@ -109,6 +111,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             avatar: 'https://picsum.photos/seed/newuser/200',
             subscribedSections: [],
         };
+        setAllUsers(prev => [...prev, newUser]);
         setUser(newUser);
     };
 
@@ -260,7 +263,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     
     const updateUser = async (updatedUser: Partial<User>) => {
         if (!user) return;
-        setUser(prev => prev ? { ...prev, ...updatedUser } : null);
+        const updatedUserObject = { ...user, ...updatedUser };
+        setUser(updatedUserObject);
+        setAllUsers(prevUsers => prevUsers.map(u => u.id === user.id ? updatedUserObject : u));
     };
 
     const markNotificationsAsRead = async () => {
@@ -330,6 +335,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     const value = {
         user,
+        allUsers,
         theme,
         language,
         s,

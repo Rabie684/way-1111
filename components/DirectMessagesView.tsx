@@ -1,7 +1,7 @@
 
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { MOCK_ALL_USERS } from '../constants';
 import { UserIcon, SendIcon, ArrowLeftIcon } from './icons/IconComponents';
 import { User } from '../types';
 
@@ -11,7 +11,7 @@ interface DirectMessagesViewProps {
 }
 
 const DirectMessagesView: React.FC<DirectMessagesViewProps> = ({ initialUser, onViewLoad }) => {
-    const { s, user, directMessages, sendDirectMessage } = useApp();
+    const { s, user, allUsers, directMessages, sendDirectMessage } = useApp();
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [newMessage, setNewMessage] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -35,7 +35,7 @@ const DirectMessagesView: React.FC<DirectMessagesViewProps> = ({ initialUser, on
     
     if (!user) return null;
 
-    const otherUsers = MOCK_ALL_USERS.filter(u => u.id !== user?.id);
+    const otherUsers = allUsers.filter(u => u.id !== user?.id);
 
     const handleSendMessage = (e: React.FormEvent) => {
         e.preventDefault();

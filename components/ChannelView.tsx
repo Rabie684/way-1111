@@ -2,7 +2,7 @@ import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { Channel, User, UserRole, PostType, Section, Post } from '../types';
 import ChatWindow from './ChatWindow';
 import SubscriptionModal from './SubscriptionModal';
-import { getLang, MOCK_ALL_USERS } from '../constants';
+import { getLang } from '../constants';
 import { useApp } from '../context/AppContext';
 import { ArrowLeftIcon, FileTextIcon, ImageIcon, VideoIcon, UploadCloudIcon, TrashIcon, DownloadIcon, CheckCircleIcon, LoaderIcon, UsersIcon, MessageSquareIcon, SlashIcon, ChevronDownIcon, LinkIcon } from './icons/IconComponents';
 import ConfirmationModal from './ConfirmationModal';
@@ -27,7 +27,7 @@ const PostIcon: React.FC<{ type: PostType }> = ({ type }) => {
 };
 
 const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack, onStartDirectMessage }) => {
-    const { s, sections, addPostFromFile, isUploadingPost, clearChannelChat, deletePostFromChannel, offlinePostIds, downloadPostForOffline, removePostFromOffline, blockUserFromChannel } = useApp();
+    const { s, allUsers, sections, addPostFromFile, isUploadingPost, clearChannelChat, deletePostFromChannel, offlinePostIds, downloadPostForOffline, removePostFromOffline, blockUserFromChannel } = useApp();
     const [activeTab, setActiveTab] = useState<'posts' | 'chat'>('posts');
     const [showSubscriptionModal, setShowSubscriptionModal] = useState<Section | null>(null);
     const [showClearConfirm, setShowClearConfirm] = useState(false);
@@ -108,19 +108,19 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack, onStar
     const channelSectionIds = useMemo(() => new Set(channelSections.map(s => s.id)), [channelSections]);
 
     const subscribedStudents = useMemo(() => 
-        MOCK_ALL_USERS.filter(u => 
+        allUsers.filter(u => 
             u.role === UserRole.Student &&
             u.subscribedSections.some(secId => channelSectionIds.has(secId)) &&
             !channel.blockedUsers.includes(u.id)
         ), 
-    [channelSectionIds, channel.blockedUsers]);
+    [allUsers, channelSectionIds, channel.blockedUsers]);
 
     const isOwner = user.role === UserRole.Professor && user.id === channel.professorId;
     
     const isSubscribedToChannel = isOwner || 
         (channelSections.some(sec => user.subscribedSections.includes(sec.id)) && !channel.blockedUsers.includes(user.id));
     
-    const professor = MOCK_ALL_USERS.find(u => u.id === channel.professorId);
+    const professor = allUsers.find(u => u.id === channel.professorId);
 
 
     const header = (

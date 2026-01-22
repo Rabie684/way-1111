@@ -2,9 +2,11 @@
 
 
 
+
+
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { getLang, MOCK_ALL_USERS, UNIVERSITIES, COLLEGES } from '../constants';
+import { getLang, UNIVERSITIES, COLLEGES } from '../constants';
 import { Channel, User, UserRole } from '../types';
 import ChannelView from './ChannelView';
 import JarvisAI from './JarvisAI';
@@ -15,7 +17,7 @@ import AutocompleteInput from './AutocompleteInput';
 import { BookOpenIcon, UserIcon, CompassIcon, MenuIcon, XIcon, BotIcon, SunIcon, MoonIcon, BellIcon, LogOutIcon, MessageSquareIcon, ExternalLinkIcon, CogIcon, QrCodeIcon, ArrowLeftIcon } from './icons/IconComponents';
 
 const StudentDashboard: React.FC = () => {
-    const { user, channels, sections, language, s, logout, theme, toggleTheme, setLanguage, notifications, markNotificationsAsRead } = useApp();
+    const { user, allUsers, channels, sections, language, s, logout, theme, toggleTheme, setLanguage, notifications, markNotificationsAsRead } = useApp();
     const [activeTab, setActiveTab] = useState<'my-channels' | 'explore' | 'ai' | 'direct-messages'>('explore');
     const [selectedChannelId, setSelectedChannelId] = useState<string | null>(null);
     const [selectedProfessorId, setSelectedProfessorId] = useState<string | null>(null);
@@ -32,12 +34,14 @@ const StudentDashboard: React.FC = () => {
     const [exploreUniversity, setExploreUniversity] = useState('');
     const [exploreCollege, setExploreCollege] = useState('');
 
-    const professorMap = useMemo(() => new Map(MOCK_ALL_USERS.filter(u => u.role === UserRole.Professor).map(p => [p.id, p])), []);
+    const professorMap = useMemo(() => new Map(allUsers.filter(u => u.role === UserRole.Professor).map(p => [p.id, p])), [allUsers]);
     
     const selectedChannel = useMemo(() => {
         if (!selectedChannelId) return null;
         return channels.find(c => c.id === selectedChannelId) || null;
     }, [selectedChannelId, channels]);
+    
+    const asjpLink = `https://www.asjp.cerist.dz/revues/?lng=${language}`;
 
     useEffect(() => {
         const handleHashChange = () => {
@@ -85,13 +89,13 @@ const StudentDashboard: React.FC = () => {
     const filteredProfessors = useMemo(() => {
         if (!exploreUniversity || !exploreCollege) return [];
         const professorsWithChannels = new Set(channels.map(c => c.professorId));
-        return MOCK_ALL_USERS.filter(u => 
+        return allUsers.filter(u => 
             u.role === UserRole.Professor &&
             professorsWithChannels.has(u.id) &&
             u.university === exploreUniversity &&
             u.college === exploreCollege
         );
-    }, [channels, exploreUniversity, exploreCollege]);
+    }, [channels, exploreUniversity, exploreCollege, allUsers]);
 
     const selectedProfessorChannels = useMemo(() => {
         if (!selectedProfessorId) return [];
@@ -347,7 +351,7 @@ const StudentDashboard: React.FC = () => {
                         <button onClick={() => handleSelectTab('explore')} className={`w-full flex items-center p-2 rounded-md text-sm font-medium ${activeTab === 'explore' ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700'}`}><CompassIcon className="w-5 h-5 me-3"/> <span>{s.explore}</span></button>
                         <button onClick={() => handleSelectTab('direct-messages')} className={`w-full flex items-center p-2 rounded-md text-sm font-medium ${activeTab === 'direct-messages' ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700'}`}><MessageSquareIcon className="w-5 h-5 me-3" /><span>{s.directMessages}</span></button>
                         <button onClick={() => handleSelectTab('ai')} className={`w-full flex items-center p-2 rounded-md text-sm font-medium ${activeTab === 'ai' ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700'}`}><BotIcon className="w-5 h-5 me-3"/> <span>{s.jarvisAi}</span></button>
-                        <a href="https://www.asjp.cerist.dz/ar/" target="_blank" rel="noopener noreferrer" className="w-full flex items-center p-2 rounded-md text-sm font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <a href={asjpLink} target="_blank" rel="noopener noreferrer" className="w-full flex items-center p-2 rounded-md text-sm font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700">
                             <ExternalLinkIcon className="w-5 h-5 me-3" /><span>{s.asjpPlatform}</span>
                         </a>
                         <button onClick={() => { setIsQrModalOpen(true); setSidebarOpen(false); }} className="w-full flex items-center p-2 rounded-md text-sm font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700">
@@ -370,7 +374,7 @@ const StudentDashboard: React.FC = () => {
                         <button onClick={() => handleSelectTab('explore')} className={`px-3 py-2 rounded-md text-sm font-medium ${activeTab === 'explore' ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>{s.explore}</button>
                         <button onClick={() => handleSelectTab('direct-messages')} className={`px-3 py-2 rounded-md text-sm font-medium ${activeTab === 'direct-messages' ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>{s.directMessages}</button>
                         <button onClick={() => handleSelectTab('ai')} className={`px-3 py-2 rounded-md text-sm font-medium ${activeTab === 'ai' ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300' : 'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>{s.jarvisAi}</button>
-                        <a href="https://www.asjp.cerist.dz/ar/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <a href={asjpLink} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700">
                             <ExternalLinkIcon className="w-4 h-4"/>
                             <span>{s.asjpPlatform}</span>
                         </a>
