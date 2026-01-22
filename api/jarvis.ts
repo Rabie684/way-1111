@@ -37,7 +37,7 @@ export default async function handler(req: any, res: any) {
         if (resultText) {
             return res.status(200).json({ text: resultText });
         } else {
-            return res.status(500).json({ error: "Could not get a valid response from the AI." });
+            return res.status(200).json({ text: "لم أفهم سؤالك. هل يمكنك إعادة صياغته؟" });
         }
     } catch (error) {
         console.error("Error calling Gemini API from serverless function:", error);

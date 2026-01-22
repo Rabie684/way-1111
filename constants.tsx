@@ -38,7 +38,6 @@ export const MOCK_PROFESSOR: User = {
     college: 'كلية العلوم الاقتصادية والتجارية وعلوم التسيير',
     avatar: 'https://picsum.photos/seed/prof2/200',
     subscribedSections: [],
-    phoneNumber: '+213123456789',
 };
 
 export const MOCK_STUDENT: User = {

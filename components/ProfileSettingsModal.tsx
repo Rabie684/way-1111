@@ -35,7 +35,7 @@ const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ onClose }) 
             avatar: preview || avatar,
         };
 
-        if (user?.role === UserRole.Professor) {
+        if (user?.role === UserRole.Student) {
              updatePayload.phoneNumber = phoneNumber;
         }
         
@@ -67,7 +67,7 @@ const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ onClose }) 
                             <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{s.fullName}</label>
                             <input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500" />
                         </div>
-                        {user?.role === UserRole.Professor && (
+                        {user?.role === UserRole.Student && (
                             <div>
                                 <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{s.phoneNumber}</label>
                                 <input
