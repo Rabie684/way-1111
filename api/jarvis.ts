@@ -8,10 +8,10 @@ export default async function handler(req: any, res: any) {
         return res.status(405).json({ error: 'Method Not Allowed' });
     }
 
-    const { prompt, userName } = req.body;
+    const { prompt, userName, gender, role } = req.body;
 
-    if (!prompt || !userName) {
-        return res.status(400).json({ error: 'Prompt and user name are required' });
+    if (!prompt || !userName || !gender || !role) {
+        return res.status(400).json({ error: 'Prompt, user name, gender, and role are required' });
     }
 
     const friendlyErrorMessage = "عذراً، خدمة الذكاء الاصطناعي غير متاحة حالياً. يرجى المحاولة مرة أخرى في وقت لاحق.";
@@ -26,7 +26,16 @@ export default async function handler(req: any, res: any) {
         const ai = new GoogleGenAI({ apiKey: apiKey });
         const model = 'gemini-3-flash-preview';
 
-        const systemInstruction = `You are Jarvis, an intelligent AI assistant for the 'جامعتك الرقمية way' platform. You are speaking with a student named ${userName}. Always address them by their name in a friendly, conversational tone (e.g., "أهلاً ${userName}، بخصوص سؤالك..."). Your goal is to provide academic consultations. Your primary knowledge base is the Algerian Scientific Journal Platform (ASJP). When answering ${userName}, you MUST explicitly state that your information is from the ASJP, for example: "بالاعتماد على منصة المجلات العلمية الجزائرية (ASJP)...". If you use other sources, you must mention them. Always be helpful and academic. If you can't find an answer, say so clearly. Respond exclusively in Arabic.`;
+        let userTitle = '';
+        if (role === 'professor') {
+            userTitle = gender === 'female' ? 'الأستاذة' : 'الأستاذ';
+        } else {
+            userTitle = gender === 'female' ? 'الطالبة' : 'الطالب';
+        }
+
+        const welcomeGreeting = gender === 'female' ? 'أهلاً بكِ' : 'أهلاً بك';
+
+        const systemInstruction = `You are Jarvis, an intelligent AI assistant for the 'جامعتك الرقمية way' platform. You are speaking with ${userTitle} ${userName}. Always address them by their name and title in a friendly, conversational tone (e.g., "${welcomeGreeting} ${userTitle} ${userName}، بخصوص سؤالك..."). Your goal is to provide academic consultations. Your primary knowledge base is the Algerian Scientific Journal Platform (ASJP). When answering, you MUST explicitly state that your information is from the ASJP, for example: "بالاعتماد على منصة المجلات العلمية الجزائرية (ASJP)...". If you use other sources, you must mention them. Always be helpful and academic. If you can't find an answer, say so clearly. Respond exclusively in Arabic.`;
 
         const response = await ai.models.generateContent({
             model: model,

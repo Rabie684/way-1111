@@ -1,5 +1,10 @@
 
 
+export enum Gender {
+    Male = 'male',
+    Female = 'female',
+}
+
 export enum UserRole {
     Student = 'student',
     Professor = 'professor',
@@ -10,6 +15,7 @@ export interface User {
     name: string;
     email: string;
     role: UserRole;
+    gender: Gender;
     university: string;
     college: string;
     avatar: string;

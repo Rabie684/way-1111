@@ -1,6 +1,5 @@
 
 
-
 import React, { useState, useEffect } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import Login from './components/Login';
@@ -9,11 +8,11 @@ import StudentDashboard from './components/StudentDashboard';
 import WelcomeToast from './components/WelcomeToast';
 import InstallPWAModal from './components/InstallPWAModal';
 import HalEye from './components/HalEye';
-import { UserRole } from './types';
+import { UserRole, Gender } from './types';
 import { getLang } from './constants';
 
 const AppContent: React.FC = () => {
-    const { user, theme, language } = useApp();
+    const { user, theme, language, s } = useApp();
     const [showWelcome, setShowWelcome] = useState(false);
     const [installPrompt, setInstallPrompt] = useState<Event | null>(null);
 
@@ -53,10 +52,27 @@ const AppContent: React.FC = () => {
         };
       }, []);
 
+    const getWelcomeMessage = (): string => {
+        if (!user) return '';
+        if (language !== 'ar') {
+            return `${s.welcomeBack} ${user.name}!`;
+        }
+    
+        const welcome = user.gender === Gender.Female ? s.welcomeGreetingFemale : s.welcomeGreetingMale;
+        let title = '';
+        if (user.role === UserRole.Professor) {
+            title = user.gender === Gender.Female ? s.professorFemaleTitle : s.professorMaleTitle;
+        } else {
+            title = user.gender === Gender.Female ? s.studentFemaleTitle : s.studentMaleTitle;
+        }
+        return `${welcome} ${title} ${user.name}!`;
+    };
+
+
     return (
         <div className="bg-gray-200 dark:bg-black text-gray-900 dark:text-gray-100 min-h-screen font-sans">
             <HalEye />
-            {user && <WelcomeToast message={`${getLang(language).welcomeBack} ${user.name}!`} show={showWelcome} />}
+            {user && <WelcomeToast message={getWelcomeMessage()} show={showWelcome} />}
             {installPrompt && <InstallPWAModal installPrompt={installPrompt} onClose={() => setInstallPrompt(null)} />}
             {user ? (
                 <main>

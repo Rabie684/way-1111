@@ -1,9 +1,11 @@
 
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { getLang, MOCK_ALL_USERS } from '../constants';
 import { SendIcon } from './icons/IconComponents';
-import { UserRole, User } from '../types';
+// FIX: Import Gender enum
+import { UserRole, User, Gender } from '../types';
 
 interface ChatWindowProps {
     channelId: string;
@@ -43,7 +45,9 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ channelId }) => {
             id: id, 
             name: `Unknown User`, 
             avatar: `https://picsum.photos/seed/${id}/200`, 
-            role: UserRole.Student, 
+            role: UserRole.Student,
+            // FIX: Added missing gender property to satisfy the User type.
+            gender: Gender.Male, 
             college: '', 
             university: '', 
             email: '', 

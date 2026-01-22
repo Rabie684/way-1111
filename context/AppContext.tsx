@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { User, UserRole, Channel, ChannelMessage, Notification, JarvisMessage, DirectMessage, Post, PostType, Section } from '../types';
+import { User, UserRole, Channel, ChannelMessage, Notification, JarvisMessage, DirectMessage, Post, PostType, Section, Gender } from '../types';
 import { 
     getLang, 
     STRINGS, 
@@ -22,6 +22,7 @@ interface LoginDetails {
     password?: string;
     role?: UserRole;
     name?: string;
+    gender?: Gender;
     university?: string;
     college?: string;
     isDemo?: boolean;
@@ -102,6 +103,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             name: details.name!,
             email: details.email,
             role: details.role!,
+            gender: details.gender!,
             university: details.university || '',
             college: details.college || '',
             avatar: 'https://picsum.photos/seed/newuser/200',
@@ -246,7 +248,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         const userMessage: JarvisMessage = { id: `jarvis-${Date.now()}`, sender: 'user', text };
         setJarvisHistory(prev => [...prev, userMessage]);
         
-        const jarvisResponse = await askJarvis(text, user.name);
+        const jarvisResponse = await askJarvis(text, user.name, user.gender, user.role);
 
         const jarvisMessage: JarvisMessage = { 
             id: `jarvis-${Date.now()+1}`, 

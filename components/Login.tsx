@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { UserRole } from '../types';
+import { UserRole, Gender } from '../types';
 import { UNIVERSITIES, COLLEGES, getLang } from '../constants';
 import TermsOfServiceModal from './TermsOfServiceModal';
 import AutocompleteInput from './AutocompleteInput';
@@ -14,6 +14,7 @@ const Login: React.FC = () => {
     const [password, setPassword] = useState('');
     const [name, setName] = useState('');
     const [role, setRole] = useState<UserRole>(UserRole.Student);
+    const [gender, setGender] = useState<Gender>(Gender.Male);
     const [university, setUniversity] = useState('');
     const [college, setCollege] = useState('');
     const [loading, setLoading] = useState(false);
@@ -38,6 +39,7 @@ const Login: React.FC = () => {
             password,
             role,
             name,
+            gender,
             university,
             college,
         });
@@ -82,39 +84,51 @@ const Login: React.FC = () => {
 
                     {isRegister && (
                         <>
-                            <div>
-                                <label htmlFor="role" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{s.role}</label>
-                                <select id="role" value={role} onChange={(e) => setRole(e.target.value as UserRole)} className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500">
-                                    <option value={UserRole.Student}>{s.student}</option>
-                                    <option value={UserRole.Professor}>{s.professor}</option>
-                                </select>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label htmlFor="role" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{s.role}</label>
+                                    <select id="role" value={role} onChange={(e) => setRole(e.target.value as UserRole)} className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500">
+                                        <option value={UserRole.Student}>{s.student}</option>
+                                        <option value={UserRole.Professor}>{s.professor}</option>
+                                    </select>
+                                </div>
+                                 <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{s.gender}</label>
+                                    <div className="mt-1 flex justify-around p-1 bg-gray-100 dark:bg-gray-700 rounded-md">
+                                        <label className={`cursor-pointer px-4 py-1 text-sm rounded-md transition-colors ${gender === Gender.Male ? 'bg-primary-500 text-white' : ''}`}>
+                                            <input type="radio" name="gender" value={Gender.Male} checked={gender === Gender.Male} onChange={() => setGender(Gender.Male)} className="sr-only" />
+                                            {s.male}
+                                        </label>
+                                        <label className={`cursor-pointer px-4 py-1 text-sm rounded-md transition-colors ${gender === Gender.Female ? 'bg-primary-500 text-white' : ''}`}>
+                                            <input type="radio" name="gender" value={Gender.Female} checked={gender === Gender.Female} onChange={() => setGender(Gender.Female)} className="sr-only" />
+                                            {s.female}
+                                        </label>
+                                    </div>
+                                </div>
                             </div>
-                            {role === UserRole.Professor && (
-                                <>
-                                    <div>
-                                        <label htmlFor="university" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{s.university}</label>
-                                        <AutocompleteInput
-                                            id="university"
-                                            options={UNIVERSITIES}
-                                            value={university}
-                                            onValueChange={setUniversity}
-                                            placeholder={s.select}
-                                            required
-                                        />
-                                    </div>
-                                    <div>
-                                        <label htmlFor="college" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{s.college}</label>
-                                        <AutocompleteInput
-                                            id="college"
-                                            options={COLLEGES}
-                                            value={college}
-                                            onValueChange={setCollege}
-                                            placeholder={s.select}
-                                            required
-                                        />
-                                    </div>
-                                </>
-                            )}
+                           
+                            <div>
+                                <label htmlFor="university" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{s.university}</label>
+                                <AutocompleteInput
+                                    id="university"
+                                    options={UNIVERSITIES}
+                                    value={university}
+                                    onValueChange={setUniversity}
+                                    placeholder={s.select}
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label htmlFor="college" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{s.college}</label>
+                                <AutocompleteInput
+                                    id="college"
+                                    options={COLLEGES}
+                                    value={college}
+                                    onValueChange={setCollege}
+                                    placeholder={s.select}
+                                    required
+                                />
+                            </div>
                         </>
                     )}
 
