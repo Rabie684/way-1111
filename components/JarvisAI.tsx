@@ -47,22 +47,6 @@ const JarvisAI: React.FC = () => {
                             {msg.sender === 'jarvis' && <BotIcon className="w-6 h-6 text-primary-500 flex-shrink-0 mt-1" />}
                             <div className={`max-w-xl p-3 rounded-lg whitespace-pre-wrap ${msg.sender === 'user' ? 'bg-primary-500 text-white rounded-br-none' : 'bg-gray-100 dark:bg-gray-700 rounded-bl-none'}`}>
                                 {msg.text}
-                                {msg.groundingChunks && msg.groundingChunks.length > 0 && (
-                                    <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-600">
-                                        <h4 className="text-xs font-bold mb-2 text-gray-500 dark:text-gray-400">المصادر:</h4>
-                                        <ol className="list-decimal list-inside space-y-1 text-sm">
-                                            {msg.groundingChunks.map((chunk, index) => (
-                                                chunk.web?.uri && (
-                                                    <li key={index}>
-                                                        <a href={chunk.web.uri} target="_blank" rel="noopener noreferrer" className="text-primary-600 dark:text-primary-400 hover:underline break-all">
-                                                            {chunk.web.title || chunk.web.uri}
-                                                        </a>
-                                                    </li>
-                                                )
-                                            ))}
-                                        </ol>
-                                    </div>
-                                )}
                             </div>
                         </div>
                     ))}

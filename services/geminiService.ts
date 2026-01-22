@@ -1,10 +1,7 @@
 
-
-
-
 const ACADEMIC_PLACEHOLDER_AR = "أهلاً بك. أنا جارفيس، مساعدك الذكي في منصة 'جامعتك الرقمية way'. حالياً، خدمة الذكاء الاصطناعي غير مفعلة. عند تفعيلها، سأقدم لك استشارات أكاديمية بالاعتماد على مصادر البحث الجزائرية.";
 
-export const askJarvis = async (prompt: string): Promise<{ text: string; groundingChunks?: any[] }> => {
+export const askJarvis = async (prompt: string): Promise<{ text: string }> => {
     try {
         // The frontend now calls our own secure API route instead of Google directly.
         const response = await fetch('/api/jarvis', {
