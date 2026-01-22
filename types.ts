@@ -76,4 +76,5 @@ export interface JarvisMessage {
     id: string;
     sender: 'user' | 'jarvis';
     text: string;
+    groundingChunks?: { web: { uri: string; title: string; } }[];
 }
