@@ -14,10 +14,12 @@ export default async function handler(req: any, res: any) {
         return res.status(400).json({ error: 'Prompt and user name are required' });
     }
 
+    const friendlyErrorMessage = "عذراً، خدمة الذكاء الاصطناعي غير متاحة حالياً. يرجى المحاولة مرة أخرى في وقت لاحق.";
     const apiKey = process.env.API_KEY;
 
     if (!apiKey) {
-        return res.status(500).json({ error: 'API key is not configured on the server.' });
+        console.error('API key is not configured on the server.');
+        return res.status(503).json({ error: friendlyErrorMessage });
     }
 
     try {
@@ -36,13 +38,21 @@ export default async function handler(req: any, res: any) {
         });
 
         const resultText = response.text;
+        
         if (resultText) {
             return res.status(200).json({ text: resultText });
         } else {
-            return res.status(200).json({ text: "لم أفهم سؤالك. هل يمكنك إعادة صياغته؟" });
+            // Handle cases where the API returns a response but no text (e.g., safety blocked)
+            console.warn("Gemini API returned no text. Full response:", JSON.stringify(response, null, 2));
+            let feedback = "لم أتمكن من إنشاء رد لسؤالك. الرجاء محاولة طرح سؤال آخر.";
+             if (response.candidates?.[0]?.finishReason === 'SAFETY') {
+                feedback = "تم حظر الرد لأسباب تتعلق بالسلامة. الرجاء إعادة صياغة سؤالك.";
+            }
+            return res.status(200).json({ text: feedback });
         }
     } catch (error) {
         console.error("Error calling Gemini API from serverless function:", error);
-        return res.status(500).json({ error: "An error occurred while communicating with Jarvis." });
+        // For any failure (invalid key, billing issues, network, etc.), return the friendly message.
+        return res.status(503).json({ error: friendlyErrorMessage });
     }
 }

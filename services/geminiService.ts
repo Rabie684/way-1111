@@ -14,11 +14,8 @@ export const askJarvis = async (prompt: string, userName: string): Promise<{ tex
 
         if (!response.ok) {
             const errorData = await response.json();
-            // If the key is not set on Vercel, use the placeholder.
-            if (response.status === 500 && errorData.error.includes('API key is not configured')) {
-                return { text: ACADEMIC_PLACEHOLDER_AR };
-            }
-            throw new Error(errorData.error || `Request failed with status ${response.status}`);
+            // The backend now sends a friendly error message in the 'error' field for any API-related issue.
+            return { text: errorData.error || `Service unavailable (status: ${response.status})` };
         }
 
         const data = await response.json();
@@ -26,6 +23,6 @@ export const askJarvis = async (prompt: string, userName: string): Promise<{ tex
 
     } catch (error) {
         console.error("Error calling our Jarvis API route:", error);
-        return { text: `An error occurred while communicating with Jarvis: ${error instanceof Error ? error.message : String(error)}` };
+        return { text: "An error occurred while communicating with Jarvis. Please check your connection and try again." };
     }
 };
