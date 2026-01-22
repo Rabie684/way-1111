@@ -13,9 +13,15 @@ export const askJarvis = async (prompt: string, userName: string): Promise<{ tex
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
-            // The backend now sends a friendly error message in the 'error' field for any API-related issue.
-            return { text: errorData.error || `Service unavailable (status: ${response.status})` };
+            try {
+                const errorData = await response.json();
+                // The backend now sends a friendly error message in the 'error' field for any API-related issue.
+                return { text: errorData.error || `Service unavailable (status: ${response.status})` };
+            } catch (jsonError) {
+                 // The response was not JSON, maybe a Vercel function crash page (HTML) or plain text.
+                console.error("Could not parse error response from API as JSON:", jsonError);
+                return { text: `Service unavailable (status: ${response.status}). The server returned an unexpected response.` };
+            }
         }
 
         const data = await response.json();

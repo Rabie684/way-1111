@@ -51,7 +51,10 @@ export default async function handler(req: any, res: any) {
             return res.status(200).json({ text: feedback });
         }
     } catch (error) {
-        console.error("Error calling Gemini API from serverless function:", error);
+        console.error("--- Gemini API Call Failed ---");
+        console.error("Timestamp:", new Date().toISOString());
+        console.error("Error Details:", error);
+        console.error("--- End of Error Report ---");
         // For any failure (invalid key, billing issues, network, etc.), return the friendly message.
         return res.status(503).json({ error: friendlyErrorMessage });
     }
