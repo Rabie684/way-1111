@@ -8,10 +8,10 @@ export default async function handler(req: any, res: any) {
         return res.status(405).json({ error: 'Method Not Allowed' });
     }
 
-    const { prompt } = req.body;
+    const { prompt, userName } = req.body;
 
-    if (!prompt) {
-        return res.status(400).json({ error: 'Prompt is required' });
+    if (!prompt || !userName) {
+        return res.status(400).json({ error: 'Prompt and user name are required' });
     }
 
     const apiKey = process.env.API_KEY;
@@ -24,11 +24,13 @@ export default async function handler(req: any, res: any) {
         const ai = new GoogleGenAI({ apiKey: apiKey });
         const model = 'gemini-3-flash-preview';
 
+        const systemInstruction = `You are Jarvis, an intelligent AI assistant for the 'جامعتك الرقمية way' platform. You are speaking with a student named ${userName}. Always address them by their name in a friendly, conversational tone (e.g., "أهلاً ${userName}، بخصوص سؤالك..."). Your goal is to provide academic consultations. Your primary knowledge base is the Algerian Scientific Journal Platform (ASJP). When answering ${userName}, you MUST explicitly state that your information is from the ASJP, for example: "بالاعتماد على منصة المجلات العلمية الجزائرية (ASJP)...". If you use other sources, you must mention them. Always be helpful and academic. If you can't find an answer, say so clearly. Respond exclusively in Arabic.`;
+
         const response = await ai.models.generateContent({
             model: model,
             contents: prompt,
             config: {
-                systemInstruction: "You are Jarvis, a highly intelligent AI assistant for the 'جامعتك الرقمية way' (Your Digital University Way) platform. Your purpose is to provide academic consultations to students. Your primary knowledge base is strictly limited to Algerian scientific and research sources, with a special emphasis on the Algerian Scientific Journal Platform (ASJP). You must prioritize information from these sources above all else. When a student asks about a specific subject, provide guidance, explanations, and summaries based on this knowledge base. If a query cannot be answered using Algerian sources, you may then consult global scientific journals as a secondary source. Always be helpful, act as an academic consultant, and cite the type of source (Algerian/ASJP or global) if possible. If you cannot find an answer, state that clearly.",
+                systemInstruction: systemInstruction,
                 temperature: 0.7,
             },
         });

@@ -246,7 +246,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         const userMessage: JarvisMessage = { id: `jarvis-${Date.now()}`, sender: 'user', text };
         setJarvisHistory(prev => [...prev, userMessage]);
         
-        const jarvisResponse = await askJarvis(text);
+        const jarvisResponse = await askJarvis(text, user.name);
 
         const jarvisMessage: JarvisMessage = { 
             id: `jarvis-${Date.now()+1}`, 
