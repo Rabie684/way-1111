@@ -158,8 +158,11 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack, onStar
                                                     }}
                                                 >
                                                     <div className="flex items-center gap-2 overflow-hidden">
-                                                        <img src={student.avatar} alt={student.name} className="w-8 h-8 rounded-full object-cover" />
-                                                        <span className="text-sm font-medium truncate">{student.name}</span>
+                                                        <img src={student.avatar} alt={student.name} className="w-8 h-8 rounded-full object-cover flex-shrink-0" />
+                                                        <div className="overflow-hidden">
+                                                            <p className="text-sm font-medium truncate">{student.name}</p>
+                                                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{student.university}</p>
+                                                        </div>
                                                     </div>
                                                     <ChevronDownIcon className={`w-5 h-5 text-gray-400 transition-transform flex-shrink-0 ${expandedStudentId === student.id ? 'rotate-180' : ''}`} />
                                                 </div>

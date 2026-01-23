@@ -1,8 +1,6 @@
 // This is a Vercel Serverless Function that acts as a secure proxy.
-// Create this file at `api/jarvis.ts`
 import { GoogleGenAI } from "@google/genai";
 
-// This function will be deployed as an API endpoint: /api/jarvis
 export default async function handler(req: any, res: any) {
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method Not Allowed' });
@@ -11,20 +9,22 @@ export default async function handler(req: any, res: any) {
     const { prompt, userName, gender, role } = req.body;
 
     if (!prompt || !userName || !gender || !role) {
-        return res.status(400).json({ error: 'Prompt, user name, gender, and role are required' });
+        return res.status(400).json({ error: 'البيانات المطلوبة ناقصة (الاسم، الجنس، الدور، أو نص السؤال).' });
     }
 
-    const friendlyErrorMessage = "عذراً، خدمة الذكاء الاصطناعي غير متاحة حالياً. يرجى المحاولة مرة أخرى في وقت لاحق.";
-    const apiKey = process.env.API_KEY;
+    // Important: Trim any whitespace from the key that might come from Vercel env variables
+    const apiKey = process.env.API_KEY?.trim();
 
     if (!apiKey) {
-        console.error('API key is not configured on the server.');
-        return res.status(503).json({ error: friendlyErrorMessage });
+        console.error('SERVER_ERROR: API_KEY is missing in environment variables.');
+        return res.status(503).json({ 
+            error: "عذراً، مفتاح الربط الذكي غير مهيأ على الخادم. يرجى التأكد من إضافة API_KEY في إعدادات Vercel." 
+        });
     }
 
     try {
         const ai = new GoogleGenAI({ apiKey: apiKey });
-        const model = 'gemini-3-flash-preview';
+        const modelName = 'gemini-3-flash-preview';
 
         let userTitle = '';
         if (role === 'professor') {
@@ -38,11 +38,13 @@ export default async function handler(req: any, res: any) {
         const systemInstruction = `You are Jarvis, an intelligent AI assistant for the 'جامعتك الرقمية way' platform. You are speaking with ${userTitle} ${userName}. Always address them by their name and title in a friendly, conversational tone (e.g., "${welcomeGreeting} ${userTitle} ${userName}، بخصوص سؤالك..."). Your goal is to provide academic consultations. Your primary knowledge base is the Algerian Scientific Journal Platform (ASJP). When answering, you MUST explicitly state that your information is from the ASJP, for example: "بالاعتماد على منصة المجلات العلمية الجزائرية (ASJP)...". If you use other sources, you must mention them. Always be helpful and academic. If you can't find an answer, say so clearly. Respond exclusively in Arabic.`;
 
         const response = await ai.models.generateContent({
-            model: model,
+            model: modelName,
             contents: prompt,
             config: {
                 systemInstruction: systemInstruction,
                 temperature: 0.7,
+                topP: 0.95,
+                topK: 40,
             },
         });
 
@@ -51,20 +53,36 @@ export default async function handler(req: any, res: any) {
         if (resultText) {
             return res.status(200).json({ text: resultText });
         } else {
-            // Handle cases where the API returns a response but no text (e.g., safety blocked)
-            console.warn("Gemini API returned no text. Full response:", JSON.stringify(response, null, 2));
+            console.warn("AI_WARNING: Empty response text from Gemini.");
             let feedback = "لم أتمكن من إنشاء رد لسؤالك. الرجاء محاولة طرح سؤال آخر.";
-             if (response.candidates?.[0]?.finishReason === 'SAFETY') {
-                feedback = "تم حظر الرد لأسباب تتعلق بالسلامة. الرجاء إعادة صياغة سؤالك.";
+            if (response.candidates?.[0]?.finishReason === 'SAFETY') {
+                feedback = "تم حظر الرد لأسباب تتعلق بالسلامة الأكاديمية. الرجاء إعادة صياغة سؤالك.";
             }
             return res.status(200).json({ text: feedback });
         }
-    } catch (error) {
-        console.error("--- Gemini API Call Failed ---");
-        console.error("Timestamp:", new Date().toISOString());
-        console.error("Error Details:", error);
-        console.error("--- End of Error Report ---");
-        // For any failure (invalid key, billing issues, network, etc.), return the friendly message.
-        return res.status(503).json({ error: friendlyErrorMessage });
+    } catch (error: any) {
+        console.error("--- Gemini API Failure ---");
+        // The error from the SDK might contain a `response` object with status
+        const status = error?.response?.status;
+        console.error("Status Code:", status);
+        console.error("Message:", error?.message);
+        
+        // Handle Rate Limiting for Free Tier
+        if (status === 429) {
+            return res.status(429).json({ 
+                error: "تم تجاوز حد الطلبات للنسخة المجانية. يرجى الانتظار دقيقة واحدة والمحاولة مرة أخرى." 
+            });
+        }
+
+        // Handle invalid API Key (often returns 400 for bad format/permissions)
+        if (status === 400 || status === 401) {
+            return res.status(401).json({ 
+                error: "مفتاح API الخاص بـ Google AI Studio غير صالح أو منتهي الصلاحية." 
+            });
+        }
+
+        return res.status(500).json({ 
+            error: "حدث خطأ غير متوقع أثناء الاتصال بجارفيس. يرجى المحاولة لاحقاً." 
+        });
     }
 }
