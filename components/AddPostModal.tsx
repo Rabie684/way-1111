@@ -4,12 +4,12 @@ import { useApp } from '../context/AppContext';
 interface AddPostModalProps {
     channelId: string;
     onClose: () => void;
-    largeFileInfo: { name: string; size: number };
+    largeFileInfo: { name: string; size: number } | null;
 }
 
 const AddPostModal: React.FC<AddPostModalProps> = ({ channelId, onClose, largeFileInfo }) => {
     const { s, addPostFromLink } = useApp();
-    const [title, setTitle] = useState(largeFileInfo.name);
+    const [title, setTitle] = useState(largeFileInfo?.name || '');
     const [url, setUrl] = useState('');
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -26,24 +26,26 @@ const AddPostModal: React.FC<AddPostModalProps> = ({ channelId, onClose, largeFi
         }
     };
 
-    const formattedSize = (largeFileInfo.size / 1024 / 1024).toFixed(1);
+    const formattedSize = largeFileInfo ? (largeFileInfo.size / 1024 / 1024).toFixed(1) : '';
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center p-4">
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md">
                 <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-                    <h2 className="text-xl font-bold">إضافة منشور كرابط</h2>
+                    <h2 className="text-xl font-bold">{largeFileInfo ? s.largeFileTitle : s.postLinkTitle}</h2>
                 </div>
                 <form onSubmit={handleSubmit}>
                     <div className="p-6 space-y-4">
-                        <div className="p-3 bg-yellow-100 dark:bg-yellow-900/40 border-l-4 rtl:border-l-0 rtl:border-r-4 border-yellow-500 text-yellow-800 dark:text-yellow-200 rounded-md">
-                            <p className="font-bold">الملف كبير جدًا</p>
-                            <p className="text-sm">"{largeFileInfo.name}" ({formattedSize} MB) يتجاوز حد 30 ميغابايت للرفع المباشر.</p>
-                            <p className="text-sm mt-1">الرجاء رفع الملف إلى خدمة سحابية (مثل Google Drive) ولصق رابط المشاركة العام أدناه.</p>
-                        </div>
+                        {largeFileInfo && (
+                            <div className="p-3 bg-yellow-100 dark:bg-yellow-900/40 border-l-4 rtl:border-l-0 rtl:border-r-4 border-yellow-500 text-yellow-800 dark:text-yellow-200 rounded-md">
+                                <p className="font-bold">{s.largeFileWarningTitle}</p>
+                                <p className="text-sm">{s.largeFileWarningMessage1.replace('{fileName}', largeFileInfo.name).replace('{fileSize}', formattedSize)}</p>
+                                <p className="text-sm mt-1">{s.largeFileWarningMessage2}</p>
+                            </div>
+                        )}
                         <div>
                             <label htmlFor="postTitle" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                عنوان المنشور
+                                {s.postTitleLabel}
                             </label>
                             <input
                                 id="postTitle"
@@ -56,7 +58,7 @@ const AddPostModal: React.FC<AddPostModalProps> = ({ channelId, onClose, largeFi
                         </div>
                         <div>
                             <label htmlFor="postUrl" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                رابط الملف
+                                {s.postUrlLabel}
                             </label>
                             <input
                                 id="postUrl"

@@ -1,5 +1,3 @@
-
-
 import React from 'react';
 import { User, Channel, UserRole, PostType, ChannelMessage, Notification, DirectMessage, Section, Gender } from './types';
 
@@ -243,6 +241,16 @@ export const STRINGS = {
         noProfessorsFound: 'لم يتم العثور على أساتذة في الجامعة والكلية المحددة.',
         noSubscribedChannels: "أنت غير مشترك في أي قناة بعد",
         noSubscribedChannelsHint: "استخدم قسم 'استكشاف' للعثور على القنوات والانضمام إليها.",
+        addFileOr: 'اسحب وأفلت أو',
+        addLinkPost: 'إضافة منشور كرابط',
+        addLinkPostDescription: 'مشاركة رابط من الويب.',
+        postLinkTitle: 'إضافة منشور كرابط',
+        postTitleLabel: 'عنوان المنشور',
+        postUrlLabel: 'الرابط',
+        largeFileTitle: 'الملف كبير جدًا',
+        largeFileWarningTitle: 'الملف كبير جدًا',
+        largeFileWarningMessage1: '"{fileName}" ({fileSize} ميغابايت) يتجاوز حد 30 ميغابايت للرفع المباشر.',
+        largeFileWarningMessage2: 'الرجاء رفع الملف إلى خدمة سحابية (مثل Google Drive) ولصق رابط المشاركة العام أدناه.',
     },
     en: {
         appName: 'Your Digital University Way',
@@ -343,6 +351,16 @@ export const STRINGS = {
         noProfessorsFound: 'No professors found for the selected university and college.',
         noSubscribedChannels: "You are not subscribed to any channels yet",
         noSubscribedChannelsHint: "Use the 'Explore' tab to find and join channels.",
+        addFileOr: 'Drag & drop or',
+        addLinkPost: 'Add Post as Link',
+        addLinkPostDescription: 'Share a link from the web.',
+        postLinkTitle: 'Add Post as Link',
+        postTitleLabel: 'Post Title',
+        postUrlLabel: 'Link',
+        largeFileTitle: 'File is Too Large',
+        largeFileWarningTitle: 'File is Too Large',
+        largeFileWarningMessage1: '"{fileName}" ({fileSize} MB) exceeds the 30MB direct upload limit.',
+        largeFileWarningMessage2: 'Please upload the file to a cloud service (like Google Drive) and paste the public sharing link below.',
     },
     fr: {
         appName: 'Votre Université Numérique Way',
@@ -443,6 +461,16 @@ export const STRINGS = {
         noProfessorsFound: 'Aucun professeur trouvé pour l\'université et la faculté sélectionnées.',
         noSubscribedChannels: "Vous n'êtes abonné à aucune chaîne pour le moment",
         noSubscribedChannelsHint: "Utilisez l'onglet 'Explorer' pour trouver et rejoindre des chaînes.",
+        addFileOr: 'Glissez-déposez ou',
+        addLinkPost: 'Ajouter comme Lien',
+        addLinkPostDescription: 'Partagez un lien depuis le web.',
+        postLinkTitle: 'Ajouter comme Lien',
+        postTitleLabel: 'Titre de la publication',
+        postUrlLabel: 'Lien',
+        largeFileTitle: 'Fichier trop volumineux',
+        largeFileWarningTitle: 'Fichier trop volumineux',
+        largeFileWarningMessage1: '"{fileName}" ({fileSize} Mo) dépasse la limite de téléversement direct de 30 Mo.',
+        largeFileWarningMessage2: 'Veuillez téléverser le fichier sur un service cloud (comme Google Drive) et coller le lien de partage public ci-dessous.',
     }
 };
 

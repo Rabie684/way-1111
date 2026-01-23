@@ -56,6 +56,16 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack, onStar
         if (isUploadingPost) return;
         fileInputRef.current?.click();
     };
+    
+    const handleOpenAddLinkModal = () => {
+        setLargeFileInfo(null);
+        setIsAddPostModalOpen(true);
+    };
+    
+    const handleCloseAddPostModal = () => {
+        setIsAddPostModalOpen(false);
+        setLargeFileInfo(null);
+    };
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -206,10 +216,10 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack, onStar
         <div className="flex flex-col h-full">
             {header}
             
-            {isAddPostModalOpen && largeFileInfo && (
+            {isAddPostModalOpen && (
                 <AddPostModal
                     channelId={channel.id}
-                    onClose={() => setIsAddPostModalOpen(false)}
+                    onClose={handleCloseAddPostModal}
                     largeFileInfo={largeFileInfo}
                 />
             )}
@@ -254,23 +264,33 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack, onStar
                         {activeTab === 'posts' && (
                             <div className="space-y-4">
                                 {isOwner && (
-                                    <div 
-                                        onClick={handleUploadClick} 
-                                        className={`bg-white dark:bg-gray-800 p-4 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 text-center transition ${isUploadingPost ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:border-primary-500 dark:hover:border-primary-500'}`}
-                                    >
-                                        <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" disabled={isUploadingPost} accept="image/*,video/*,application/pdf" />
-                                        {isUploadingPost ? (
-                                            <>
-                                                <LoaderIcon className="w-12 h-12 mx-auto text-primary-500"/>
-                                                <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">جاري الرفع...</p>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <UploadCloudIcon className="w-12 h-12 mx-auto text-gray-400"/>
-                                                <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">اسحب وأفلت الملفات أو <span className="font-medium text-primary-600 hover:text-primary-500">{s.upload}</span></p>
-                                                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">الرفع المباشر حتى 30 ميغابايت. للملفات الأكبر، سيُطلب منك رابط.</p>
-                                            </>
-                                        )}
+                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div 
+                                            onClick={handleUploadClick} 
+                                            className={`bg-white dark:bg-gray-800 p-4 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 text-center transition flex flex-col justify-center items-center min-h-[160px] ${isUploadingPost ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:border-primary-500 dark:hover:border-primary-500'}`}
+                                        >
+                                            <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" disabled={isUploadingPost} accept="image/*,video/*,application/pdf" />
+                                            {isUploadingPost ? (
+                                                <>
+                                                    <LoaderIcon className="w-12 h-12 mx-auto text-primary-500"/>
+                                                    <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">جاري الرفع...</p>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <UploadCloudIcon className="w-12 h-12 mx-auto text-gray-400"/>
+                                                    <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">{s.addFileOr} <span className="font-medium text-primary-600 hover:text-primary-500">{s.upload}</span></p>
+                                                    <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">الرفع المباشر حتى 30 ميغابايت.</p>
+                                                </>
+                                            )}
+                                        </div>
+                                        <div 
+                                            onClick={handleOpenAddLinkModal}
+                                            className="bg-white dark:bg-gray-800 p-4 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600 text-center transition cursor-pointer hover:border-primary-500 dark:hover:border-primary-500 flex flex-col justify-center items-center min-h-[160px]"
+                                        >
+                                            <LinkIcon className="w-12 h-12 mx-auto text-gray-400"/>
+                                            <p className="mt-2 text-sm font-medium text-gray-600 dark:text-gray-400">{s.addLinkPost}</p>
+                                            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{s.addLinkPostDescription}</p>
+                                        </div>
                                     </div>
                                 )}
                                 {channel.posts.map(post => {
