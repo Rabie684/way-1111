@@ -1,9 +1,8 @@
-
-
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
-import { UserIcon, SendIcon, ArrowLeftIcon } from './icons/IconComponents';
-import { User } from '../types';
+import { UserIcon, SendIcon, ArrowLeftIcon, TrashIcon } from './icons/IconComponents';
+import { User, DirectMessage, UserRole } from '../types';
+import ConfirmationModal from './ConfirmationModal';
 
 interface DirectMessagesViewProps {
     initialUser?: User | null;
@@ -11,9 +10,10 @@ interface DirectMessagesViewProps {
 }
 
 const DirectMessagesView: React.FC<DirectMessagesViewProps> = ({ initialUser, onViewLoad }) => {
-    const { s, user, allUsers, directMessages, sendDirectMessage } = useApp();
+    const { s, user, allUsers, directMessages, sendDirectMessage, deleteDirectMessage } = useApp();
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [newMessage, setNewMessage] = useState('');
+    const [messageToDelete, setMessageToDelete] = useState<DirectMessage | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const scrollToBottom = () => {
@@ -35,13 +35,28 @@ const DirectMessagesView: React.FC<DirectMessagesViewProps> = ({ initialUser, on
     
     if (!user) return null;
 
-    const otherUsers = allUsers.filter(u => u.id !== user?.id);
+    const otherUsers = useMemo(() => {
+        if (!user) return [];
+        const users = allUsers.filter(u => u.id !== user.id);
+        if (user.role === UserRole.Student) {
+            return users.filter(u => u.role === UserRole.Professor);
+        }
+        return users;
+    }, [allUsers, user]);
+
 
     const handleSendMessage = (e: React.FormEvent) => {
         e.preventDefault();
         if (newMessage.trim() && selectedUser) {
             sendDirectMessage(selectedUser.id, newMessage.trim());
             setNewMessage('');
+        }
+    };
+
+    const handleConfirmDelete = () => {
+        if (messageToDelete) {
+            deleteDirectMessage(messageToDelete.id);
+            setMessageToDelete(null);
         }
     };
     
@@ -67,7 +82,7 @@ const DirectMessagesView: React.FC<DirectMessagesViewProps> = ({ initialUser, on
                             <img src={u.avatar} alt={u.name} className="w-10 h-10 rounded-full object-cover" />
                             <div>
                                 <p className="font-semibold">{u.name}</p>
-                                <p className="text-xs text-gray-500">{u.role}</p>
+                                <p className="text-xs text-gray-500">{u.role === UserRole.Professor ? (u.gender === "female" ? s.professorFemaleTitle : s.professorMaleTitle) : (u.gender === "female" ? s.studentFemaleTitle : s.studentMaleTitle)}</p>
                             </div>
                         </button>
                     ))}
@@ -89,13 +104,21 @@ const DirectMessagesView: React.FC<DirectMessagesViewProps> = ({ initialUser, on
                             {conversationMessages.map((msg) => {
                                 const isCurrentUser = msg.senderId === user.id;
                                 return (
-                                    <div key={msg.id} className={`flex items-end gap-2 ${isCurrentUser ? 'justify-end' : 'justify-start'}`}>
-                                        {!isCurrentUser && <img src={selectedUser.avatar} alt={selectedUser.name} className="w-8 h-8 rounded-full object-cover"/>}
-                                        <div className={`max-w-xs md:max-w-md p-3 rounded-lg ${isCurrentUser ? 'bg-primary-500 text-white rounded-br-none' : 'bg-white dark:bg-gray-700 rounded-bl-none'}`}>
+                                    <div key={msg.id} className={`flex items-end gap-2 group ${isCurrentUser ? 'justify-end flex-row-reverse' : 'justify-start'}`}>
+                                        <img src={isCurrentUser ? user.avatar : selectedUser.avatar} alt={isCurrentUser ? user.name : selectedUser.name} className="w-8 h-8 rounded-full object-cover"/>
+                                        <div className={`max-w-xs md:max-w-md p-3 rounded-lg ${isCurrentUser ? 'bg-primary-500 text-white rounded-bl-none' : 'bg-white dark:bg-gray-700 rounded-br-none'}`}>
                                             <p className="text-sm">{msg.text}</p>
                                             <p className={`text-xs mt-1 ${isCurrentUser ? 'text-primary-200' : 'text-gray-400'}`}>{msg.timestamp}</p>
                                         </div>
-                                        {isCurrentUser && <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full object-cover"/>}
+                                         {isCurrentUser && (
+                                            <button 
+                                                onClick={() => setMessageToDelete(msg)}
+                                                className="p-1 rounded-full text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 opacity-0 group-hover:opacity-100 transition-opacity self-center"
+                                                title={s.deleteMessage}
+                                            >
+                                                <TrashIcon className="w-4 h-4" />
+                                            </button>
+                                        )}
                                     </div>
                                 );
                             })}
@@ -124,6 +147,14 @@ const DirectMessagesView: React.FC<DirectMessagesViewProps> = ({ initialUser, on
                     </div>
                 )}
             </div>
+            {messageToDelete && (
+                <ConfirmationModal
+                    title={s.deleteMessageConfirmTitle}
+                    message={s.deleteMessageConfirmMessage}
+                    onClose={() => setMessageToDelete(null)}
+                    onConfirm={handleConfirmDelete}
+                />
+            )}
         </div>
     );
 };

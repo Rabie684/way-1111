@@ -53,6 +53,7 @@ interface AppContextType {
     subscribeToSection: (sectionId: string) => Promise<void>;
     sendMessage: (channelId: string, text: string) => Promise<void>;
     sendDirectMessage: (receiverId: string, text: string) => Promise<void>;
+    deleteDirectMessage: (messageId: string) => Promise<void>;
     addPostFromFile: (channelId: string, file: File) => Promise<void>;
     addPostFromLink: (channelId: string, title: string, url: string) => Promise<void>;
     sendJarvisMessage: (text: string) => Promise<void>;
@@ -80,36 +81,52 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const [jarvisHistory, setJarvisHistory] = useState<JarvisMessage[]>([]);
     const [offlinePostIds, setOfflinePostIds] = useState<Set<string>>(new Set());
     const [isUploadingPost, setIsUploadingPost] = useState(false);
-    
+
     const s = getLang(language);
     
-    const login = async (details: LoginDetails) => {
-        const { email, isDemo, role } = details;
-        if (isDemo) {
-            setUser(role === UserRole.Professor ? MOCK_PROFESSOR : MOCK_STUDENT);
-            return;
-        }
+    useEffect(() => {
+        const checkOfflinePosts = async () => {
+            if ('caches' in window) {
+                const cache = await caches.open(OFFLINE_CACHE_NAME);
+                const requests = await cache.keys();
+                const postIds = new Set<string>();
+                requests.forEach(req => {
+                    const url = new URL(req.url);
+                    const postId = url.searchParams.get('postId');
+                    if (postId) {
+                        postIds.add(postId);
+                    }
+                });
+                setOfflinePostIds(postIds);
+            }
+        };
+        checkOfflinePosts();
+    }, []);
 
-        const foundUser = allUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
-        if (foundUser) {
-            setUser(foundUser);
+    const login = async (details: LoginDetails) => {
+        if (details.isDemo) {
+            setUser(details.role === UserRole.Professor ? MOCK_PROFESSOR : MOCK_STUDENT);
         } else {
-            console.error('Login failed: User not found');
-            alert('Login failed: User not found. Please use a demo account or register.');
+            console.log('Logging in user...');
+            // In a real app, this would involve an API call
+            const existingUser = allUsers.find(u => u.email === details.email);
+            if (existingUser) setUser(existingUser);
+            else alert('User not found!');
         }
     };
-    
+
     const register = async (details: LoginDetails) => {
+        console.log('Registering user...');
         const newUser: User = {
-            id: `user-${Date.now()}`,
+            id: 'user-' + Date.now(),
             name: details.name!,
-            email: details.email,
+            email: details.email!,
             role: details.role!,
             gender: details.gender!,
-            university: details.university || '',
-            college: details.college || '',
-            avatar: 'https://picsum.photos/seed/newuser/200',
-            subscribedSections: [],
+            university: details.university!,
+            college: details.college!,
+            avatar: `https://picsum.photos/seed/${Date.now()}/200`,
+            subscribedSections: []
         };
         setAllUsers(prev => [...prev, newUser]);
         setUser(newUser);
@@ -119,167 +136,182 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setUser(null);
     };
 
-    const toggleTheme = () => {
-        setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
-    };
+    const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
 
     const createChannel = async (channelData: Omit<Channel, 'id' | 'professorId' | 'posts' | 'subscribers' | 'blockedUsers'>) => {
         if (!user || user.role !== UserRole.Professor) return;
         const newChannel: Channel = {
-            ...channelData,
-            id: `ch-${Date.now()}`,
+            id: 'ch-' + Date.now(),
             professorId: user.id,
             posts: [],
             subscribers: 0,
             blockedUsers: [],
+            ...channelData,
         };
         setChannels(prev => [...prev, newChannel]);
     };
 
     const subscribeToSection = async (sectionId: string) => {
         if (!user) return;
-        setUser(prevUser => {
-            if (!prevUser) return null;
-            const newSubscriptions = [...prevUser.subscribedSections, sectionId];
-            return { ...prevUser, subscribedSections: newSubscriptions };
-        });
-        
+        setUser(prev => prev ? { ...prev, subscribedSections: [...prev.subscribedSections, sectionId] } : null);
         const section = sections.find(s => s.id === sectionId);
         const channel = channels.find(c => c.id === section?.channelId);
-        if (section && channel) {
-            const newNotification: Notification = {
-                id: `notif-${Date.now()}`,
-                text: s.subscriptionSuccessNotification
-                    .replace('{sectionName}', section.name)
-                    .replace('{channelName}', channel.name),
-                timestamp: 'Just now',
-                read: false,
-            };
-            setNotifications(prev => [newNotification, ...prev]);
+        if(section && channel) {
+            const notifText = s.subscriptionSuccessNotification
+                .replace('{sectionName}', section.name)
+                .replace('{channelName}', channel.name);
+            addNotification(notifText);
         }
     };
+    
+    const addNotification = (text: string) => {
+        const newNotif: Notification = {
+            id: 'notif-' + Date.now(),
+            text,
+            timestamp: 'الآن',
+            read: false,
+        };
+        setNotifications(prev => [newNotif, ...prev]);
+    }
 
     const sendMessage = async (channelId: string, text: string) => {
         if (!user) return;
         const newMessage: ChannelMessage = {
-            id: `msg-${Date.now()}`,
-            channelId,
+            id: 'msg-ch-' + Date.now(),
             senderId: user.id,
+            channelId,
             text,
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
         setChannelMessages(prev => [...prev, newMessage]);
     };
 
     const sendDirectMessage = async (receiverId: string, text: string) => {
         if (!user) return;
-         const newMessage: DirectMessage = {
-            id: `dm-${Date.now()}`,
+        const newMessage: DirectMessage = {
+            id: 'dm-' + Date.now(),
             senderId: user.id,
             receiverId,
             text,
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
         setDirectMessages(prev => [...prev, newMessage]);
     };
     
+    const deleteDirectMessage = async (messageId: string) => {
+        setDirectMessages(prev => prev.filter(msg => msg.id !== messageId));
+    };
+
     const addPostFromFile = async (channelId: string, file: File) => {
         setIsUploadingPost(true);
-        try {
-            await new Promise<void>((resolve, reject) => {
-                const fileReader = new FileReader();
-                fileReader.readAsDataURL(file);
-
-                fileReader.onload = () => {
-                    const fileUrl = fileReader.result as string;
-                    const mimeType = file.type;
-                    let type: PostType;
-
-                    if (mimeType.startsWith('image/')) {
-                        type = PostType.Image;
-                    } else if (mimeType.startsWith('video/')) {
-                        type = PostType.Video;
-                    } else if (mimeType === 'application/pdf') {
-                        type = PostType.PDF;
-                    } else {
-                        // This check should ideally be done before calling the function
-                        return reject(new Error('Unsupported file type'));
-                    }
-
-                    const newPost: Post = {
-                        id: `post-${Date.now()}`,
-                        type,
-                        title: file.name,
-                        url: fileUrl,
-                        createdAt: new Date().toISOString().split('T')[0],
-                    };
-
-                    setChannels(prevChannels => prevChannels.map(ch => 
-                        ch.id === channelId ? { ...ch, posts: [newPost, ...ch.posts] } : ch
-                    ));
-                    resolve();
-                };
-
-                fileReader.onerror = (error) => {
-                    console.error("Error reading file:", error);
-                    alert("فشل في قراءة الملف.");
-                    reject(error);
-                };
-            });
-        } catch (error) {
-            console.error("Upload failed:", error);
-        } finally {
-            setIsUploadingPost(false);
+        // Simulate upload delay
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        let type: PostType;
+        if (file.type.startsWith('image/')) type = PostType.Image;
+        else if (file.type.startsWith('video/')) type = PostType.Video;
+        else if (file.type === 'application/pdf') type = PostType.PDF;
+        else {
+             alert('File type not supported');
+             setIsUploadingPost(false);
+             return;
         }
+
+        const newPost: Post = {
+            id: 'p-' + Date.now(),
+            type,
+            title: file.name,
+            url: URL.createObjectURL(file), // Using blob URL for local preview
+            createdAt: new Date().toISOString().split('T')[0]
+        };
+
+        setChannels(prev => prev.map(ch => ch.id === channelId ? { ...ch, posts: [newPost, ...ch.posts] } : ch));
+        setIsUploadingPost(false);
     };
 
     const addPostFromLink = async (channelId: string, title: string, url: string) => {
         const newPost: Post = {
-            id: `post-${Date.now()}`,
+            id: 'p-' + Date.now(),
             type: PostType.Link,
-            title: title,
-            url: url,
-            createdAt: new Date().toISOString().split('T')[0],
+            title,
+            url,
+            createdAt: new Date().toISOString().split('T')[0]
         };
-        setChannels(prev => prev.map(ch => 
-            ch.id === channelId ? { ...ch, posts: [newPost, ...ch.posts] } : ch
-        ));
+        setChannels(prev => prev.map(ch => ch.id === channelId ? { ...ch, posts: [newPost, ...ch.posts] } : ch));
     };
+
 
     const sendJarvisMessage = async (text: string) => {
-        if(!user) return;
-        const userMessage: JarvisMessage = { id: `jarvis-${Date.now()}`, sender: 'user', text };
+        if (!user) return;
+        const userMessage: JarvisMessage = { id: 'jarvis-' + Date.now(), sender: 'user', text };
         setJarvisHistory(prev => [...prev, userMessage]);
-        
-        const jarvisResponse = await askJarvis(text, user.name, user.gender, user.role);
 
-        const jarvisMessage: JarvisMessage = { 
-            id: `jarvis-${Date.now()+1}`, 
-            sender: 'jarvis', 
-            text: jarvisResponse.text, 
-        };
-        setJarvisHistory(prev => [...prev, jarvisMessage]);
+        const response = await askJarvis(text, user.name, user.gender, user.role);
+        
+        const jarvisResponse: JarvisMessage = { id: 'jarvis-' + Date.now() + 1, sender: 'jarvis', text: response.text };
+        setJarvisHistory(prev => [...prev, jarvisResponse]);
     };
-    
+
     const updateUser = async (updatedUser: Partial<User>) => {
         if (!user) return;
-        const updatedUserObject = { ...user, ...updatedUser };
-        setUser(updatedUserObject);
-        setAllUsers(prevUsers => prevUsers.map(u => u.id === user.id ? updatedUserObject : u));
+        setUser(prev => prev ? { ...prev, ...updatedUser } : null);
+        setAllUsers(prev => prev.map(u => u.id === user.id ? {...u, ...updatedUser} : u));
     };
-
+    
     const markNotificationsAsRead = async () => {
-        setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+        setNotifications(prev => prev.map(n => ({...n, read: true})));
     };
-
+    
     const clearChannelChat = async (channelId: string) => {
-        setChannelMessages(prev => prev.filter(msg => msg.channelId !== channelId));
+        setChannelMessages(prev => prev.filter(m => m.channelId !== channelId));
     };
 
+    const deletePostFromChannel = async (channelId: string, postId: string) => {
+        setChannels(prev => prev.map(ch => {
+            if (ch.id === channelId) {
+                return {...ch, posts: ch.posts.filter(p => p.id !== postId)};
+            }
+            return ch;
+        }));
+    };
+    
+    const downloadPostForOffline = async (post: Post) => {
+        if ('caches' in window) {
+            try {
+                const cache = await caches.open(OFFLINE_CACHE_NAME);
+                const requestUrl = new URL(post.url);
+                // Add postId to differentiate requests for the same URL if needed for other reasons
+                // but cache key will be the original URL
+                requestUrl.searchParams.set('postId', post.id);
+
+                const response = await fetch(post.url, { mode: 'cors' });
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                
+                // Use a new Request object with the postId for the cache key, but fetch the original URL
+                const cacheRequest = new Request(requestUrl.toString(), { mode: 'cors' });
+                await cache.put(cacheRequest, response);
+
+                setOfflinePostIds(prev => new Set(prev).add(post.id));
+            } catch (error) {
+                console.error('Failed to cache file:', error);
+                alert('Failed to download for offline use.');
+            }
+        }
+    };
+    
     const removePostFromOffline = async (post: Post) => {
-        const cache = await caches.open(OFFLINE_CACHE_NAME);
-        const deleted = await cache.delete(post.url);
-        if (deleted) {
+        if ('caches' in window) {
+            const cache = await caches.open(OFFLINE_CACHE_NAME);
+            const requests = await cache.keys();
+            for (const req of requests) {
+                const url = new URL(req.url);
+                if (url.searchParams.get('postId') === post.id) {
+                    await cache.delete(req);
+                    break;
+                }
+            }
             setOfflinePostIds(prev => {
                 const next = new Set(prev);
                 next.delete(post.id);
@@ -287,51 +319,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             });
         }
     };
-    
-    const deletePostFromChannel = async (channelId: string, postId: string) => {
-        let postToRemove: Post | undefined;
-        setChannels(prevChannels =>
-            prevChannels.map(ch => {
-                if (ch.id === channelId) {
-                    postToRemove = ch.posts.find(p => p.id === postId);
-                    return { ...ch, posts: ch.posts.filter(p => p.id !== postId) };
-                }
-                return ch;
-            })
-        );
-        if (postToRemove) {
-            await removePostFromOffline(postToRemove);
-        }
-    };
-
-    const downloadPostForOffline = async (post: Post) => {
-        try {
-            const cache = await caches.open(OFFLINE_CACHE_NAME);
-            // Fetch supports data URLs in modern browsers
-            const response = await fetch(post.url);
-            if (!response.ok) {
-                throw new Error(`Failed to fetch: ${response.statusText}`);
-            }
-            await cache.put(post.url, response);
-            setOfflinePostIds(prev => new Set(prev).add(post.id));
-        } catch (error) {
-            console.error('Failed to download post for offline:', post.url, error);
-            alert(`Failed to download file. It might be due to a network issue or cross-origin restrictions (CORS). Some resources like placeholder images from external sites cannot be cached for offline use.`);
-        }
-    };
 
     const blockUserFromChannel = async (userId: string, channelId: string) => {
-        setChannels(prevChannels => prevChannels.map(ch => {
-            if (ch.id === channelId && !ch.blockedUsers.includes(userId)) {
-                return {
-                    ...ch,
-                    blockedUsers: [...ch.blockedUsers, userId]
-                };
-            }
-            return ch;
-        }));
+        setChannels(prev => prev.map(ch => 
+            ch.id === channelId ? { ...ch, blockedUsers: [...ch.blockedUsers, userId] } : ch
+        ));
     };
-
 
     const value = {
         user,
@@ -356,6 +349,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         subscribeToSection,
         sendMessage,
         sendDirectMessage,
+        deleteDirectMessage,
         addPostFromFile,
         addPostFromLink,
         sendJarvisMessage,
@@ -365,7 +359,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         deletePostFromChannel,
         downloadPostForOffline,
         removePostFromOffline,
-        blockUserFromChannel,
+        blockUserFromChannel
     };
 
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
