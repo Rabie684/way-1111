@@ -254,6 +254,8 @@ export const STRINGS = {
         largeFileWarningTitle: 'الملف كبير جدًا',
         largeFileWarningMessage1: '"{fileName}" ({fileSize} ميغابايت) يتجاوز حد 30 ميغابايت للرفع المباشر.',
         largeFileWarningMessage2: 'الرجاء رفع الملف إلى خدمة سحابية (مثل Google Drive) ولصق رابط المشاركة العام أدناه.',
+        copy: 'نسخ',
+        copied: 'تم النسخ!',
     },
     en: {
         appName: 'Your Digital University Way',
@@ -367,6 +369,8 @@ export const STRINGS = {
         largeFileWarningTitle: 'File is Too Large',
         largeFileWarningMessage1: '"{fileName}" ({fileSize} MB) exceeds the 30MB direct upload limit.',
         largeFileWarningMessage2: 'Please upload the file to a cloud service (like Google Drive) and paste the public sharing link below.',
+        copy: 'Copy',
+        copied: 'Copied!',
     },
     fr: {
         appName: 'Votre Université Numérique Way',
@@ -480,6 +484,8 @@ export const STRINGS = {
         largeFileWarningTitle: 'Fichier trop volumineux',
         largeFileWarningMessage1: '"{fileName}" ({fileSize} Mo) dépasse la limite de téléversement direct de 30 Mo.',
         largeFileWarningMessage2: 'Veuillez téléverser le fichier sur un service cloud (comme Google Drive) et coller le lien de partage public ci-dessous.',
+        copy: 'Copier',
+        copied: 'Copié !',
     }
 };
 

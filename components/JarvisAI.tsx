@@ -1,15 +1,14 @@
-
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { getLang } from '../constants';
-import { SendIcon, BotIcon } from './icons/IconComponents';
+import { SendIcon, BotIcon, ClipboardIcon, CheckIcon } from './icons/IconComponents';
 
 const JarvisAI: React.FC = () => {
     const { language, jarvisHistory, sendJarvisMessage } = useApp();
     const s = getLang(language);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
     const scrollToBottom = () => {
@@ -17,6 +16,13 @@ const JarvisAI: React.FC = () => {
     };
 
     useEffect(scrollToBottom, [jarvisHistory]);
+    
+    const handleCopy = (text: string, id: string) => {
+        navigator.clipboard.writeText(text).then(() => {
+            setCopiedMessageId(id);
+            setTimeout(() => setCopiedMessageId(null), 2000);
+        });
+    };
 
     const handleSend = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -45,8 +51,21 @@ const JarvisAI: React.FC = () => {
                     {jarvisHistory.map((msg) => (
                         <div key={msg.id} className={`flex items-start gap-3 ${msg.sender === 'user' ? 'justify-end' : ''}`}>
                             {msg.sender === 'jarvis' && <BotIcon className="w-6 h-6 text-primary-500 flex-shrink-0 mt-1" />}
-                            <div className={`max-w-xl p-3 rounded-lg whitespace-pre-wrap ${msg.sender === 'user' ? 'bg-primary-500 text-white rounded-br-none' : 'bg-gray-100 dark:bg-gray-700 rounded-bl-none'}`}>
+                            <div className={`relative group max-w-xl p-3 rounded-lg whitespace-pre-wrap ${msg.sender === 'user' ? 'bg-primary-500 text-white rounded-br-none' : 'bg-gray-100 dark:bg-gray-700 rounded-bl-none'}`}>
                                 {msg.text}
+                                {msg.sender === 'jarvis' && (
+                                    <button
+                                        onClick={() => handleCopy(msg.text, msg.id)}
+                                        className="absolute top-2 end-2 p-1 rounded-md text-gray-500 dark:text-gray-400 bg-white/50 dark:bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity focus:opacity-100 hover:text-gray-800 dark:hover:text-gray-200"
+                                        title={copiedMessageId === msg.id ? s.copied : s.copy}
+                                    >
+                                        {copiedMessageId === msg.id ? (
+                                            <CheckIcon className="w-4 h-4 text-green-500" />
+                                        ) : (
+                                            <ClipboardIcon className="w-4 h-4" />
+                                        )}
+                                    </button>
+                                )}
                             </div>
                         </div>
                     ))}
