@@ -71,7 +71,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [allUsers, setAllUsers] = useState<User[]>(MOCK_ALL_USERS);
-    const [theme, setTheme] = useState<Theme>('light');
+    const [theme, setTheme] = useState<Theme>('dark');
     const [language, setLanguage] = useState<Language>('ar');
     const [channels, setChannels] = useState<Channel[]>(MOCK_CHANNELS);
     const [sections, setSections] = useState<Section[]>(MOCK_SECTIONS);
