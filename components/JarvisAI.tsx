@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { getLang } from '../constants';
-import { SendIcon, BotIcon, ClipboardIcon, CheckIcon } from './icons/IconComponents';
+import { SendIcon, BotIcon, ClipboardIcon, CheckIcon, PaperclipIcon, XIcon, FileTextIcon } from './icons/IconComponents';
 
 const JarvisAI: React.FC = () => {
     const { language, jarvisHistory, sendJarvisMessage } = useApp();
@@ -9,11 +9,25 @@ const JarvisAI: React.FC = () => {
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
+    const [attachedFile, setAttachedFile] = useState<File | null>(null);
+    const [filePreview, setFilePreview] = useState<string | null>(null);
+
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
+
+    useEffect(() => {
+        // Cleanup blob URLs to prevent memory leaks
+        return () => {
+            if (filePreview) {
+                URL.revokeObjectURL(filePreview);
+            }
+        };
+    }, [filePreview]);
 
     useEffect(scrollToBottom, [jarvisHistory]);
     
@@ -23,14 +37,40 @@ const JarvisAI: React.FC = () => {
             setTimeout(() => setCopiedMessageId(null), 2000);
         });
     };
+    
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setAttachedFile(file);
+            if (file.type.startsWith('image/')) {
+                const previewUrl = URL.createObjectURL(file);
+                setFilePreview(previewUrl);
+            } else {
+                setFilePreview(null);
+            }
+        }
+    };
+
+    const handleRemoveFile = () => {
+        setAttachedFile(null);
+        if (filePreview) {
+            URL.revokeObjectURL(filePreview);
+            setFilePreview(null);
+        }
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+    };
+
 
     const handleSend = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!input.trim() || isLoading) return;
+        if ((!input.trim() && !attachedFile) || isLoading) return;
 
         setIsLoading(true);
-        await sendJarvisMessage(input.trim());
+        await sendJarvisMessage(input.trim(), attachedFile || undefined);
         setInput('');
+        handleRemoveFile();
         setIsLoading(false);
     };
 
@@ -52,6 +92,18 @@ const JarvisAI: React.FC = () => {
                         <div key={msg.id} className={`flex items-start gap-3 ${msg.sender === 'user' ? 'justify-end' : ''}`}>
                             {msg.sender === 'jarvis' && <BotIcon className="w-6 h-6 text-primary-500 flex-shrink-0 mt-1" />}
                             <div className={`relative group max-w-xl p-3 rounded-lg whitespace-pre-wrap ${msg.sender === 'user' ? 'bg-primary-500 text-white rounded-br-none' : 'bg-gray-100 dark:bg-gray-700 rounded-bl-none'}`}>
+                                {msg.file && (
+                                    <div className="mb-2">
+                                        {msg.file.type.startsWith('image/') ? (
+                                            <img src={msg.file.url} alt={msg.file.name} className="max-w-xs max-h-48 rounded-md object-cover"/>
+                                        ) : (
+                                            <div className="flex items-center gap-2 p-2 bg-black/10 dark:bg-white/10 rounded-md">
+                                                <FileTextIcon className="w-6 h-6 flex-shrink-0"/>
+                                                <span className="text-sm font-medium truncate">{msg.file.name}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                                 {msg.text}
                                 {msg.sender === 'jarvis' && (
                                     <button
@@ -84,8 +136,39 @@ const JarvisAI: React.FC = () => {
                     <div ref={messagesEndRef} />
                 </div>
             </div>
+            
+            {attachedFile && (
+                <div className="mb-2 p-2 bg-gray-100 dark:bg-gray-700 rounded-md flex items-center justify-between">
+                    <div className="flex items-center gap-2 overflow-hidden">
+                         {filePreview ? (
+                            <img src={filePreview} alt="preview" className="w-10 h-10 rounded object-cover flex-shrink-0"/>
+                         ) : (
+                            <FileTextIcon className="w-8 h-8 text-gray-500 flex-shrink-0"/>
+                         )}
+                        <span className="text-sm font-medium truncate">{attachedFile.name}</span>
+                    </div>
+                    <button onClick={handleRemoveFile} className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-600">
+                        <XIcon className="w-4 h-4"/>
+                    </button>
+                </div>
+            )}
 
             <form onSubmit={handleSend} className="flex items-center gap-3">
+                <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    className="hidden"
+                    accept="image/*,application/pdf"
+                />
+                 <button 
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isLoading}
+                    className="p-3 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50"
+                >
+                    <PaperclipIcon className="w-5 h-5"/>
+                </button>
                 <input
                     type="text"
                     value={input}
@@ -96,8 +179,8 @@ const JarvisAI: React.FC = () => {
                 />
                 <button 
                     type="submit" 
-                    disabled={isLoading}
-                    className="p-3 rounded-full bg-primary-500 text-white hover:bg-primary-600 disabled:bg-primary-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:focus:ring-offset-gray-900"
+                    disabled={isLoading || (!input.trim() && !attachedFile)}
+                    className="p-3 rounded-full bg-primary-500 text-white hover:bg-primary-600 disabled:bg-primary-300 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:focus:ring-offset-gray-900"
                 >
                     <SendIcon className="w-5 h-5"/>
                 </button>

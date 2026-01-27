@@ -12,7 +12,7 @@ import {
     MOCK_NOTIFICATIONS,
     MOCK_ALL_USERS
 } from '../constants';
-import { askJarvis } from '../services/geminiService';
+import { askJarvis, JarvisFile } from '../services/geminiService';
 
 type Theme = 'light' | 'dark';
 type Language = 'ar' | 'en' | 'fr';
@@ -29,6 +29,19 @@ interface LoginDetails {
 }
 
 const OFFLINE_CACHE_NAME = 'offline-files-cache-v1';
+
+// Helper to convert file to base64
+const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => {
+            const result = (reader.result as string).split(',')[1];
+            resolve(result);
+        };
+        reader.onerror = error => reject(error);
+    });
+};
 
 interface AppContextType {
     user: User | null;
@@ -56,7 +69,7 @@ interface AppContextType {
     deleteDirectMessage: (messageId: string) => Promise<void>;
     addPostFromFile: (channelId: string, file: File) => Promise<void>;
     addPostFromLink: (channelId: string, title: string, url: string) => Promise<void>;
-    sendJarvisMessage: (text: string) => Promise<void>;
+    sendJarvisMessage: (text: string, file?: File) => Promise<void>;
     updateUser: (updatedUser: Partial<User>) => Promise<void>;
     markNotificationsAsRead: () => Promise<void>;
     clearChannelChat: (channelId: string) => Promise<void>;
@@ -241,12 +254,26 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     };
 
 
-    const sendJarvisMessage = async (text: string) => {
+    const sendJarvisMessage = async (text: string, file?: File) => {
         if (!user) return;
+        
         const userMessage: JarvisMessage = { id: 'jarvis-' + Date.now(), sender: 'user', text };
+        if (file) {
+            userMessage.file = {
+                name: file.name,
+                type: file.type,
+                url: URL.createObjectURL(file),
+            };
+        }
         setJarvisHistory(prev => [...prev, userMessage]);
 
-        const response = await askJarvis(text, user.name, user.gender, user.role);
+        let jarvisFile: JarvisFile | undefined;
+        if (file) {
+            const base64 = await fileToBase64(file);
+            jarvisFile = { base64, mimeType: file.type };
+        }
+        
+        const response = await askJarvis(text, user.name, user.gender, user.role, jarvisFile);
         
         const jarvisResponse: JarvisMessage = { id: 'jarvis-' + Date.now() + 1, sender: 'jarvis', text: response.text };
         setJarvisHistory(prev => [...prev, jarvisResponse]);

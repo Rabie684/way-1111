@@ -1,14 +1,19 @@
 
 import { Gender, UserRole } from '../types';
 
-export const askJarvis = async (prompt: string, userName: string, gender: Gender, role: UserRole): Promise<{ text: string }> => {
+export interface JarvisFile {
+    base64: string;
+    mimeType: string;
+}
+
+export const askJarvis = async (prompt: string, userName: string, gender: Gender, role: UserRole, file?: JarvisFile): Promise<{ text: string }> => {
     try {
         const response = await fetch('/api/jarvis', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ prompt, userName, gender, role }),
+            body: JSON.stringify({ prompt, userName, gender, role, file }),
         });
 
         if (!response.ok) {

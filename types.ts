@@ -82,4 +82,9 @@ export interface JarvisMessage {
     id: string;
     sender: 'user' | 'jarvis';
     text: string;
+    file?: {
+        name: string;
+        type: string;
+        url: string;
+    };
 }

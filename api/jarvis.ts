@@ -6,10 +6,14 @@ export default async function handler(req: any, res: any) {
         return res.status(405).json({ error: 'Method Not Allowed' });
     }
 
-    const { prompt, userName, gender, role } = req.body;
+    const { prompt, userName, gender, role, file } = req.body;
 
-    if (!prompt || !userName || !gender || !role) {
-        return res.status(400).json({ error: 'البيانات المطلوبة ناقصة (الاسم، الجنس، الدور، أو نص السؤال).' });
+    if (!prompt && !file) {
+        return res.status(400).json({ error: 'Either a prompt or a file is required.' });
+    }
+    
+    if (!userName || !gender || !role) {
+        return res.status(400).json({ error: 'البيانات المطلوبة ناقصة (الاسم، الجنس، أو الدور).' });
     }
 
     // Important: Trim any whitespace from the key that might come from Vercel env variables
@@ -35,11 +39,25 @@ export default async function handler(req: any, res: any) {
 
         const welcomeGreeting = gender === 'female' ? 'أهلاً بكِ' : 'أهلاً بك';
 
-        const systemInstruction = `You are Jarvis, an intelligent AI assistant for the 'جامعتك الرقمية way' platform. You are speaking with ${userTitle} ${userName}. Always address them by their name and title in a friendly, conversational tone (e.g., "${welcomeGreeting} ${userTitle} ${userName}، بخصوص سؤالك..."). Your goal is to provide academic consultations. Your primary knowledge base is the Algerian Scientific Journal Platform (ASJP). When answering, you MUST explicitly state that your information is from the ASJP, for example: "بالاعتماد على منصة المجلات العلمية الجزائرية (ASJP)...". If you use other sources, you must mention them. Always be helpful and academic. If you can't find an answer, say so clearly. Respond exclusively in Arabic.`;
+        const systemInstruction = `You are Jarvis, an intelligent AI assistant for the 'جامعتك الرقمية way' platform. You are speaking with ${userTitle} ${userName}. Always address them by their name and title in a friendly, conversational tone (e.g., "${welcomeGreeting} ${userTitle} ${userName}، بخصوص سؤالك..."). Your goal is to provide academic consultations. Your primary knowledge base is the Algerian Scientific Journal Platform (ASJP). When answering, you MUST explicitly state that your information is from the ASJP, for example: "بالاعتماد على منصة المجلات العلمية الجزائرية (ASJP)...". If you use other sources, you must mention them. You might receive images or PDF files to analyze along with the user's prompt; respond to them accordingly. Always be helpful and academic. If you can't find an answer, say so clearly. Respond exclusively in Arabic.`;
+
+        const contents: any = { parts: [] };
+        if (file) {
+            contents.parts.push({
+                inlineData: {
+                    mimeType: file.mimeType,
+                    data: file.base64,
+                },
+            });
+        }
+        if (prompt) {
+            contents.parts.push({ text: prompt });
+        }
+
 
         const response = await ai.models.generateContent({
             model: modelName,
-            contents: prompt,
+            contents: contents,
             config: {
                 systemInstruction: systemInstruction,
                 temperature: 0.7,
