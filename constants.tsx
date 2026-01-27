@@ -256,6 +256,8 @@ export const STRINGS = {
         largeFileWarningMessage2: 'الرجاء رفع الملف إلى خدمة سحابية (مثل Google Drive) ولصق رابط المشاركة العام أدناه.',
         copy: 'نسخ',
         copied: 'تم النسخ!',
+        jarvisFileReceived: 'لقد تلقيت ملف الأستاذ، هل تود مني تلخيصه أو شرح النقاط الغامضة فيه؟',
+        shareWithJarvis: 'مشاركة مع جارفيس',
     },
     en: {
         appName: 'Your Digital University Way',
@@ -371,6 +373,8 @@ export const STRINGS = {
         largeFileWarningMessage2: 'Please upload the file to a cloud service (like Google Drive) and paste the public sharing link below.',
         copy: 'Copy',
         copied: 'Copied!',
+        jarvisFileReceived: "I have received the professor's file. Would you like me to summarize it or explain any unclear points?",
+        shareWithJarvis: 'Share with Jarvis',
     },
     fr: {
         appName: 'Votre Université Numérique Way',
@@ -486,6 +490,8 @@ export const STRINGS = {
         largeFileWarningMessage2: 'Veuillez téléverser le fichier sur un service cloud (comme Google Drive) et coller le lien de partage public ci-dessous.',
         copy: 'Copier',
         copied: 'Copié !',
+        jarvisFileReceived: "J'ai reçu le fichier du professeur. Souhaitez-vous que je le résume ou que j'éclaircisse des points ambigus ?",
+        shareWithJarvis: 'Partager avec Jarvis',
     }
 };
 

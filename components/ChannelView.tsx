@@ -4,7 +4,7 @@ import ChatWindow from './ChatWindow';
 import SubscriptionModal from './SubscriptionModal';
 import { getLang } from '../constants';
 import { useApp } from '../context/AppContext';
-import { ArrowLeftIcon, FileTextIcon, ImageIcon, VideoIcon, UploadCloudIcon, TrashIcon, DownloadIcon, CheckCircleIcon, LoaderIcon, UsersIcon, MessageSquareIcon, SlashIcon, ChevronDownIcon, LinkIcon } from './icons/IconComponents';
+import { ArrowLeftIcon, FileTextIcon, ImageIcon, VideoIcon, UploadCloudIcon, TrashIcon, DownloadIcon, CheckCircleIcon, LoaderIcon, UsersIcon, MessageSquareIcon, SlashIcon, ChevronDownIcon, LinkIcon, Share2Icon } from './icons/IconComponents';
 import ConfirmationModal from './ConfirmationModal';
 import AddPostModal from './AddPostModal';
 
@@ -27,7 +27,7 @@ const PostIcon: React.FC<{ type: PostType }> = ({ type }) => {
 };
 
 const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack, onStartDirectMessage }) => {
-    const { s, allUsers, sections, addPostFromFile, isUploadingPost, clearChannelChat, deletePostFromChannel, offlinePostIds, downloadPostForOffline, removePostFromOffline, blockUserFromChannel } = useApp();
+    const { s, allUsers, sections, addPostFromFile, isUploadingPost, clearChannelChat, deletePostFromChannel, offlinePostIds, downloadPostForOffline, removePostFromOffline, blockUserFromChannel, sharePostWithJarvis } = useApp();
     const [activeTab, setActiveTab] = useState<'posts' | 'chat'>('posts');
     const [showSubscriptionModal, setShowSubscriptionModal] = useState<Section | null>(null);
     const [showClearConfirm, setShowClearConfirm] = useState(false);
@@ -308,6 +308,19 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack, onStar
                                             <div className="flex items-center flex-shrink-0 gap-2">
                                                 {post.type === PostType.Image && <img src={post.url} alt={post.title} className="w-24 h-12 object-cover rounded hidden sm:block"/>}
                                                 
+                                                {user.role === UserRole.Student && (
+                                                    <button
+                                                        onClick={() => {
+                                                            sharePostWithJarvis(post);
+                                                            window.location.hash = '#/ai';
+                                                        }}
+                                                        className="p-2 text-gray-400 hover:text-primary-500 rounded-full hover:bg-primary-100 dark:hover:bg-primary-900/50"
+                                                        title={s.shareWithJarvis}
+                                                    >
+                                                        <Share2Icon className="w-5 h-5" />
+                                                    </button>
+                                                )}
+
                                                 {post.type === PostType.Link || post.url.includes('google.com') ? null : isDownloading ? (
                                                     <div className="p-2 text-gray-400" title="Downloading...">
                                                         <LoaderIcon className="w-5 h-5" />

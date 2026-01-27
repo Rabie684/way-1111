@@ -77,6 +77,7 @@ interface AppContextType {
     downloadPostForOffline: (post: Post) => Promise<void>;
     removePostFromOffline: (post: Post) => Promise<void>;
     blockUserFromChannel: (userId: string, channelId: string) => Promise<void>;
+    sharePostWithJarvis: (post: Post) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -94,6 +95,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const [jarvisHistory, setJarvisHistory] = useState<JarvisMessage[]>([]);
     const [offlinePostIds, setOfflinePostIds] = useState<Set<string>>(new Set());
     const [isUploadingPost, setIsUploadingPost] = useState(false);
+    const [jarvisContextPost, setJarvisContextPost] = useState<Post | null>(null);
 
     const s = getLang(language);
     
@@ -267,13 +269,30 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         }
         setJarvisHistory(prev => [...prev, userMessage]);
 
-        let jarvisFile: JarvisFile | undefined;
+        let fileToSend: JarvisFile | undefined;
+        let finalPrompt = text;
+
         if (file) {
             const base64 = await fileToBase64(file);
-            jarvisFile = { base64, mimeType: file.type };
+            fileToSend = { base64, mimeType: file.type };
+            if (jarvisContextPost) setJarvisContextPost(null);
+        } else if (jarvisContextPost) {
+            try {
+                const response = await fetch(jarvisContextPost.url, { mode: 'cors' });
+                if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
+                const blob = await response.blob();
+                const fetchedFile = new File([blob], jarvisContextPost.title, { type: blob.type });
+                const base64 = await fileToBase64(fetchedFile);
+                fileToSend = { base64, mimeType: fetchedFile.type };
+            } catch (error) {
+                console.error("Failed to fetch shared post content:", error);
+                finalPrompt = `لم أتمكن من الوصول إلى الملف "${jarvisContextPost.title}" لتحليله. يرجى التأكد من أن الرابط متاح للعموم. سأحاول الإجابة على سؤالك بناءً على المعلومات المتاحة. ${text}`;
+            } finally {
+                setJarvisContextPost(null);
+            }
         }
         
-        const response = await askJarvis(text, user.name, user.gender, user.role, jarvisFile);
+        const response = await askJarvis(finalPrompt, user.name, user.gender, user.role, fileToSend);
         
         const jarvisResponse: JarvisMessage = { id: 'jarvis-' + Date.now() + 1, sender: 'jarvis', text: response.text };
         setJarvisHistory(prev => [...prev, jarvisResponse]);
@@ -307,8 +326,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             try {
                 const cache = await caches.open(OFFLINE_CACHE_NAME);
                 const requestUrl = new URL(post.url);
-                // Add postId to differentiate requests for the same URL if needed for other reasons
-                // but cache key will be the original URL
                 requestUrl.searchParams.set('postId', post.id);
 
                 const response = await fetch(post.url, { mode: 'cors' });
@@ -316,7 +333,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
                     throw new Error('Network response was not ok');
                 }
                 
-                // Use a new Request object with the postId for the cache key, but fetch the original URL
                 const cacheRequest = new Request(requestUrl.toString(), { mode: 'cors' });
                 await cache.put(cacheRequest, response);
 
@@ -353,6 +369,24 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         ));
     };
 
+    const sharePostWithJarvis = (post: Post) => {
+        if (!user) return;
+        setJarvisContextPost(post);
+
+        const userMessage: JarvisMessage = {
+            id: 'jarvis-' + Date.now(),
+            sender: 'user',
+            text: `مشاركة ملف لتحليله: "${post.title}"`,
+        };
+        const jarvisMessage: JarvisMessage = {
+            id: 'jarvis-' + Date.now() + 1,
+            sender: 'jarvis',
+            text: s.jarvisFileReceived,
+        };
+
+        setJarvisHistory(prev => [...prev, userMessage, jarvisMessage]);
+    };
+
     const value = {
         user,
         allUsers,
@@ -386,7 +420,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         deletePostFromChannel,
         downloadPostForOffline,
         removePostFromOffline,
-        blockUserFromChannel
+        blockUserFromChannel,
+        sharePostWithJarvis
     };
 
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
