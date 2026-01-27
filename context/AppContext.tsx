@@ -267,6 +267,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
                 url: URL.createObjectURL(file),
             };
         }
+
+        const currentHistory = [...jarvisHistory];
         setJarvisHistory(prev => [...prev, userMessage]);
 
         let fileToSend: JarvisFile | undefined;
@@ -292,7 +294,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             }
         }
         
-        const response = await askJarvis(finalPrompt, user.name, user.gender, user.role, fileToSend);
+        const response = await askJarvis(finalPrompt, user.name, user.gender, user.role, fileToSend, currentHistory);
         
         const jarvisResponse: JarvisMessage = { id: 'jarvis-' + Date.now() + 1, sender: 'jarvis', text: response.text };
         setJarvisHistory(prev => [...prev, jarvisResponse]);

@@ -6,7 +6,7 @@ export default async function handler(req: any, res: any) {
         return res.status(405).json({ error: 'Method Not Allowed' });
     }
 
-    const { prompt, userName, gender, role, file } = req.body;
+    const { prompt, userName, gender, role, file, history } = req.body;
 
     if (!prompt && !file) {
         return res.status(400).json({ error: 'Either a prompt or a file is required.' });
@@ -40,10 +40,15 @@ export default async function handler(req: any, res: any) {
         const welcomeGreeting = gender === 'female' ? 'أهلاً بكِ' : 'أهلاً بك';
 
         const systemInstruction = `You are Jarvis, an intelligent AI assistant for the 'جامعتك الرقمية way' platform. You are speaking with ${userTitle} ${userName}. Always address them by their name and title in a friendly, conversational tone (e.g., "${welcomeGreeting} ${userTitle} ${userName}، بخصوص سؤالك..."). Your goal is to provide academic consultations. Your primary knowledge base is the Algerian Scientific Journal Platform (ASJP). When answering, you MUST explicitly state that your information is from the ASJP, for example: "بالاعتماد على منصة المجلات العلمية الجزائرية (ASJP)...". If you use other sources, you must mention them. You might receive images or PDF files to analyze along with the user's prompt; respond to them accordingly. Always be helpful and academic. If you can't find an answer, say so clearly. Respond exclusively in Arabic.`;
+        
+        const geminiHistory = (history || []).map((msg: any) => ({
+            role: msg.sender === 'user' ? 'user' : 'model',
+            parts: [{ text: msg.text }],
+        }));
 
-        const contents: any = { parts: [] };
+        const currentUserParts: any[] = [];
         if (file) {
-            contents.parts.push({
+            currentUserParts.push({
                 inlineData: {
                     mimeType: file.mimeType,
                     data: file.base64,
@@ -51,13 +56,21 @@ export default async function handler(req: any, res: any) {
             });
         }
         if (prompt) {
-            contents.parts.push({ text: prompt });
+            currentUserParts.push({ text: prompt });
         }
+        
+        const fullContents = [
+            ...geminiHistory,
+            {
+                role: 'user',
+                parts: currentUserParts,
+            },
+        ];
 
 
         const response = await ai.models.generateContent({
             model: modelName,
-            contents: contents,
+            contents: fullContents,
             config: {
                 systemInstruction: systemInstruction,
                 temperature: 0.7,
