@@ -11,6 +11,8 @@ const JarvisAI: React.FC = () => {
     const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
     const [attachedFile, setAttachedFile] = useState<File | null>(null);
     const [filePreview, setFilePreview] = useState<string | null>(null);
+    const [isResearchPlanMode, setIsResearchPlanMode] = useState(false);
+
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -42,6 +44,7 @@ const JarvisAI: React.FC = () => {
         const file = e.target.files?.[0];
         if (file) {
             setAttachedFile(file);
+             setIsResearchPlanMode(false);
             if (file.type.startsWith('image/')) {
                 const previewUrl = URL.createObjectURL(file);
                 setFilePreview(previewUrl);
@@ -62,15 +65,23 @@ const JarvisAI: React.FC = () => {
         }
     };
 
+    const handleToggleResearchPlanMode = () => {
+        setIsResearchPlanMode(prev => !prev);
+        if (!isResearchPlanMode) {
+            handleRemoveFile();
+        }
+    };
+
 
     const handleSend = async (e: React.FormEvent) => {
         e.preventDefault();
         if ((!input.trim() && !attachedFile) || isLoading) return;
 
         setIsLoading(true);
-        await sendJarvisMessage(input.trim(), attachedFile || undefined);
+        await sendJarvisMessage(input.trim(), attachedFile || undefined, isResearchPlanMode);
         setInput('');
         handleRemoveFile();
+        setIsResearchPlanMode(false);
         setIsLoading(false);
     };
 
@@ -153,34 +164,40 @@ const JarvisAI: React.FC = () => {
                 </div>
             )}
 
-            <form onSubmit={handleSend} className="flex items-center gap-3">
-                <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleFileChange}
-                    className="hidden"
-                    accept="image/*,application/pdf"
-                />
-                 <button 
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={isLoading}
-                    className="p-3 rounded-full bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50"
-                >
-                    <PaperclipIcon className="w-5 h-5"/>
-                </button>
-                <input
-                    type="text"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    placeholder={s.askJarvis}
-                    disabled={isLoading}
-                    className="flex-1 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-full focus:outline-none focus:ring-2 focus:ring-primary-500"
-                />
+            <form onSubmit={handleSend} className="flex items-center gap-2 sm:gap-3">
+                <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
+                <div className="flex-1 flex items-center gap-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-full focus-within:ring-2 focus-within:ring-primary-500">
+                    <input
+                        type="text"
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        placeholder={isResearchPlanMode ? s.enterResearchTopic : s.askJarvis}
+                        disabled={isLoading}
+                        className="flex-1 min-w-0 w-full py-2 px-4 bg-transparent focus:outline-none"
+                    />
+                    <button 
+                        type="button"
+                        onClick={handleToggleResearchPlanMode}
+                        disabled={isLoading}
+                        className={`p-2 rounded-full transition-colors flex-shrink-0 ${isResearchPlanMode ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/50 dark:text-primary-300' : 'text-gray-500 dark:text-gray-400'} hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50`}
+                        title={s.researchPlan}
+                    >
+                        <FileTextIcon className="w-5 h-5"/>
+                    </button>
+                    <button 
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isLoading || isResearchPlanMode}
+                        className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 me-1"
+                        title={s.upload}
+                    >
+                        <PaperclipIcon className="w-5 h-5"/>
+                    </button>
+                </div>
                 <button 
                     type="submit" 
                     disabled={isLoading || (!input.trim() && !attachedFile)}
-                    className="p-3 rounded-full bg-primary-500 text-white hover:bg-primary-600 disabled:bg-primary-300 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:focus:ring-offset-gray-900"
+                    className="p-3 rounded-full bg-primary-500 text-white hover:bg-primary-600 disabled:bg-primary-300 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:focus:ring-offset-gray-900 flex-shrink-0"
                 >
                     <SendIcon className="w-5 h-5"/>
                 </button>

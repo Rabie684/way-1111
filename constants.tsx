@@ -258,6 +258,9 @@ export const STRINGS = {
         copied: 'تم النسخ!',
         jarvisFileReceived: 'لقد تلقيت ملف الأستاذ، هل تود مني تلخيصه أو شرح النقاط الغامضة فيه؟',
         shareWithJarvis: 'مشاركة مع جارفيس',
+        researchPlan: 'خطة بحث',
+        enterResearchTopic: 'اكتب عنوان البحث...',
+        researchPlanRequest: 'طلب خطة بحث لـ:'
     },
     en: {
         appName: 'Your Digital University Way',
@@ -375,6 +378,9 @@ export const STRINGS = {
         copied: 'Copied!',
         jarvisFileReceived: "I have received the professor's file. Would you like me to summarize it or explain any unclear points?",
         shareWithJarvis: 'Share with Jarvis',
+        researchPlan: 'Research Plan',
+        enterResearchTopic: 'Enter research topic...',
+        researchPlanRequest: 'Research plan request for:'
     },
     fr: {
         appName: 'Votre Université Numérique Way',
@@ -492,6 +498,9 @@ export const STRINGS = {
         copied: 'Copié !',
         jarvisFileReceived: "J'ai reçu le fichier du professeur. Souhaitez-vous que je le résume ou que j'éclaircisse des points ambigus ?",
         shareWithJarvis: 'Partager avec Jarvis',
+        researchPlan: 'Plan de recherche',
+        enterResearchTopic: 'Entrez le sujet de recherche...',
+        researchPlanRequest: 'Demande de plan de recherche pour:'
     }
 };
 

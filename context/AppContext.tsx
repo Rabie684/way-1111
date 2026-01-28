@@ -69,7 +69,7 @@ interface AppContextType {
     deleteDirectMessage: (messageId: string) => Promise<void>;
     addPostFromFile: (channelId: string, file: File) => Promise<void>;
     addPostFromLink: (channelId: string, title: string, url: string) => Promise<void>;
-    sendJarvisMessage: (text: string, file?: File) => Promise<void>;
+    sendJarvisMessage: (text: string, file?: File, isResearchPlan?: boolean) => Promise<void>;
     updateUser: (updatedUser: Partial<User>) => Promise<void>;
     markNotificationsAsRead: () => Promise<void>;
     clearChannelChat: (channelId: string) => Promise<void>;
@@ -256,10 +256,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     };
 
 
-    const sendJarvisMessage = async (text: string, file?: File) => {
+    const sendJarvisMessage = async (text: string, file?: File, isResearchPlan?: boolean) => {
         if (!user) return;
         
-        const userMessage: JarvisMessage = { id: 'jarvis-' + Date.now(), sender: 'user', text };
+        const userMessageText = isResearchPlan ? `${s.researchPlanRequest} "${text}"` : text;
+        const userMessage: JarvisMessage = { id: 'jarvis-' + Date.now(), sender: 'user', text: userMessageText };
+        
         if (file) {
             userMessage.file = {
                 name: file.name,
@@ -268,11 +270,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             };
         }
 
-        const currentHistory = [...jarvisHistory];
-        setJarvisHistory(prev => [...prev, userMessage]);
+        const currentHistory = [...jarvisHistory, userMessage];
+        setJarvisHistory(currentHistory);
+        
+        let apiPrompt = text;
+        if(isResearchPlan) {
+            apiPrompt = `أنشئ خطة بحث مفصلة للموضوع التالي: '${text}'. يجب أن تتضمن الخطة مقدمة، إشكالية، فصول ومباحث مقترحة، وخاتمة. الأهم من ذلك، قم بتضمين قائمة بالمصادر والمراجع الأكاديمية ذات الصلة من منصة المجلات العلمية الجزائرية (ASJP) التي يمكن أن تساعد في هذا البحث.`;
+        }
 
         let fileToSend: JarvisFile | undefined;
-        let finalPrompt = text;
 
         if (file) {
             const base64 = await fileToBase64(file);
@@ -288,13 +294,13 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
                 fileToSend = { base64, mimeType: fetchedFile.type };
             } catch (error) {
                 console.error("Failed to fetch shared post content:", error);
-                finalPrompt = `لم أتمكن من الوصول إلى الملف "${jarvisContextPost.title}" لتحليله. يرجى التأكد من أن الرابط متاح للعموم. سأحاول الإجابة على سؤالك بناءً على المعلومات المتاحة. ${text}`;
+                apiPrompt = `لم أتمكن من الوصول إلى الملف "${jarvisContextPost.title}" لتحليله. يرجى التأكد من أن الرابط متاح للعموم. سأحاول الإجابة على سؤالك بناءً على المعلومات المتاحة. ${text}`;
             } finally {
                 setJarvisContextPost(null);
             }
         }
         
-        const response = await askJarvis(finalPrompt, user.name, user.gender, user.role, fileToSend, currentHistory);
+        const response = await askJarvis(apiPrompt, user.name, user.gender, user.role, fileToSend, currentHistory);
         
         const jarvisResponse: JarvisMessage = { id: 'jarvis-' + Date.now() + 1, sender: 'jarvis', text: response.text };
         setJarvisHistory(prev => [...prev, jarvisResponse]);
