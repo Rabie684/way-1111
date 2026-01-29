@@ -239,7 +239,7 @@ export const STRINGS = {
         message: 'مراسلة',
         blockUserConfirmTitle: 'تأكيد الحظر',
         blockUserConfirmMessage: 'هل أنت متأكد أنك تريد حظر {userName} من هذه القناة؟ سيفقد الوصول إلى كل المحتوى والدردشة.',
-        channelsBy: 'قنوات الأستاذ {profName}',
+        channelsBy: 'قنوات {profName}',
         channels: 'قنوات',
         noProfessorsFound: 'لم يتم العثور على أساتذة في الجامعة والكلية المحددة.',
         noSubscribedChannels: "أنت غير مشترك في أي قناة بعد",

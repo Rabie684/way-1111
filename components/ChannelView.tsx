@@ -1,5 +1,5 @@
 import React, { useState, useRef, useMemo, useEffect } from 'react';
-import { Channel, User, UserRole, PostType, Section, Post } from '../types';
+import { Channel, User, UserRole, PostType, Section, Post, Gender } from '../types';
 import ChatWindow from './ChatWindow';
 import SubscriptionModal from './SubscriptionModal';
 import { getLang } from '../constants';
@@ -131,6 +131,7 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack, onStar
         (channelSections.some(sec => user.subscribedSections.includes(sec.id)) && !channel.blockedUsers.includes(user.id));
     
     const professor = allUsers.find(u => u.id === channel.professorId);
+    const professorTitle = professor ? (professor.gender === Gender.Female ? s.professorFemaleTitle : s.professorMaleTitle) : '';
 
 
     const header = (
@@ -148,7 +149,7 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack, onStar
                 <div className="flex items-center text-sm">
                     {professor && <>
                         <img src={professor.avatar} alt={professor.name} className="w-6 h-6 rounded-full me-2"/>
-                        <span>{professor.name}</span>
+                        <span>{professorTitle} {professor.name}</span>
                     </>}
                      {isOwner && (
                         <div className="relative ms-4" ref={subscribersDropdownRef}>

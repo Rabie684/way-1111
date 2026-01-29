@@ -7,7 +7,7 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { getLang, UNIVERSITIES, COLLEGES } from '../constants';
-import { Channel, User, UserRole } from '../types';
+import { Channel, User, UserRole, Gender } from '../types';
 import ChannelView from './ChannelView';
 import JarvisAI from './JarvisAI';
 import ProfileSettingsModal from './ProfileSettingsModal';
@@ -183,15 +183,21 @@ const StudentDashboard: React.FC = () => {
                                 <ArrowLeftIcon className="w-4 h-4" />
                                 {s.back}
                             </button>
-                             <h2 className="text-xl font-bold mb-4">{s.channelsBy.replace('{profName}', professorMap.get(selectedProfessorId)?.name || '')}</h2>
+                            {(() => {
+                                const selectedProfessor = professorMap.get(selectedProfessorId);
+                                const profTitle = selectedProfessor?.gender === Gender.Female ? s.professorFemaleTitle : s.professorMaleTitle;
+                                const profTitledName = selectedProfessor ? `${profTitle} ${selectedProfessor.name}` : '';
+                                return <h2 className="text-xl font-bold mb-4">{s.channelsBy.replace('{profName}', profTitledName)}</h2>
+                            })()}
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                {selectedProfessorChannels.map(channel => {
                                     const professor = professorMap.get(channel.professorId);
+                                    const profInCardTitle = professor?.gender === Gender.Female ? s.professorFemaleTitle : s.professorMaleTitle;
                                     return(
                                         <div key={channel.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-transform hover:scale-105">
                                             <div className="p-6">
                                                 <h3 className="text-xl font-bold text-primary-600 dark:text-primary-400 mb-2">{channel.name}</h3>
-                                                {professor && (<div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-4"><img src={professor.avatar} alt={professor.name} className="w-6 h-6 rounded-full me-2"/><span>{professor.name}</span></div>)}
+                                                {professor && (<div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-4"><img src={professor.avatar} alt={professor.name} className="w-6 h-6 rounded-full me-2"/><span>{profInCardTitle} {professor.name}</span></div>)}
                                                 <p className="text-sm text-gray-500 mb-4">{channel.specialization}</p>
                                                 <div className="flex justify-between items-center">
                                                     <div className="flex items-center space-x-4 rtl:space-x-reverse text-sm text-gray-500"><div className="flex items-center"><BookOpenIcon className="w-4 h-4 me-1"/> {channel.posts.length}</div></div>
@@ -208,11 +214,12 @@ const StudentDashboard: React.FC = () => {
                         <div className="space-y-4">
                             {filteredProfessors.map(prof => {
                                 const profChannelsCount = channels.filter(c => c.professorId === prof.id).length;
+                                const profTitle = prof.gender === Gender.Female ? s.professorFemaleTitle : s.professorMaleTitle;
                                 return (
                                     <div key={prof.id} onClick={() => window.location.hash = `#/explore/${prof.id}`} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex items-center gap-4 cursor-pointer transition-all hover:shadow-lg hover:border-primary-500 border-2 border-transparent">
                                         <img src={prof.avatar} alt={prof.name} className="w-16 h-16 rounded-full object-cover" />
                                         <div className="flex-1">
-                                            <h3 className="font-bold text-lg">{prof.name}</h3>
+                                            <h3 className="font-bold text-lg">{profTitle} {prof.name}</h3>
                                             <p className="text-sm text-gray-500">{prof.college}</p>
                                         </div>
                                         <div className="text-center">
@@ -240,11 +247,12 @@ const StudentDashboard: React.FC = () => {
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {mySubscribedChannels.map(channel => {
                                     const professor = professorMap.get(channel.professorId);
+                                    const professorTitle = professor?.gender === Gender.Female ? s.professorFemaleTitle : s.professorMaleTitle;
                                     return(
                                         <div key={channel.id} onClick={() => handleChannelClick(channel)} className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-transform hover:scale-105 cursor-pointer">
                                             <div className="p-6">
                                                 <h3 className="text-xl font-bold text-primary-600 dark:text-primary-400 mb-2">{channel.name}</h3>
-                                                {professor && (<div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-4"><img src={professor.avatar} alt={professor.name} className="w-6 h-6 rounded-full me-2"/><span>{professor.name}</span></div>)}
+                                                {professor && (<div className="flex items-center text-sm text-gray-600 dark:text-gray-400 mb-4"><img src={professor.avatar} alt={professor.name} className="w-6 h-6 rounded-full me-2"/><span>{professorTitle} {professor.name}</span></div>)}
                                                 <p className="text-sm text-gray-500 mb-4">{channel.specialization}</p>
                                                 <div className="flex justify-between items-center text-sm text-gray-500">
                                                     <div className="flex items-center"><BookOpenIcon className="w-4 h-4 me-1"/> {channel.posts.length} {s.posts}</div>
