@@ -103,24 +103,35 @@ const DirectMessagesView: React.FC<DirectMessagesViewProps> = ({ initialUser, on
                         <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-gray-50 dark:bg-gray-900">
                             {conversationMessages.map((msg) => {
                                 const isCurrentUser = msg.senderId === user.id;
-                                return (
-                                    <div key={msg.id} className={`flex items-end gap-2 group ${isCurrentUser ? 'justify-end flex-row-reverse' : 'justify-start'}`}>
-                                        <img src={isCurrentUser ? user.avatar : selectedUser.avatar} alt={isCurrentUser ? user.name : selectedUser.name} className="w-8 h-8 rounded-full object-cover"/>
-                                        <div className={`max-w-xs md:max-w-md p-3 rounded-lg ${isCurrentUser ? 'bg-primary-500 text-white rounded-bl-none' : 'bg-white dark:bg-gray-700 rounded-br-none'}`}>
-                                            <p className="text-sm">{msg.text}</p>
-                                            <p className={`text-xs mt-1 ${isCurrentUser ? 'text-primary-200' : 'text-gray-400'}`}>{msg.timestamp}</p>
-                                        </div>
-                                         {isCurrentUser && (
+
+                                if (isCurrentUser) {
+                                    return (
+                                        <div key={msg.id} className="flex justify-end items-end gap-2 group">
                                             <button 
                                                 onClick={() => setMessageToDelete(msg)}
-                                                className="p-1 rounded-full text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 opacity-0 group-hover:opacity-100 transition-opacity self-center"
+                                                className="p-1 rounded-full text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 opacity-0 group-hover:opacity-100 transition-opacity self-center flex-shrink-0"
                                                 title={s.deleteMessage}
                                             >
                                                 <TrashIcon className="w-4 h-4" />
                                             </button>
-                                        )}
-                                    </div>
-                                );
+                                            <div className="max-w-xs md:max-w-md p-3 rounded-lg bg-primary-500 text-white rounded-br-none">
+                                                <p className="text-sm break-words">{msg.text}</p>
+                                                <p className="text-xs mt-1 text-primary-200 text-right">{msg.timestamp}</p>
+                                            </div>
+                                            <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full object-cover flex-shrink-0"/>
+                                        </div>
+                                    );
+                                } else {
+                                    return (
+                                        <div key={msg.id} className="flex justify-start items-end gap-2">
+                                            <img src={selectedUser.avatar} alt={selectedUser.name} className="w-8 h-8 rounded-full object-cover flex-shrink-0"/>
+                                            <div className="max-w-xs md:max-w-md p-3 rounded-lg bg-white dark:bg-gray-700 rounded-bl-none">
+                                                <p className="text-sm break-words">{msg.text}</p>
+                                                <p className="text-xs mt-1 text-gray-400 text-right">{msg.timestamp}</p>
+                                            </div>
+                                        </div>
+                                    );
+                                }
                             })}
                             <div ref={messagesEndRef} />
                         </div>
