@@ -1,19 +1,19 @@
 
-import { Gender, UserRole, JarvisMessage } from '../types';
+import { Gender, UserRole, IAMessage } from '../types';
 
-export interface JarvisFile {
+export interface IAFile {
     base64: string;
     mimeType: string;
 }
 
-export const askJarvis = async (
+export const askIA = async (
     prompt: string,
     userName: string,
     gender: Gender,
     role: UserRole,
     onChunk: (chunk: string) => void,
-    file?: JarvisFile,
-    history?: JarvisMessage[]
+    file?: IAFile,
+    history?: IAMessage[]
 ): Promise<void> => {
     try {
         const response = await fetch('/api/jarvis', {
@@ -64,7 +64,7 @@ export const askJarvis = async (
         }
 
     } catch (error) {
-        console.error("Jarvis Service Error:", error);
+        console.error("IA Service Error:", error);
         onChunk("تعذر الوصول إلى الخادم. يرجى التأكد من اتصالك بالإنترنت والمحاولة مرة أخرى.");
     }
 };

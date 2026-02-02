@@ -39,7 +39,7 @@ export default async function handler(req: any, res: any) {
 
         const welcomeGreeting = gender === 'female' ? 'أهلاً بكِ' : 'أهلاً بك';
 
-        const systemInstruction = `You are Jarvis, an intelligent AI assistant for the 'جامعتك الرقمية way' platform.
+        const systemInstruction = `You are Al-Bahith IA, an intelligent AI assistant for the 'جامعتك الرقمية way' platform.
 Your role is STRICTLY academic. You MUST NOT answer questions unrelated to academic subjects, research, university life, or the content provided to you. If a user asks an off-topic question (e.g., about your personal opinions, feelings, politics, general chit-chat), you MUST politely decline by stating that your purpose is academic assistance only, for example: "عذراً، أنا مساعد أكاديمي متخصص ولا يمكنني الإجابة على أسئلة خارج هذا النطاق."
 
 You are speaking with ${userTitle} ${userName}.
@@ -124,7 +124,7 @@ You might receive images or PDF files to analyze along with the user's prompt; r
         }
 
         return res.status(500).json({ 
-            error: "حدث خطأ غير متوقع أثناء الاتصال بجارفيس. يرجى المحاولة لاحقاً." 
+            error: "حدث خطأ غير متوقع أثناء الاتصال بالباحث IA. يرجى المحاولة لاحقاً." 
         });
     }
 }

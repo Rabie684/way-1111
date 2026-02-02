@@ -27,7 +27,7 @@ const PostIcon: React.FC<{ type: PostType }> = ({ type }) => {
 };
 
 const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack, onStartDirectMessage }) => {
-    const { s, allUsers, sections, addPostFromFile, isUploadingPost, clearChannelChat, deletePostFromChannel, offlinePostIds, downloadPostForOffline, removePostFromOffline, blockUserFromChannel, sharePostWithJarvis } = useApp();
+    const { s, allUsers, sections, addPostFromFile, isUploadingPost, clearChannelChat, deletePostFromChannel, offlinePostIds, downloadPostForOffline, removePostFromOffline, blockUserFromChannel, sharePostWithIA } = useApp();
     const [activeTab, setActiveTab] = useState<'posts' | 'chat'>('posts');
     const [showSubscriptionModal, setShowSubscriptionModal] = useState<Section | null>(null);
     const [showClearConfirm, setShowClearConfirm] = useState(false);
@@ -312,7 +312,7 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack, onStar
                                                 {user.role === UserRole.Student && (
                                                     <button
                                                         onClick={() => {
-                                                            sharePostWithJarvis(post);
+                                                            sharePostWithIA(post);
                                                             window.location.hash = '#/ai';
                                                         }}
                                                         className="p-2 text-gray-400 hover:text-primary-500 rounded-full hover:bg-primary-100 dark:hover:bg-primary-900/50"

@@ -78,9 +78,9 @@ export interface Notification {
     read: boolean;
 }
 
-export interface JarvisMessage {
+export interface IAMessage {
     id: string;
-    sender: 'user' | 'jarvis';
+    sender: 'user' | 'ia';
     text: string;
     file?: {
         name: string;

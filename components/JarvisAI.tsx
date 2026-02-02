@@ -3,8 +3,8 @@ import { useApp } from '../context/AppContext';
 import { getLang } from '../constants';
 import { SendIcon, BotIcon, ClipboardIcon, CheckIcon, PaperclipIcon, XIcon, FileTextIcon } from './icons/IconComponents';
 
-const JarvisAI: React.FC = () => {
-    const { language, jarvisHistory, sendJarvisMessage } = useApp();
+const AlBahithIA: React.FC = () => {
+    const { language, iaHistory, sendIAMessage } = useApp();
     const s = getLang(language);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -31,7 +31,7 @@ const JarvisAI: React.FC = () => {
         };
     }, [filePreview]);
 
-    useEffect(scrollToBottom, [jarvisHistory]);
+    useEffect(scrollToBottom, [iaHistory]);
     
     const handleCopy = (text: string, id: string) => {
         navigator.clipboard.writeText(text).then(() => {
@@ -78,7 +78,7 @@ const JarvisAI: React.FC = () => {
         if ((!input.trim() && !attachedFile) || isLoading) return;
 
         setIsLoading(true);
-        await sendJarvisMessage(input.trim(), attachedFile || undefined, isResearchPlanMode);
+        await sendIAMessage(input.trim(), attachedFile || undefined, isResearchPlanMode);
         setInput('');
         handleRemoveFile();
         setIsResearchPlanMode(false);
@@ -99,9 +99,9 @@ const JarvisAI: React.FC = () => {
             
             <div className="flex-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md p-4 overflow-y-auto mb-4">
                 <div className="space-y-4">
-                    {jarvisHistory.map((msg) => (
+                    {iaHistory.map((msg) => (
                         <div key={msg.id} className={`flex items-start gap-3 ${msg.sender === 'user' ? 'justify-end' : ''}`}>
-                            {msg.sender === 'jarvis' && <BotIcon className="w-6 h-6 text-primary-500 flex-shrink-0 mt-1" />}
+                            {msg.sender === 'ia' && <BotIcon className="w-6 h-6 text-primary-500 flex-shrink-0 mt-1" />}
                             <div className={`relative group max-w-xl p-3 rounded-lg whitespace-pre-wrap ${msg.sender === 'user' ? 'bg-primary-500 text-white rounded-br-none' : 'bg-gray-100 dark:bg-gray-700 rounded-bl-none'}`}>
                                 {msg.file && (
                                     <div className="mb-2">
@@ -116,7 +116,7 @@ const JarvisAI: React.FC = () => {
                                     </div>
                                 )}
                                 {msg.text}
-                                {msg.sender === 'jarvis' && msg.text && (
+                                {msg.sender === 'ia' && msg.text && (
                                     <button
                                         onClick={() => handleCopy(msg.text, msg.id)}
                                         className="absolute top-2 end-2 p-1 rounded-md text-gray-500 dark:text-gray-400 bg-white/50 dark:bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity focus:opacity-100 hover:text-gray-800 dark:hover:text-gray-200"
@@ -194,4 +194,4 @@ const JarvisAI: React.FC = () => {
     );
 };
 
-export default JarvisAI;
+export default AlBahithIA;

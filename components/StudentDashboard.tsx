@@ -4,12 +4,14 @@
 
 
 
+
+
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { getLang, UNIVERSITIES, COLLEGES } from '../constants';
 import { Channel, User, UserRole, Gender } from '../types';
 import ChannelView from './ChannelView';
-import JarvisAI from './JarvisAI';
+import AlBahithIA from './JarvisAI';
 import ProfileSettingsModal from './ProfileSettingsModal';
 import DirectMessagesView from './DirectMessagesView';
 import QRCodeModal from './QRCodeModal';
@@ -149,7 +151,7 @@ const StudentDashboard: React.FC = () => {
     if (!user) return null;
 
     const renderContent = () => {
-        if (activeTab === 'ai') return <JarvisAI />;
+        if (activeTab === 'ai') return <AlBahithIA />;
         if (activeTab === 'direct-messages') return <DirectMessagesView />;
         if (activeTab === 'explore') return (
             <div className="p-4 sm:p-8 h-full flex flex-col overflow-y-auto">

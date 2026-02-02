@@ -3,12 +3,13 @@
 
 
 
+
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { getLang } from '../constants';
 import { Channel, User } from '../types';
 import ChannelView from './ChannelView';
-import JarvisAI from './JarvisAI';
+import AlBahithIA from './JarvisAI';
 import CreateChannelModal from './CreateChannelModal';
 import ProfileSettingsModal from './ProfileSettingsModal';
 import DirectMessagesView from './DirectMessagesView';
@@ -117,7 +118,7 @@ const ProfessorDashboard: React.FC = () => {
     }
 
     const renderContent = () => {
-        if (activeTab === 'ai') return <JarvisAI />;
+        if (activeTab === 'ai') return <AlBahithIA />;
         if (activeTab === 'direct-messages') return <DirectMessagesView initialUser={dmTargetUser} onViewLoad={() => setDmTargetUser(null)} />;
         if (activeTab === 'channel') {
             if (selectedChannel) return <ChannelView channel={selectedChannel} user={user!} onBack={handleBackFromChannel} onStartDirectMessage={handleStartDirectMessage} />;

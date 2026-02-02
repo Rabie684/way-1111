@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { User, UserRole, Channel, ChannelMessage, Notification, JarvisMessage, DirectMessage, Post, PostType, Section, Gender } from '../types';
+import { User, UserRole, Channel, ChannelMessage, Notification, IAMessage, DirectMessage, Post, PostType, Section, Gender } from '../types';
 import { 
     getLang, 
     STRINGS, 
@@ -12,7 +12,7 @@ import {
     MOCK_NOTIFICATIONS,
     MOCK_ALL_USERS
 } from '../constants';
-import { askJarvis, JarvisFile } from '../services/geminiService';
+import { askIA, IAFile } from '../services/geminiService';
 
 type Theme = 'light' | 'dark';
 type Language = 'ar' | 'en' | 'fr';
@@ -54,7 +54,7 @@ interface AppContextType {
     channelMessages: ChannelMessage[];
     directMessages: DirectMessage[];
     notifications: Notification[];
-    jarvisHistory: JarvisMessage[];
+    iaHistory: IAMessage[];
     offlinePostIds: Set<string>;
     isUploadingPost: boolean;
     login: (details: LoginDetails) => Promise<void>;
@@ -69,7 +69,7 @@ interface AppContextType {
     deleteDirectMessage: (messageId: string) => Promise<void>;
     addPostFromFile: (channelId: string, file: File) => Promise<void>;
     addPostFromLink: (channelId: string, title: string, url: string) => Promise<void>;
-    sendJarvisMessage: (text: string, file?: File, isResearchPlan?: boolean) => Promise<void>;
+    sendIAMessage: (text: string, file?: File, isResearchPlan?: boolean) => Promise<void>;
     updateUser: (updatedUser: Partial<User>) => Promise<void>;
     markNotificationsAsRead: () => Promise<void>;
     clearChannelChat: (channelId: string) => Promise<void>;
@@ -77,7 +77,7 @@ interface AppContextType {
     downloadPostForOffline: (post: Post) => Promise<void>;
     removePostFromOffline: (post: Post) => Promise<void>;
     blockUserFromChannel: (userId: string, channelId: string) => Promise<void>;
-    sharePostWithJarvis: (post: Post) => void;
+    sharePostWithIA: (post: Post) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -92,10 +92,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const [channelMessages, setChannelMessages] = useState<ChannelMessage[]>(MOCK_CHANNEL_MESSAGES);
     const [directMessages, setDirectMessages] = useState<DirectMessage[]>(MOCK_DIRECT_MESSAGES);
     const [notifications, setNotifications] = useState<Notification[]>(MOCK_NOTIFICATIONS);
-    const [jarvisHistory, setJarvisHistory] = useState<JarvisMessage[]>([]);
+    const [iaHistory, setIAHistory] = useState<IAMessage[]>([]);
     const [offlinePostIds, setOfflinePostIds] = useState<Set<string>>(new Set());
     const [isUploadingPost, setIsUploadingPost] = useState(false);
-    const [jarvisContextPost, setJarvisContextPost] = useState<Post | null>(null);
+    const [iaContextPost, setIAContextPost] = useState<Post | null>(null);
 
     const s = getLang(language);
     
@@ -254,12 +254,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         ));
     };
 
-    const sendJarvisMessage = async (text: string, file?: File, isResearchPlan?: boolean) => {
+    const sendIAMessage = async (text: string, file?: File, isResearchPlan?: boolean) => {
         if (!user) return;
     
         const userMessageText = isResearchPlan ? `${s.researchPlanRequest} "${text}"` : text;
         
-        const userMessage: JarvisMessage = {
+        const userMessage: IAMessage = {
             id: 'user-' + Date.now(),
             sender: 'user',
             text: userMessageText,
@@ -273,49 +273,49 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             };
         }
         
-        const jarvisMessageId = 'jarvis-' + Date.now();
-        const jarvisPlaceholder: JarvisMessage = {
-            id: jarvisMessageId,
-            sender: 'jarvis',
+        const iaMessageId = 'ia-' + Date.now();
+        const iaPlaceholder: IAMessage = {
+            id: iaMessageId,
+            sender: 'ia',
             text: ''
         };
         
-        setJarvisHistory(prev => [...prev, userMessage, jarvisPlaceholder]);
+        setIAHistory(prev => [...prev, userMessage, iaPlaceholder]);
         
-        let jarvisFile: JarvisFile | undefined;
+        let iaFile: IAFile | undefined;
         if (file) {
             try {
                 const base64 = await fileToBase64(file);
-                jarvisFile = { base64, mimeType: file.type };
+                iaFile = { base64, mimeType: file.type };
             } catch (error) {
                 console.error("Error converting file to base64:", error);
                 // Show error in the chat
-                 setJarvisHistory(prev =>
+                 setIAHistory(prev =>
                     prev.map(msg =>
-                        msg.id === jarvisMessageId ? { ...msg, text: "حدث خطأ أثناء معالجة الملف." } : msg
+                        msg.id === iaMessageId ? { ...msg, text: "حدث خطأ أثناء معالجة الملف." } : msg
                     )
                 );
                 return;
             }
         }
         
-        const historyForApi = jarvisHistory.filter(m => m.id !== jarvisMessageId);
+        const historyForApi = iaHistory.filter(m => m.id !== iaMessageId);
         
         const onChunk = (chunk: string) => {
-            setJarvisHistory(prev =>
+            setIAHistory(prev =>
                 prev.map(msg =>
-                    msg.id === jarvisMessageId ? { ...msg, text: msg.text + chunk } : msg
+                    msg.id === iaMessageId ? { ...msg, text: msg.text + chunk } : msg
                 )
             );
         };
         
-        await askJarvis(
+        await askIA(
             userMessageText,
             user.name,
             user.gender,
             user.role,
             onChunk,
-            jarvisFile,
+            iaFile,
             historyForApi
         );
     };
@@ -375,13 +375,13 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         ));
     };
     
-    const sharePostWithJarvis = (post: Post) => {
-        setJarvisContextPost(post);
+    const sharePostWithIA = (post: Post) => {
+        setIAContextPost(post);
         fetch(post.url)
             .then(res => res.blob())
             .then(blob => {
                 const file = new File([blob], post.title, { type: blob.type });
-                sendJarvisMessage(s.jarvisFileReceived, file);
+                sendIAMessage(s.jarvisFileReceived, file);
             });
     };
 
@@ -396,7 +396,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         channelMessages,
         directMessages,
         notifications,
-        jarvisHistory,
+        iaHistory,
         offlinePostIds,
         isUploadingPost,
         login,
@@ -411,7 +411,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         deleteDirectMessage,
         addPostFromFile,
         addPostFromLink,
-        sendJarvisMessage,
+        sendIAMessage,
         updateUser,
         markNotificationsAsRead,
         clearChannelChat,
@@ -419,7 +419,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         downloadPostForOffline,
         removePostFromOffline,
         blockUserFromChannel,
-        sharePostWithJarvis,
+        sharePostWithIA,
     };
 
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
