@@ -116,7 +116,7 @@ const JarvisAI: React.FC = () => {
                                     </div>
                                 )}
                                 {msg.text}
-                                {msg.sender === 'jarvis' && (
+                                {msg.sender === 'jarvis' && msg.text && (
                                     <button
                                         onClick={() => handleCopy(msg.text, msg.id)}
                                         className="absolute top-2 end-2 p-1 rounded-md text-gray-500 dark:text-gray-400 bg-white/50 dark:bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity focus:opacity-100 hover:text-gray-800 dark:hover:text-gray-200"
@@ -132,18 +132,6 @@ const JarvisAI: React.FC = () => {
                             </div>
                         </div>
                     ))}
-                    {isLoading && (
-                         <div className="flex items-start gap-3">
-                            <BotIcon className="w-6 h-6 text-primary-500 flex-shrink-0 mt-1" />
-                            <div className="max-w-xl p-3 rounded-lg bg-gray-100 dark:bg-gray-700 rounded-bl-none">
-                                <div className="flex items-center space-x-2">
-                                    <div className="w-2 h-2 bg-primary-500 rounded-full animate-pulse"></div>
-                                    <div className="w-2 h-2 bg-primary-500 rounded-full animate-pulse" style={{animationDelay: '0.2s'}}></div>
-                                    <div className="w-2 h-2 bg-primary-500 rounded-full animate-pulse" style={{animationDelay: '0.4s'}}></div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
                     <div ref={messagesEndRef} />
                 </div>
             </div>

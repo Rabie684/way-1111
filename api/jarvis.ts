@@ -78,7 +78,7 @@ You might receive images or PDF files to analyze along with the user's prompt; r
         ];
 
 
-        const response = await ai.models.generateContent({
+        const streamResult = await ai.models.generateContentStream({
             model: modelName,
             contents: fullContents,
             config: {
@@ -88,19 +88,20 @@ You might receive images or PDF files to analyze along with the user's prompt; r
                 topK: 40,
             },
         });
-
-        const resultText = response.text;
         
-        if (resultText) {
-            return res.status(200).json({ text: resultText });
-        } else {
-            console.warn("AI_WARNING: Empty response text from Gemini.");
-            let feedback = "لم أتمكن من إنشاء رد لسؤالك. الرجاء محاولة طرح سؤال آخر.";
-            if (response.candidates?.[0]?.finishReason === 'SAFETY') {
-                feedback = "تم حظر الرد لأسباب تتعلق بالسلامة الأكاديمية. الرجاء إعادة صياغة سؤالك.";
+        // Set headers for streaming
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+
+        for await (const chunk of streamResult) {
+            // Ensure there's text to send. Some chunks might be empty.
+            const chunkText = chunk.text;
+            if (chunkText) {
+                res.write(chunkText);
             }
-            return res.status(200).json({ text: feedback });
         }
+
+        res.end(); // End the stream when Gemini is done.
+
     } catch (error: any) {
         console.error("--- Gemini API Failure ---");
         // The error from the SDK might contain a `response` object with status

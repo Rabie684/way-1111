@@ -140,8 +140,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             gender: details.gender!,
             university: details.university!,
             college: details.college!,
-            avatar: `https://picsum.photos/seed/${Date.now()}/200`,
-            subscribedSections: []
+            avatar: `https://picsum.photos/seed/${details.name!}/200`,
+            subscribedSections: [],
         };
         setAllUsers(prev => [...prev, newUser]);
         setUser(newUser);
@@ -151,17 +151,19 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setUser(null);
     };
 
-    const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
+    const toggleTheme = () => {
+        setTheme(prev => prev === 'light' ? 'dark' : 'light');
+    };
 
     const createChannel = async (channelData: Omit<Channel, 'id' | 'professorId' | 'posts' | 'subscribers' | 'blockedUsers'>) => {
         if (!user || user.role !== UserRole.Professor) return;
         const newChannel: Channel = {
             id: 'ch-' + Date.now(),
+            ...channelData,
             professorId: user.id,
             posts: [],
             subscribers: 0,
             blockedUsers: [],
-            ...channelData,
         };
         setChannels(prev => [...prev, newChannel]);
     };
@@ -171,44 +173,37 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setUser(prev => prev ? { ...prev, subscribedSections: [...prev.subscribedSections, sectionId] } : null);
         const section = sections.find(s => s.id === sectionId);
         const channel = channels.find(c => c.id === section?.channelId);
-        if(section && channel) {
-            const notifText = s.subscriptionSuccessNotification
-                .replace('{sectionName}', section.name)
-                .replace('{channelName}', channel.name);
-            addNotification(notifText);
+        if (section && channel) {
+             const newNotif: Notification = {
+                id: 'notif-' + Date.now(),
+                text: s.subscriptionSuccessNotification.replace('{sectionName}', section.name).replace('{channelName}', channel.name),
+                timestamp: 'الآن',
+                read: false,
+            };
+            setNotifications(prev => [newNotif, ...prev]);
         }
     };
-    
-    const addNotification = (text: string) => {
-        const newNotif: Notification = {
-            id: 'notif-' + Date.now(),
-            text,
-            timestamp: 'الآن',
-            read: false,
-        };
-        setNotifications(prev => [newNotif, ...prev]);
-    }
 
     const sendMessage = async (channelId: string, text: string) => {
         if (!user) return;
         const newMessage: ChannelMessage = {
-            id: 'msg-ch-' + Date.now(),
-            senderId: user.id,
+            id: 'msg-' + Date.now(),
             channelId,
+            senderId: user.id,
             text,
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            timestamp: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
         };
         setChannelMessages(prev => [...prev, newMessage]);
     };
-
+    
     const sendDirectMessage = async (receiverId: string, text: string) => {
         if (!user) return;
         const newMessage: DirectMessage = {
             id: 'dm-' + Date.now(),
-            senderId: user.id,
             receiverId,
+            senderId: user.id,
             text,
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            timestamp: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
         };
         setDirectMessages(prev => [...prev, newMessage]);
     };
@@ -221,15 +216,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setIsUploadingPost(true);
         // Simulate upload delay
         await new Promise(resolve => setTimeout(resolve, 1500));
-        
+
         let type: PostType;
         if (file.type.startsWith('image/')) type = PostType.Image;
         else if (file.type.startsWith('video/')) type = PostType.Video;
         else if (file.type === 'application/pdf') type = PostType.PDF;
         else {
-             alert('File type not supported');
-             setIsUploadingPost(false);
-             return;
+            alert('Unsupported file type.');
+            setIsUploadingPost(false);
+            return;
         }
 
         const newPost: Post = {
@@ -237,10 +232,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             type,
             title: file.name,
             url: URL.createObjectURL(file), // Using blob URL for local preview
-            createdAt: new Date().toISOString().split('T')[0]
+            createdAt: new Date().toISOString().split('T')[0],
         };
 
-        setChannels(prev => prev.map(ch => ch.id === channelId ? { ...ch, posts: [newPost, ...ch.posts] } : ch));
+        setChannels(prev => prev.map(ch =>
+            ch.id === channelId ? { ...ch, posts: [newPost, ...ch.posts] } : ch
+        ));
         setIsUploadingPost(false);
     };
 
@@ -250,149 +247,142 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             type: PostType.Link,
             title,
             url,
-            createdAt: new Date().toISOString().split('T')[0]
+            createdAt: new Date().toISOString().split('T')[0],
         };
-        setChannels(prev => prev.map(ch => ch.id === channelId ? { ...ch, posts: [newPost, ...ch.posts] } : ch));
+        setChannels(prev => prev.map(ch =>
+            ch.id === channelId ? { ...ch, posts: [newPost, ...ch.posts] } : ch
+        ));
     };
-
 
     const sendJarvisMessage = async (text: string, file?: File, isResearchPlan?: boolean) => {
         if (!user) return;
-        
+    
         const userMessageText = isResearchPlan ? `${s.researchPlanRequest} "${text}"` : text;
-        const userMessage: JarvisMessage = { id: 'jarvis-' + Date.now(), sender: 'user', text: userMessageText };
+        
+        const userMessage: JarvisMessage = {
+            id: 'user-' + Date.now(),
+            sender: 'user',
+            text: userMessageText,
+        };
         
         if (file) {
             userMessage.file = {
                 name: file.name,
                 type: file.type,
-                url: URL.createObjectURL(file),
+                url: URL.createObjectURL(file), // Create a temporary URL for display
             };
         }
-
-        const currentHistory = [...jarvisHistory, userMessage];
-        setJarvisHistory(currentHistory);
         
-        let apiPrompt = text;
-        if(isResearchPlan) {
-            apiPrompt = `أنشئ خطة بحث مفصلة للموضوع التالي: '${text}'. يجب أن تتضمن الخطة مقدمة، إشكالية، فصول ومباحث مقترحة، وخاتمة. الأهم من ذلك، قم بتضمين قائمة بالمصادر والمراجع الأكاديمية ذات الصلة من منصة المجلات العلمية الجزائرية (ASJP) التي يمكن أن تساعد في هذا البحث.`;
-        }
-
-        let fileToSend: JarvisFile | undefined;
-
+        const jarvisMessageId = 'jarvis-' + Date.now();
+        const jarvisPlaceholder: JarvisMessage = {
+            id: jarvisMessageId,
+            sender: 'jarvis',
+            text: ''
+        };
+        
+        setJarvisHistory(prev => [...prev, userMessage, jarvisPlaceholder]);
+        
+        let jarvisFile: JarvisFile | undefined;
         if (file) {
-            const base64 = await fileToBase64(file);
-            fileToSend = { base64, mimeType: file.type };
-            if (jarvisContextPost) setJarvisContextPost(null);
-        } else if (jarvisContextPost) {
             try {
-                const response = await fetch(jarvisContextPost.url, { mode: 'cors' });
-                if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
-                const blob = await response.blob();
-                const fetchedFile = new File([blob], jarvisContextPost.title, { type: blob.type });
-                const base64 = await fileToBase64(fetchedFile);
-                fileToSend = { base64, mimeType: fetchedFile.type };
+                const base64 = await fileToBase64(file);
+                jarvisFile = { base64, mimeType: file.type };
             } catch (error) {
-                console.error("Failed to fetch shared post content:", error);
-                apiPrompt = `لم أتمكن من الوصول إلى الملف "${jarvisContextPost.title}" لتحليله. يرجى التأكد من أن الرابط متاح للعموم. سأحاول الإجابة على سؤالك بناءً على المعلومات المتاحة. ${text}`;
-            } finally {
-                setJarvisContextPost(null);
+                console.error("Error converting file to base64:", error);
+                // Show error in the chat
+                 setJarvisHistory(prev =>
+                    prev.map(msg =>
+                        msg.id === jarvisMessageId ? { ...msg, text: "حدث خطأ أثناء معالجة الملف." } : msg
+                    )
+                );
+                return;
             }
         }
         
-        const response = await askJarvis(apiPrompt, user.name, user.gender, user.role, fileToSend, currentHistory);
+        const historyForApi = jarvisHistory.filter(m => m.id !== jarvisMessageId);
         
-        const jarvisResponse: JarvisMessage = { id: 'jarvis-' + Date.now() + 1, sender: 'jarvis', text: response.text };
-        setJarvisHistory(prev => [...prev, jarvisResponse]);
+        const onChunk = (chunk: string) => {
+            setJarvisHistory(prev =>
+                prev.map(msg =>
+                    msg.id === jarvisMessageId ? { ...msg, text: msg.text + chunk } : msg
+                )
+            );
+        };
+        
+        await askJarvis(
+            userMessageText,
+            user.name,
+            user.gender,
+            user.role,
+            onChunk,
+            jarvisFile,
+            historyForApi
+        );
     };
 
     const updateUser = async (updatedUser: Partial<User>) => {
         if (!user) return;
-        setUser(prev => prev ? { ...prev, ...updatedUser } : null);
-        setAllUsers(prev => prev.map(u => u.id === user.id ? {...u, ...updatedUser} : u));
+        const newUserData = { ...user, ...updatedUser };
+        setUser(newUserData);
+        setAllUsers(prev => prev.map(u => u.id === user.id ? newUserData : u));
     };
-    
+
     const markNotificationsAsRead = async () => {
-        setNotifications(prev => prev.map(n => ({...n, read: true})));
+        setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     };
     
     const clearChannelChat = async (channelId: string) => {
         setChannelMessages(prev => prev.filter(m => m.channelId !== channelId));
     };
-
+    
     const deletePostFromChannel = async (channelId: string, postId: string) => {
-        setChannels(prev => prev.map(ch => {
-            if (ch.id === channelId) {
-                return {...ch, posts: ch.posts.filter(p => p.id !== postId)};
-            }
-            return ch;
-        }));
+        setChannels(prev => prev.map(ch => 
+            ch.id === channelId 
+                ? { ...ch, posts: ch.posts.filter(p => p.id !== postId) }
+                : ch
+        ));
     };
     
     const downloadPostForOffline = async (post: Post) => {
-        if ('caches' in window) {
-            try {
-                const cache = await caches.open(OFFLINE_CACHE_NAME);
-                const requestUrl = new URL(post.url);
-                requestUrl.searchParams.set('postId', post.id);
-
-                const response = await fetch(post.url, { mode: 'cors' });
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                
-                const cacheRequest = new Request(requestUrl.toString(), { mode: 'cors' });
-                await cache.put(cacheRequest, response);
-
-                setOfflinePostIds(prev => new Set(prev).add(post.id));
-            } catch (error) {
-                console.error('Failed to cache file:', error);
-                alert('Failed to download for offline use.');
-            }
+         if ('caches' in window) {
+            const response = await fetch(post.url);
+            const blob = await response.blob();
+            const cache = await caches.open(OFFLINE_CACHE_NAME);
+            const cacheUrl = `${post.url}?postId=${post.id}`;
+            await cache.put(cacheUrl, new Response(blob));
+            setOfflinePostIds(prev => new Set(prev).add(post.id));
         }
     };
     
     const removePostFromOffline = async (post: Post) => {
         if ('caches' in window) {
             const cache = await caches.open(OFFLINE_CACHE_NAME);
-            const requests = await cache.keys();
-            for (const req of requests) {
-                const url = new URL(req.url);
-                if (url.searchParams.get('postId') === post.id) {
-                    await cache.delete(req);
-                    break;
-                }
-            }
+            const cacheUrl = `${post.url}?postId=${post.id}`;
+            await cache.delete(cacheUrl);
             setOfflinePostIds(prev => {
-                const next = new Set(prev);
-                next.delete(post.id);
-                return next;
+                const newSet = new Set(prev);
+                newSet.delete(post.id);
+                return newSet;
             });
         }
     };
-
+    
     const blockUserFromChannel = async (userId: string, channelId: string) => {
         setChannels(prev => prev.map(ch => 
-            ch.id === channelId ? { ...ch, blockedUsers: [...ch.blockedUsers, userId] } : ch
+            ch.id === channelId 
+            ? { ...ch, blockedUsers: [...ch.blockedUsers, userId] }
+            : ch
         ));
     };
-
+    
     const sharePostWithJarvis = (post: Post) => {
-        if (!user) return;
         setJarvisContextPost(post);
-
-        const userMessage: JarvisMessage = {
-            id: 'jarvis-' + Date.now(),
-            sender: 'user',
-            text: `مشاركة ملف لتحليله: "${post.title}"`,
-        };
-        const jarvisMessage: JarvisMessage = {
-            id: 'jarvis-' + Date.now() + 1,
-            sender: 'jarvis',
-            text: s.jarvisFileReceived,
-        };
-
-        setJarvisHistory(prev => [...prev, userMessage, jarvisMessage]);
+        fetch(post.url)
+            .then(res => res.blob())
+            .then(blob => {
+                const file = new File([blob], post.title, { type: blob.type });
+                sendJarvisMessage(s.jarvisFileReceived, file);
+            });
     };
 
     const value = {
@@ -429,7 +419,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         downloadPostForOffline,
         removePostFromOffline,
         blockUserFromChannel,
-        sharePostWithJarvis
+        sharePostWithJarvis,
     };
 
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

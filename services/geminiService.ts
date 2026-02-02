@@ -6,7 +6,15 @@ export interface JarvisFile {
     mimeType: string;
 }
 
-export const askJarvis = async (prompt: string, userName: string, gender: Gender, role: UserRole, file?: JarvisFile, history?: JarvisMessage[]): Promise<{ text: string }> => {
+export const askJarvis = async (
+    prompt: string,
+    userName: string,
+    gender: Gender,
+    role: UserRole,
+    onChunk: (chunk: string) => void,
+    file?: JarvisFile,
+    history?: JarvisMessage[]
+): Promise<void> => {
     try {
         const response = await fetch('/api/jarvis', {
             method: 'POST',
@@ -16,22 +24,47 @@ export const askJarvis = async (prompt: string, userName: string, gender: Gender
             body: JSON.stringify({ prompt, userName, gender, role, file, history }),
         });
 
+        if (!response.body) {
+            throw new Error("Response body is missing");
+        }
+        
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+
+        // If the response is not OK, we expect a JSON error object, not a stream
         if (!response.ok) {
+            let errorBody = '';
+            // eslint-disable-next-line no-constant-condition
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                errorBody += decoder.decode(value);
+            }
+
             let errorMessage = `فشل الاتصال (كود: ${response.status})`;
             try {
-                const errorData = await response.json();
+                const errorData = JSON.parse(errorBody);
                 errorMessage = errorData.error || errorMessage;
             } catch (jsonError) {
-                console.error("API error was not JSON:", jsonError);
+                console.error("API error response was not JSON:", errorBody);
             }
-            return { text: errorMessage };
+            onChunk(errorMessage);
+            return;
         }
-
-        const data = await response.json();
-        return data;
+        
+        // Handle successful streaming response
+        // eslint-disable-next-line no-constant-condition
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) {
+                break;
+            }
+            const chunk = decoder.decode(value, { stream: true });
+            onChunk(chunk);
+        }
 
     } catch (error) {
         console.error("Jarvis Service Error:", error);
-        return { text: "تعذر الوصول إلى الخادم. يرجى التأكد من اتصالك بالإنترنت والمحاولة مرة أخرى." };
+        onChunk("تعذر الوصول إلى الخادم. يرجى التأكد من اتصالك بالإنترنت والمحاولة مرة أخرى.");
     }
 };
