@@ -4,9 +4,10 @@ import ChatWindow from './ChatWindow';
 import SubscriptionModal from './SubscriptionModal';
 import { getLang } from '../constants';
 import { useApp } from '../context/AppContext';
-import { ArrowLeftIcon, FileTextIcon, ImageIcon, VideoIcon, UploadCloudIcon, TrashIcon, DownloadIcon, CheckCircleIcon, LoaderIcon, UsersIcon, MessageSquareIcon, SlashIcon, ChevronDownIcon, LinkIcon, Share2Icon } from './icons/IconComponents';
+import { ArrowLeftIcon, FileTextIcon, ImageIcon, VideoIcon, UploadCloudIcon, TrashIcon, DownloadIcon, CheckCircleIcon, LoaderIcon, UsersIcon, MessageSquareIcon, SlashIcon, ChevronDownIcon, LinkIcon, Share2Icon, PencilIcon, LockIcon } from './icons/IconComponents';
 import ConfirmationModal from './ConfirmationModal';
 import AddPostModal from './AddPostModal';
+import EditChannelModal from './EditChannelModal';
 
 
 interface ChannelViewProps {
@@ -37,6 +38,7 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack, onStar
     const [userToBlock, setUserToBlock] = useState<User | null>(null);
     const [expandedStudentId, setExpandedStudentId] = useState<string | null>(null);
     const [isAddPostModalOpen, setIsAddPostModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [largeFileInfo, setLargeFileInfo] = useState<{name: string, size: number} | null>(null);
 
     const subscribersDropdownRef = useRef<HTMLDivElement>(null);
@@ -132,6 +134,7 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack, onStar
     
     const professor = allUsers.find(u => u.id === channel.professorId);
     const professorTitle = professor ? (professor.gender === Gender.Female ? s.professorFemaleTitle : s.professorMaleTitle) : '';
+    const canAccessChat = isOwner || (user.role === UserRole.Student && user.university === professor?.university);
 
 
     const header = (
@@ -140,13 +143,17 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack, onStar
                 <button onClick={onBack} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700" aria-label={s.back}>
                     <ArrowLeftIcon className="w-6 h-6" />
                 </button>
-                <div>
+                <div className="flex items-center gap-2">
                     <h2 className="text-xl sm:text-2xl font-bold">{channel.name}</h2>
-                    <p className="text-sm text-gray-500">{channel.specialization}</p>
+                    {isOwner && (
+                        <button onClick={() => setIsEditModalOpen(true)} className="p-1.5 text-gray-500 hover:text-primary-600 dark:hover:text-primary-400 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <PencilIcon className="w-4 h-4" />
+                        </button>
+                    )}
                 </div>
             </div>
-            <div className="flex items-center justify-between mt-2">
-                <div className="flex items-center text-sm">
+             <div className="flex items-center justify-between mt-2">
+                 <div className="flex items-center text-sm">
                     {professor && <>
                         <img src={professor.avatar} alt={professor.name} className="w-6 h-6 rounded-full me-2"/>
                         <span>{professorTitle} {professor.name}</span>
@@ -224,6 +231,13 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack, onStar
                     largeFileInfo={largeFileInfo}
                 />
             )}
+            
+            {isEditModalOpen && (
+                <EditChannelModal 
+                    channel={channel}
+                    onClose={() => setIsEditModalOpen(false)}
+                />
+            )}
 
             {!isSubscribedToChannel && user.role === UserRole.Student ? (
                 <div className="flex-1 overflow-y-auto p-4 sm:p-6 text-center bg-gray-50 dark:bg-gray-900">
@@ -261,9 +275,9 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack, onStar
                     </div>
 
                     {/* Content */}
-                    <div className={`flex-1 overflow-y-auto ${activeTab === 'chat' ? 'p-0' : 'p-4'}`}>
+                    <div className="flex-1 overflow-y-auto bg-gray-100 dark:bg-gray-900">
                         {activeTab === 'posts' && (
-                            <div className="space-y-4">
+                             <div className="p-4 space-y-4">
                                 {isOwner && (
                                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div 
@@ -360,9 +374,16 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack, onStar
                             </div>
                         )}
                         {activeTab === 'chat' && (
-                            <div className="h-full">
-                                <ChatWindow channelId={channel.id} />
-                            </div>
+                             canAccessChat ? (
+                                <div className="h-full">
+                                    <ChatWindow channelId={channel.id} />
+                                </div>
+                            ) : (
+                                <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 p-4">
+                                    <LockIcon className="w-16 h-16 mb-4 text-gray-400" />
+                                    <h3 className="text-xl font-semibold">{s.chatRestrictionMessage.replace('{universityName}', professor?.university || 'this university')}</h3>
+                                </div>
+                            )
                         )}
                     </div>
                 </>

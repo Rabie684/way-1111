@@ -63,6 +63,7 @@ interface AppContextType {
     toggleTheme: () => void;
     setLanguage: (lang: Language) => void;
     createChannel: (channel: Omit<Channel, 'id' | 'professorId' | 'posts' | 'subscribers' | 'blockedUsers'>) => Promise<void>;
+    updateChannel: (channelId: string, updates: { name: string; specialization: string }) => Promise<void>;
     subscribeToSection: (sectionId: string) => Promise<void>;
     sendMessage: (channelId: string, text: string) => Promise<void>;
     sendDirectMessage: (receiverId: string, text: string) => Promise<void>;
@@ -166,6 +167,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             blockedUsers: [],
         };
         setChannels(prev => [...prev, newChannel]);
+    };
+
+    const updateChannel = async (channelId: string, updates: { name: string; specialization: string }) => {
+        setChannels(prev => prev.map(ch => 
+            ch.id === channelId 
+                ? { ...ch, ...updates }
+                : ch
+        ));
     };
 
     const subscribeToSection = async (sectionId: string) => {
@@ -405,6 +414,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         toggleTheme,
         setLanguage,
         createChannel,
+        updateChannel,
         subscribeToSection,
         sendMessage,
         sendDirectMessage,

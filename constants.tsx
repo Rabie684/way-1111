@@ -260,7 +260,9 @@ export const STRINGS = {
         shareWithJarvis: 'مشاركة مع الباحث IA',
         researchPlan: 'خطة بحث',
         enterResearchTopic: 'اكتب عنوان البحث...',
-        researchPlanRequest: 'طلب خطة بحث لـ:'
+        researchPlanRequest: 'طلب خطة بحث لـ:',
+        editChannel: 'تعديل القناة',
+        chatRestrictionMessage: 'الدردشة الجماعية مخصصة لطلاب جامعة "{universityName}" فقط.'
     },
     en: {
         appName: 'Your Digital University Way',
@@ -380,7 +382,9 @@ export const STRINGS = {
         shareWithJarvis: 'Share with Al-Bahith IA',
         researchPlan: 'Research Plan',
         enterResearchTopic: 'Enter research topic...',
-        researchPlanRequest: 'Research plan request for:'
+        researchPlanRequest: 'Research plan request for:',
+        editChannel: 'Edit Channel',
+        chatRestrictionMessage: 'Group chat is reserved for students from "{universityName}" only.'
     },
     fr: {
         appName: 'Votre Université Numérique Way',
@@ -500,7 +504,9 @@ export const STRINGS = {
         shareWithJarvis: 'Partager avec Al-Bahith IA',
         researchPlan: 'Plan de recherche',
         enterResearchTopic: 'Entrez le sujet de recherche...',
-        researchPlanRequest: 'Demande de plan de recherche pour:'
+        researchPlanRequest: 'Demande de plan de recherche pour:',
+        editChannel: 'Modifier la chaîne',
+        chatRestrictionMessage: 'Le chat de groupe est réservé aux étudiants de "{universityName}" uniquement.'
     }
 };
 
