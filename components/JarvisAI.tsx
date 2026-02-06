@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { getLang } from '../constants';
-import { SendIcon, BotIcon, ClipboardIcon, CheckIcon, PaperclipIcon, XIcon, FileTextIcon } from './icons/IconComponents';
+import { SendIcon, BotIcon, ClipboardIcon, CheckIcon, PaperclipIcon, XIcon, FileTextIcon, LightbulbIcon, SearchIcon } from './icons/IconComponents';
 
 const AlBahithIA: React.FC = () => {
     const { language, iaHistory, sendIAMessage } = useApp();
@@ -16,18 +16,15 @@ const AlBahithIA: React.FC = () => {
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
-
+    const textInputRef = useRef<HTMLInputElement>(null);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
     useEffect(() => {
-        // Cleanup blob URLs to prevent memory leaks
         return () => {
-            if (filePreview) {
-                URL.revokeObjectURL(filePreview);
-            }
+            if (filePreview) URL.revokeObjectURL(filePreview);
         };
     }, [filePreview]);
 
@@ -46,8 +43,7 @@ const AlBahithIA: React.FC = () => {
             setAttachedFile(file);
              setIsResearchPlanMode(false);
             if (file.type.startsWith('image/')) {
-                const previewUrl = URL.createObjectURL(file);
-                setFilePreview(previewUrl);
+                setFilePreview(URL.createObjectURL(file));
             } else {
                 setFilePreview(null);
             }
@@ -56,22 +52,16 @@ const AlBahithIA: React.FC = () => {
 
     const handleRemoveFile = () => {
         setAttachedFile(null);
-        if (filePreview) {
-            URL.revokeObjectURL(filePreview);
-            setFilePreview(null);
-        }
-        if (fileInputRef.current) {
-            fileInputRef.current.value = "";
-        }
+        if (filePreview) URL.revokeObjectURL(filePreview);
+        setFilePreview(null);
+        if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
     const handleToggleResearchPlanMode = () => {
         setIsResearchPlanMode(prev => !prev);
-        if (!isResearchPlanMode) {
-            handleRemoveFile();
-        }
+        if (!isResearchPlanMode) handleRemoveFile();
+        textInputRef.current?.focus();
     };
-
 
     const handleSend = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -85,9 +75,24 @@ const AlBahithIA: React.FC = () => {
         setIsLoading(false);
     };
 
+    // Prompt Starter button handlers
+    const handlePromptButtonClick = (promptText: string) => {
+        setInput(promptText);
+        textInputRef.current?.focus();
+    };
+
+    const handleFileUploadClick = () => {
+        fileInputRef.current?.click();
+    };
+    
+    const handleResearchPlanClick = () => {
+        setIsResearchPlanMode(true);
+        textInputRef.current?.focus();
+    };
+
     return (
         <div className="p-4 sm:p-6 h-full flex flex-col">
-            <div className="flex items-center gap-4 mb-4">
+            <div className="flex items-center gap-4 mb-4 flex-shrink-0">
                 <div className="p-3 bg-primary-100 dark:bg-primary-900/50 rounded-full">
                     <BotIcon className="w-8 h-8 text-primary-600 dark:text-primary-300" />
                 </div>
@@ -98,46 +103,72 @@ const AlBahithIA: React.FC = () => {
             </div>
             
             <div className="flex-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md p-4 overflow-y-auto mb-4">
-                <div className="space-y-4">
-                    {iaHistory.map((msg) => (
-                        <div key={msg.id} className={`flex items-start gap-3 ${msg.sender === 'user' ? 'justify-end' : ''}`}>
-                            {msg.sender === 'ia' && <BotIcon className="w-6 h-6 text-primary-500 flex-shrink-0 mt-1" />}
-                            <div className={`relative group max-w-xl p-3 rounded-lg whitespace-pre-wrap ${msg.sender === 'user' ? 'bg-primary-500 text-white rounded-br-none' : 'bg-gray-100 dark:bg-gray-700 rounded-bl-none'}`}>
-                                {msg.file && (
-                                    <div className="mb-2">
-                                        {msg.file.type.startsWith('image/') ? (
-                                            <img src={msg.file.url} alt={msg.file.name} className="max-w-xs max-h-48 rounded-md object-cover"/>
-                                        ) : (
-                                            <div className="flex items-center gap-2 p-2 bg-black/10 dark:bg-white/10 rounded-md">
-                                                <FileTextIcon className="w-6 h-6 flex-shrink-0"/>
-                                                <span className="text-sm font-medium truncate">{msg.file.name}</span>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                                {msg.text}
-                                {msg.sender === 'ia' && msg.text && (
-                                    <button
-                                        onClick={() => handleCopy(msg.text, msg.id)}
-                                        className="absolute top-2 end-2 p-1 rounded-md text-gray-500 dark:text-gray-400 bg-white/50 dark:bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity focus:opacity-100 hover:text-gray-800 dark:hover:text-gray-200"
-                                        title={copiedMessageId === msg.id ? s.copied : s.copy}
-                                    >
-                                        {copiedMessageId === msg.id ? (
-                                            <CheckIcon className="w-4 h-4 text-green-500" />
-                                        ) : (
-                                            <ClipboardIcon className="w-4 h-4" />
-                                        )}
-                                    </button>
-                                )}
-                            </div>
+                {iaHistory.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-full text-center">
+                        <BotIcon className="w-16 h-16 text-primary-400/50 mb-4"/>
+                        <h3 className="text-2xl font-bold mb-1">{s.jarvisWelcomeTitle}</h3>
+                        <p className="text-gray-500 dark:text-gray-400 mb-8 max-w-sm">{s.jarvisWelcomeMessage}</p>
+                        <div className="grid grid-cols-2 gap-3 w-full max-w-lg">
+                            <button onClick={handleFileUploadClick} className="flex items-center gap-3 p-3 bg-gray-100 dark:bg-gray-700/50 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-start">
+                                <PaperclipIcon className="w-5 h-5 text-primary-500 flex-shrink-0"/>
+                                <span>{s.jarvisPromptSummarize}</span>
+                            </button>
+                             <button onClick={handleResearchPlanClick} className="flex items-center gap-3 p-3 bg-gray-100 dark:bg-gray-700/50 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-start">
+                                <FileTextIcon className="w-5 h-5 text-primary-500 flex-shrink-0"/>
+                                <span>{s.jarvisPromptResearchPlan}</span>
+                            </button>
+                             <button onClick={() => handlePromptButtonClick('اشرح لي مفهوم ')} className="flex items-center gap-3 p-3 bg-gray-100 dark:bg-gray-700/50 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-start">
+                                <LightbulbIcon className="w-5 h-5 text-primary-500 flex-shrink-0"/>
+                                <span>{s.jarvisPromptExplain}</span>
+                            </button>
+                             <button onClick={() => handlePromptButtonClick('ما هي أحدث المصادر حول ')} className="flex items-center gap-3 p-3 bg-gray-100 dark:bg-gray-700/50 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-start">
+                                <SearchIcon className="w-5 h-5 text-primary-500 flex-shrink-0"/>
+                                <span>{s.jarvisPromptSources}</span>
+                            </button>
                         </div>
-                    ))}
-                    <div ref={messagesEndRef} />
-                </div>
+                    </div>
+                ) : (
+                    <div className="space-y-4">
+                        {iaHistory.map((msg) => (
+                            <div key={msg.id} className={`flex items-start gap-3 ${msg.sender === 'user' ? 'justify-end' : ''}`}>
+                                {msg.sender === 'ia' && <BotIcon className="w-6 h-6 text-primary-500 flex-shrink-0 mt-1" />}
+                                <div className={`relative group max-w-xl p-3 rounded-lg whitespace-pre-wrap ${msg.sender === 'user' ? 'bg-primary-500 text-white rounded-br-none' : 'bg-gray-100 dark:bg-gray-700 rounded-bl-none'}`}>
+                                    {msg.file && (
+                                        <div className="mb-2">
+                                            {msg.file.type.startsWith('image/') ? (
+                                                <img src={msg.file.url} alt={msg.file.name} className="max-w-xs max-h-48 rounded-md object-cover"/>
+                                            ) : (
+                                                <div className="flex items-center gap-2 p-2 bg-black/10 dark:bg-white/10 rounded-md">
+                                                    <FileTextIcon className="w-6 h-6 flex-shrink-0"/>
+                                                    <span className="text-sm font-medium truncate">{msg.file.name}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                    {msg.text}
+                                    {msg.sender === 'ia' && msg.text && (
+                                        <button
+                                            onClick={() => handleCopy(msg.text, msg.id)}
+                                            className="absolute top-2 end-2 p-1 rounded-md text-gray-500 dark:text-gray-400 bg-white/50 dark:bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity focus:opacity-100 hover:text-gray-800 dark:hover:text-gray-200"
+                                            title={copiedMessageId === msg.id ? s.copied : s.copy}
+                                        >
+                                            {copiedMessageId === msg.id ? (
+                                                <CheckIcon className="w-4 h-4 text-green-500" />
+                                            ) : (
+                                                <ClipboardIcon className="w-4 h-4" />
+                                            )}
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                        <div ref={messagesEndRef} />
+                    </div>
+                )}
             </div>
             
             {attachedFile && (
-                <div className="mb-2 p-2 bg-gray-100 dark:bg-gray-700 rounded-md flex items-center justify-between">
+                <div className="mb-2 p-2 bg-gray-100 dark:bg-gray-700 rounded-md flex items-center justify-between flex-shrink-0">
                     <div className="flex items-center gap-2 overflow-hidden">
                          {filePreview ? (
                             <img src={filePreview} alt="preview" className="w-10 h-10 rounded object-cover flex-shrink-0"/>
@@ -152,10 +183,11 @@ const AlBahithIA: React.FC = () => {
                 </div>
             )}
 
-            <form onSubmit={handleSend} className="flex items-center gap-2 sm:gap-3">
+            <form onSubmit={handleSend} className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                 <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
                 <div className="flex-1 flex items-center gap-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-full focus-within:ring-2 focus-within:ring-primary-500">
                     <input
+                        ref={textInputRef}
                         type="text"
                         value={input}
                         onChange={(e) => setInput(e.target.value)}

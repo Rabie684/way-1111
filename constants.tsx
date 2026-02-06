@@ -262,7 +262,13 @@ export const STRINGS = {
         enterResearchTopic: 'اكتب عنوان البحث...',
         researchPlanRequest: 'طلب خطة بحث لـ:',
         editChannel: 'تعديل القناة',
-        chatRestrictionMessage: 'الدردشة الجماعية مخصصة لطلاب جامعة "{universityName}" فقط.'
+        chatRestrictionMessage: 'الدردشة الجماعية مخصصة لطلاب جامعة "{universityName}" فقط.',
+        jarvisWelcomeTitle: "مرحباً بك في الباحث IA",
+        jarvisWelcomeMessage: "كيف يمكنني مساعدتك اليوم في رحلتك الأكاديمية؟",
+        jarvisPromptSummarize: "لخص لي ملف",
+        jarvisPromptResearchPlan: "اقترح خطة بحث",
+        jarvisPromptExplain: "اشرح مفهوماً",
+        jarvisPromptSources: "ابحث عن مصادر",
     },
     en: {
         appName: 'Your Digital University Way',
@@ -384,7 +390,13 @@ export const STRINGS = {
         enterResearchTopic: 'Enter research topic...',
         researchPlanRequest: 'Research plan request for:',
         editChannel: 'Edit Channel',
-        chatRestrictionMessage: 'Group chat is reserved for students from "{universityName}" only.'
+        chatRestrictionMessage: 'Group chat is reserved for students from "{universityName}" only.',
+        jarvisWelcomeTitle: "Welcome to Al-Bahith IA",
+        jarvisWelcomeMessage: "How can I help you with your academic journey today?",
+        jarvisPromptSummarize: "Summarize a file",
+        jarvisPromptResearchPlan: "Suggest a research plan",
+        jarvisPromptExplain: "Explain a concept",
+        jarvisPromptSources: "Find sources",
     },
     fr: {
         appName: 'Votre Université Numérique Way',
@@ -506,7 +518,13 @@ export const STRINGS = {
         enterResearchTopic: 'Entrez le sujet de recherche...',
         researchPlanRequest: 'Demande de plan de recherche pour:',
         editChannel: 'Modifier la chaîne',
-        chatRestrictionMessage: 'Le chat de groupe est réservé aux étudiants de "{universityName}" uniquement.'
+        chatRestrictionMessage: 'Le chat de groupe est réservé aux étudiants de "{universityName}" uniquement.',
+        jarvisWelcomeTitle: "Bienvenue chez Al-Bahith IA",
+        jarvisWelcomeMessage: "Comment puis-je vous aider dans votre parcours académique aujourd'hui ?",
+        jarvisPromptSummarize: "Résumer un fichier",
+        jarvisPromptResearchPlan: "Suggérer un plan de recherche",
+        jarvisPromptExplain: "Expliquer un concept",
+        jarvisPromptSources: "Trouver des sources",
     }
 };
 
