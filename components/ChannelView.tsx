@@ -4,10 +4,9 @@ import ChatWindow from './ChatWindow';
 import SubscriptionModal from './SubscriptionModal';
 import { getLang } from '../constants';
 import { useApp } from '../context/AppContext';
-import { ArrowLeftIcon, FileTextIcon, ImageIcon, VideoIcon, UploadCloudIcon, TrashIcon, DownloadIcon, CheckCircleIcon, LoaderIcon, UsersIcon, MessageSquareIcon, SlashIcon, ChevronDownIcon, LinkIcon, Share2Icon, PencilIcon, LockIcon } from './icons/IconComponents';
+import { ArrowLeftIcon, FileTextIcon, ImageIcon, VideoIcon, UploadCloudIcon, TrashIcon, DownloadIcon, CheckCircleIcon, LoaderIcon, UsersIcon, MessageSquareIcon, SlashIcon, ChevronDownIcon, LinkIcon, Share2Icon, LockIcon } from './icons/IconComponents';
 import ConfirmationModal from './ConfirmationModal';
 import AddPostModal from './AddPostModal';
-import EditChannelModal from './EditChannelModal';
 
 
 interface ChannelViewProps {
@@ -38,7 +37,6 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack, onStar
     const [userToBlock, setUserToBlock] = useState<User | null>(null);
     const [expandedStudentId, setExpandedStudentId] = useState<string | null>(null);
     const [isAddPostModalOpen, setIsAddPostModalOpen] = useState(false);
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [largeFileInfo, setLargeFileInfo] = useState<{name: string, size: number} | null>(null);
 
     const subscribersDropdownRef = useRef<HTMLDivElement>(null);
@@ -143,13 +141,9 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack, onStar
                 <button onClick={onBack} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700" aria-label={s.back}>
                     <ArrowLeftIcon className="w-6 h-6" />
                 </button>
-                <div className="flex items-center gap-2">
+                <div>
                     <h2 className="text-xl sm:text-2xl font-bold">{channel.name}</h2>
-                    {isOwner && (
-                        <button onClick={() => setIsEditModalOpen(true)} className="p-1.5 text-gray-500 hover:text-primary-600 dark:hover:text-primary-400 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
-                            <PencilIcon className="w-4 h-4" />
-                        </button>
-                    )}
+                    <p className="text-sm text-gray-500">{channel.specialization}</p>
                 </div>
             </div>
              <div className="flex items-center justify-between mt-2">
@@ -229,13 +223,6 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack, onStar
                     channelId={channel.id}
                     onClose={handleCloseAddPostModal}
                     largeFileInfo={largeFileInfo}
-                />
-            )}
-            
-            {isEditModalOpen && (
-                <EditChannelModal 
-                    channel={channel}
-                    onClose={() => setIsEditModalOpen(false)}
                 />
             )}
 

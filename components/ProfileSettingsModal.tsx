@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { getLang } from '../constants';
-import { UserRole } from '../types';
+import { UserRole, Channel } from '../types';
 import { LogOutIcon } from './icons/IconComponents';
 
 interface ProfileSettingsModalProps {
@@ -9,13 +9,30 @@ interface ProfileSettingsModalProps {
 }
 
 const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ onClose }) => {
-    const { user, updateUser, language, logout } = useApp();
+    const { user, updateUser, language, logout, channels, updateChannel } = useApp();
     const s = getLang(language);
 
+    // User profile state
     const [name, setName] = useState(user?.name || '');
     const [avatar, setAvatar] = useState(user?.avatar || '');
     const [preview, setPreview] = useState<string | null>(user?.avatar || null);
     const [phoneNumber, setPhoneNumber] = useState(user?.phoneNumber || '');
+
+    // Channel editing state
+    const professorChannels = user?.role === UserRole.Professor ? channels.filter(ch => ch.professorId === user.id) : [];
+    const [selectedChannelId, setSelectedChannelId] = useState<string>(professorChannels.length > 0 ? professorChannels[0].id : '');
+    const [channelName, setChannelName] = useState('');
+    const [channelSpecialization, setChannelSpecialization] = useState('');
+
+    useEffect(() => {
+        if (selectedChannelId) {
+            const selectedChannel = channels.find(ch => ch.id === selectedChannelId);
+            if (selectedChannel) {
+                setChannelName(selectedChannel.name);
+                setChannelSpecialization(selectedChannel.specialization);
+            }
+        }
+    }, [selectedChannelId, channels]);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -40,6 +57,11 @@ const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ onClose }) 
         }
         
         updateUser(updatePayload);
+
+        if (user?.role === UserRole.Professor && selectedChannelId && channelName && channelSpecialization) {
+            updateChannel(selectedChannelId, { name: channelName, specialization: channelSpecialization });
+        }
+
         onClose();
     };
 
@@ -50,12 +72,12 @@ const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ onClose }) 
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md m-4">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md m-4 flex flex-col max-h-[90vh]">
                 <div className="p-6 border-b border-gray-200 dark:border-gray-700">
                     <h2 className="text-xl font-bold">{s.profileSettings}</h2>
                 </div>
-                <form onSubmit={handleSubmit}>
-                    <div className="p-6 space-y-4">
+                <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
+                    <div className="p-6 space-y-4 overflow-y-auto">
                         <div className="flex flex-col items-center space-y-2">
                             <img src={preview || 'https://picsum.photos/200'} alt="Avatar Preview" className="w-24 h-24 rounded-full object-cover"/>
                             <input type="file" id="avatar-upload" className="hidden" onChange={handleFileChange} accept="image/*"/>
@@ -81,8 +103,42 @@ const ProfileSettingsModal: React.FC<ProfileSettingsModalProps> = ({ onClose }) 
                                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{s.phoneNumberDescription}</p>
                             </div>
                         )}
+                        {user?.role === UserRole.Professor && professorChannels.length > 0 && (
+                            <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+                                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">{s.editChannel}</h3>
+                                <div className="space-y-4">
+                                    <div>
+                                        <label htmlFor="channelSelect" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                            {s.channels}
+                                        </label>
+                                        <select 
+                                            id="channelSelect" 
+                                            value={selectedChannelId} 
+                                            onChange={(e) => setSelectedChannelId(e.target.value)} 
+                                            className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                                        >
+                                            {professorChannels.map(ch => (
+                                                <option key={ch.id} value={ch.id}>{ch.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    {selectedChannelId && (
+                                        <>
+                                            <div>
+                                                <label htmlFor="channelName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{s.channelName}</label>
+                                                <input id="channelName" type="text" value={channelName} onChange={(e) => setChannelName(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500" />
+                                            </div>
+                                            <div>
+                                                <label htmlFor="specialization" className="block text-sm font-medium text-gray-700 dark:text-gray-300">{s.specialization}</label>
+                                                <input id="specialization" type="text" value={channelSpecialization} onChange={(e) => setChannelSpecialization(e.target.value)} required className="mt-1 block w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500" />
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+                        )}
                     </div>
-                    <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 flex justify-between items-center">
+                    <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700/50 flex justify-between items-center mt-auto">
                         <button type="button" onClick={handleLogout} className="px-4 py-2 text-sm font-medium text-red-600 bg-transparent rounded-md hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/50 flex items-center gap-2">
                             <LogOutIcon className="w-4 h-4" />
                             {s.logout}
