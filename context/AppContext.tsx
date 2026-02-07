@@ -325,7 +325,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             user.role,
             onChunk,
             iaFile,
-            historyForApi
+            historyForApi,
+            language
         );
     };
 

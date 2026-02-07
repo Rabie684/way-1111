@@ -13,7 +13,8 @@ export const askIA = async (
     role: UserRole,
     onChunk: (chunk: string) => void,
     file?: IAFile,
-    history?: IAMessage[]
+    history?: IAMessage[],
+    language?: 'ar' | 'en' | 'fr'
 ): Promise<void> => {
     try {
         const response = await fetch('/api/jarvis', {
@@ -21,7 +22,7 @@ export const askIA = async (
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ prompt, userName, gender, role, file, history }),
+            body: JSON.stringify({ prompt, userName, gender, role, file, history, language }),
         });
 
         if (!response.body) {
