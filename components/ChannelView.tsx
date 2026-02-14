@@ -27,7 +27,7 @@ const PostIcon: React.FC<{ type: PostType }> = ({ type }) => {
 };
 
 const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack, onStartDirectMessage }) => {
-    const { s, allUsers, sections, addPostFromFile, isUploadingPost, clearChannelChat, deletePostFromChannel, offlinePostIds, downloadPostForOffline, removePostFromOffline, blockUserFromChannel, sharePostWithIA } = useApp();
+    const { s, allUsers, sections, addPostFromFile, isUploadingPost, clearChannelChat, deletePostFromChannel, offlinePostIds, downloadPostForOffline, removePostFromOffline, blockUserFromChannel, sharePostWithIA, updateChannelMeetLink } = useApp();
     const [activeTab, setActiveTab] = useState<'posts' | 'chat'>('posts');
     const [showSubscriptionModal, setShowSubscriptionModal] = useState<Section | null>(null);
     const [showClearConfirm, setShowClearConfirm] = useState(false);
@@ -134,6 +134,12 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack, onStar
     const professorTitle = professor ? (professor.gender === Gender.Female ? s.professorFemaleTitle : s.professorMaleTitle) : '';
     const canAccessChat = isOwner || (user.role === UserRole.Student && user.university === professor?.university);
 
+    const handleProfessorMeetClick = async () => {
+        const newLink = await updateChannelMeetLink(channel.id);
+        if (newLink) {
+            window.open(newLink, '_blank', 'noopener,noreferrer');
+        }
+    };
 
     const header = (
         <header className="p-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
@@ -206,10 +212,17 @@ const ChannelView: React.FC<ChannelViewProps> = ({ channel, user, onBack, onStar
                         </div>
                     )}
                 </div>
-                <a href={channel.meetLink} target="_blank" rel="noopener noreferrer" className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700">
-                    <VideoIcon className="w-4 h-4 me-1.5"/>
-                    {s.googleMeet}
-                </a>
+                {isOwner ? (
+                    <button onClick={handleProfessorMeetClick} className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700">
+                        <VideoIcon className="w-4 h-4 me-1.5"/>
+                        {s.googleMeet}
+                    </button>
+                ) : (
+                    <a href={channel.meetLink} target="_blank" rel="noopener noreferrer" className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700">
+                        <VideoIcon className="w-4 h-4 me-1.5"/>
+                        {s.googleMeet}
+                    </a>
+                )}
             </div>
         </header>
     );

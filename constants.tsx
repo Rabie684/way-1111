@@ -269,6 +269,8 @@ export const STRINGS = {
         jarvisPromptResearchPlan: "اقترح خطة بحث",
         jarvisPromptExplain: "اشرح مفهوماً",
         jarvisPromptSources: "ابحث عن مصادر",
+        meetSessionStarted: 'بدأ اجتماع Google Meet في قناة "{channelName}".',
+        now: 'الآن',
     },
     en: {
         appName: 'Your Digital University Way',
@@ -397,6 +399,8 @@ export const STRINGS = {
         jarvisPromptResearchPlan: "Suggest a research plan",
         jarvisPromptExplain: "Explain a concept",
         jarvisPromptSources: "Find sources",
+        meetSessionStarted: 'A Google Meet session has started in the "{channelName}" channel.',
+        now: 'Now',
     },
     fr: {
         appName: 'Votre Université Numérique Way',
@@ -525,6 +529,8 @@ export const STRINGS = {
         jarvisPromptResearchPlan: "Suggérer un plan de recherche",
         jarvisPromptExplain: "Expliquer un concept",
         jarvisPromptSources: "Trouver des sources",
+        meetSessionStarted: 'Une session Google Meet a commencé dans la chaîne "{channelName}".',
+        now: 'Maintenant',
     }
 };
 

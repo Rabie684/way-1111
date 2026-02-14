@@ -64,6 +64,7 @@ interface AppContextType {
     setLanguage: (lang: Language) => void;
     createChannel: (channel: Omit<Channel, 'id' | 'professorId' | 'posts' | 'subscribers' | 'blockedUsers'>) => Promise<void>;
     updateChannel: (channelId: string, updates: { name: string; specialization: string }) => Promise<void>;
+    updateChannelMeetLink: (channelId: string) => Promise<string | null>;
     subscribeToSection: (sectionId: string) => Promise<void>;
     sendMessage: (channelId: string, text: string) => Promise<void>;
     sendDirectMessage: (receiverId: string, text: string) => Promise<void>;
@@ -176,6 +177,38 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
                 : ch
         ));
     };
+    
+    const updateChannelMeetLink = async (channelId: string): Promise<string | null> => {
+        const randomCode = [
+            Math.random().toString(36).substring(2, 5),
+            Math.random().toString(36).substring(2, 6),
+            Math.random().toString(36).substring(2, 5)
+        ].join('-');
+        const newLink = `https://meet.google.com/${randomCode}`;
+
+        let updatedChannelName = '';
+
+        setChannels(prev => prev.map(ch => {
+            if (ch.id === channelId) {
+                updatedChannelName = ch.name;
+                return { ...ch, meetLink: newLink };
+            }
+            return ch;
+        }));
+
+        if (updatedChannelName) {
+            const newNotif: Notification = {
+                id: 'notif-meet-' + Date.now(),
+                text: s.meetSessionStarted.replace('{channelName}', updatedChannelName),
+                timestamp: s.now,
+                read: false,
+            };
+            setNotifications(prev => [newNotif, ...prev]);
+        }
+        
+        return newLink;
+    };
+
 
     const subscribeToSection = async (sectionId: string) => {
         if (!user) return;
@@ -186,7 +219,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
              const newNotif: Notification = {
                 id: 'notif-' + Date.now(),
                 text: s.subscriptionSuccessNotification.replace('{sectionName}', section.name).replace('{channelName}', channel.name),
-                timestamp: 'الآن',
+                timestamp: s.now,
                 read: false,
             };
             setNotifications(prev => [newNotif, ...prev]);
@@ -416,6 +449,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setLanguage,
         createChannel,
         updateChannel,
+        updateChannelMeetLink,
         subscribeToSection,
         sendMessage,
         sendDirectMessage,
